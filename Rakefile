@@ -40,8 +40,19 @@ task :spec do
   load "spec_runner.rb"
 end
 
-desc "Build C extension"
-task :ext do
-  cd "ext/"
-  sh "ruby extconf.rb && make clean && make"
+namespace :ext do
+  desc "Rebuilds the C extension"
+  task :rebuild do
+    cd "ext/"
+    sh "ruby extconf.rb && make clean && make"
+  end
+
+  desc "Builds the C extension"
+  task :build do
+    cd "ext/"
+    sh "ruby extconf.rb && make"
+  end
 end
+
+desc "Builds the C extension"
+task :ext => ["ext:build"]
