@@ -1,0 +1,7 @@
+.yardoc/
+doc/
+pkg/
+*.rbc
+*.gems
+*.o
+*.gemspec
