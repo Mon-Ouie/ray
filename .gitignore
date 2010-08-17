@@ -5,3 +5,6 @@ pkg/
 *.gems
 *.o
 *.gemspec
+*.bundle
+Makefile
+ext/ray
