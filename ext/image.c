@@ -214,6 +214,16 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
    return surf;
 }
 
+/*
+  Sets the alpha transparency.
+  @param [Integer, 0..255] alpha the new transparency
+*/
+VALUE ray_image_set_alpha(VALUE self, VALUE alpha) {
+   SDL_SetAlpha(ray_rb2surface(self), SDL_SRCALPHA | SDL_RLEACCEL,
+                NUM2INT(alpha));
+   return alpha;
+}
+
 void Init_ray_image() {
    ray_cImage = rb_define_class_under(ray_mRay, "Image", rb_cObject);
    
@@ -224,4 +234,6 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "flip", ray_image_flip, 0);
 
    rb_define_method(ray_cImage, "blit", ray_image_blit, 1);
+
+   rb_define_method(ray_cImage, "alpha=", ray_image_set_alpha, 1);
 }
