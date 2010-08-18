@@ -146,6 +146,22 @@ VALUE ray_set_text_icon(VALUE self, VALUE icon) {
    return icon;
 }
 
+/*
+  @return [true, false] True if the input is grabbed, which means the mouse
+                        is confined in the window, and keyboard input is sent
+                        directly to the window.
+*/
+VALUE ray_grab_input(VALUE self) {
+   SDL_GrabMode mode = SDL_WM_GrabInput(SDL_GRAB_QUERY);
+   return (mode == SDL_GRAB_ON) ? Qtrue : Qfalse;
+}
+
+/* Sets the grab input to true or false */
+VALUE ray_set_grab_input(VALUE self, VALUE grab) {
+   SDL_WM_GrabInput(RTEST(grab) ? SDL_GRAB_ON : SDL_GRAB_OFF);
+   return grab;
+}
+
 /* @return [true, false] true if Ray supports other image formats than BMP */
 VALUE ray_has_image_support(VALUE self) {
 #ifdef HAVE_SDL_IMAGE
@@ -164,13 +180,18 @@ void Init_ray_ext() {
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
    
    rb_define_module_function(ray_mRay, "icon=", ray_set_icon, 1);
-   rb_define_module_function(ray_mRay, "window_title=", ray_set_window_title, 1);
+   rb_define_module_function(ray_mRay, "window_title=", ray_set_window_title,
+                             1);
    rb_define_module_function(ray_mRay, "text_icon=", ray_set_text_icon, 1);
 
    rb_define_module_function(ray_mRay, "window_title", ray_window_title, 0);
    rb_define_module_function(ray_mRay, "text_icon", ray_text_icon, 0);
 
-   rb_define_module_function(ray_mRay, "has_image_support?", ray_has_image_support, 0);
+   rb_define_module_function(ray_mRay, "grab_input", ray_grab_input, 0);
+   rb_define_module_function(ray_mRay, "grab_input=", ray_set_grab_input, 1);
+
+   rb_define_module_function(ray_mRay, "has_image_support?",
+                             ray_has_image_support, 0);
 
    Init_ray_image();
    Init_ray_color();

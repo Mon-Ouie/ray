@@ -21,18 +21,26 @@ describe Ray do
     its(:window_title) { should be_nil }
     its(:text_icon) { should be_nil }
 
+    its(:grab_input) { should be_false }
+
     after :all do Ray.stop end
   end
 
   context "after changing the title" do
     before :all do Ray.init end
 
-    it "should change the window title and text icon" do
+    it "should change the window title and text icon and grab the input" do
       Ray.text_icon = "foo"
       Ray.text_icon.should == "foo"
 
       Ray.window_title = "bar"
       Ray.window_title == "bar"
+
+      Ray.grab_input = false
+      Ray.grab_input.should be_false
+
+      Ray.grab_input = true
+      Ray.grab_input.should be_true
     end
 
     after :all do Ray.stop end
