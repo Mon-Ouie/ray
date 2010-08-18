@@ -233,6 +233,21 @@ VALUE ray_image_flags(VALUE self) {
    return INT2NUM(flags);
 }
 
+/* @return [Integer] Width of the surface */
+VALUE ray_image_width(VALUE self) {
+   return INT2FIX(ray_rb2surface(self)->w);
+}
+
+/* @return [Integer] Height of the surface */
+VALUE ray_image_height(VALUE self) {
+   return INT2FIX(ray_rb2surface(self)->h);
+}
+
+/* @return [Integer] Bits per pixel */
+VALUE ray_image_bpp(VALUE self) {
+   return INT2FIX(ray_rb2surface(self)->format->BitsPerPixel);
+}
+
 void Init_ray_image() {
    ray_cImage = rb_define_class_under(ray_mRay, "Image", rb_cObject);
    
@@ -247,6 +262,10 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "alpha=", ray_image_set_alpha, 1);
 
    rb_define_method(ray_cImage, "flags", ray_image_flags, 0);
+
+   rb_define_method(ray_cImage, "width", ray_image_width, 0);
+   rb_define_method(ray_cImage, "height", ray_image_height, 0);
+   rb_define_method(ray_cImage, "bpp", ray_image_bpp, 0);
 
    rb_define_const(ray_cImage, "FLAG_ANYFORMAT", INT2FIX(SDL_ANYFORMAT));
    rb_define_const(ray_cImage, "FLAG_ASYNCBLIT", INT2FIX(SDL_ASYNCBLIT));
