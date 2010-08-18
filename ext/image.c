@@ -48,6 +48,18 @@ void ray_init_image_with_hash(VALUE self, VALUE arg) {
    }
 }
 
+void ray_init_image_with_filename(VALUE self, VALUE filename) {
+   char *c_filename = StringValuePtr(filename);
+   ray_image *image = ray_rb2image(self);
+
+   image->surface = SDL_LoadBMP(c_filename);
+   
+   if (!image->surface) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               SDL_GetError());
+   }
+}
+
 /*
   Creates a new image.
 
@@ -63,10 +75,16 @@ void ray_init_image_with_hash(VALUE self, VALUE arg) {
 
     @option hash [true, false] :hw_surface See Ray.create_window
     @option hash [true, false] :sw_surface See Ray.create_window
+
+  @overload initialize(filename)
+    Loads the image from a file.
+    @param [String, #to_str] filename The name of the file to open 
  */
 VALUE ray_init_image(VALUE self, VALUE arg) {
    if (RAY_IS_A(arg, rb_cHash))
       ray_init_image_with_hash(self, arg);
+   else if (rb_respond_to(arg, RAY_METH("to_str")))
+      ray_init_image_with_filename(self, rb_String(arg));
    else {
       rb_raise(rb_eTypeError, "Can't convert %s into Hash",
                RAY_OBJ_CLASSNAME(arg));
