@@ -80,7 +80,7 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
 
    if (RTEST(rb_hash_aref(hash, RAY_SYM("no_frame"))))
       flags |= SDL_NOFRAME;
-
+   
    SDL_Surface *screen = SDL_SetVideoMode(NUM2INT(width),
                                           NUM2INT(height),
                                           NUM2INT(bitsperpixel),
@@ -162,6 +162,15 @@ VALUE ray_set_grab_input(VALUE self, VALUE grab) {
    return grab;
 }
 
+/* @return [Ray::Image, nil] The current screen, created by create_window */
+VALUE ray_screen(VALUE self) {
+   SDL_Surface *surf = SDL_GetVideoSurface();
+   
+   if (!surf)
+      return Qnil;
+   return ray_create_image(surf);
+}
+
 /* @return [true, false] true if Ray supports other image formats than BMP */
 VALUE ray_has_image_support(VALUE self) {
 #ifdef HAVE_SDL_IMAGE
@@ -178,6 +187,7 @@ void Init_ray_ext() {
    rb_define_module_function(ray_mRay, "stop", ray_stop, 0);
 
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
+   rb_define_module_function(ray_mRay, "screen", ray_screen, 0);
    
    rb_define_module_function(ray_mRay, "icon=", ray_set_icon, 1);
    rb_define_module_function(ray_mRay, "window_title=", ray_set_window_title,
