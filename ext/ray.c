@@ -93,11 +93,16 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
    return ray_create_image(screen);
 }
 
+/*
+  Sets the window icon
+  @param [Ray::Image] icon The icon to display
+*/
 VALUE ray_set_icon(VALUE self, VALUE icon) {
    SDL_WM_SetIcon(ray_rb2surface(icon), NULL);
    return icon;
 }
 
+/* @return [String, nil] The window title */
 VALUE ray_window_title(VALUE self) {
    char *title = NULL;
    SDL_WM_GetCaption(&title, NULL);
@@ -107,6 +112,7 @@ VALUE ray_window_title(VALUE self) {
    return rb_str_new2(title);
 }
 
+/* Sets the window title */
 VALUE ray_set_window_title(VALUE self, VALUE title) {
    char *icon = NULL;
 
@@ -118,6 +124,7 @@ VALUE ray_set_window_title(VALUE self, VALUE title) {
    return title;
 }
 
+/* @return [String, nil] The window text icon */
 VALUE ray_text_icon(VALUE self) {
    char *icon = NULL;
    SDL_WM_GetCaption(NULL, &icon);
@@ -127,6 +134,7 @@ VALUE ray_text_icon(VALUE self) {
    return rb_str_new2(icon);   
 }
 
+/* Sets the window title */
 VALUE ray_set_text_icon(VALUE self, VALUE icon) {
    char *title;
    
@@ -138,6 +146,7 @@ VALUE ray_set_text_icon(VALUE self, VALUE icon) {
    return icon;
 }
 
+/* @return [true, false] true if Ray supports other image formats than BMP */
 VALUE ray_has_image_support(VALUE self) {
 #ifdef HAVE_SDL_IMAGE
    return Qtrue;
