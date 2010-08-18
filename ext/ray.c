@@ -98,6 +98,28 @@ VALUE ray_set_icon(VALUE self, VALUE icon) {
    return icon;
 }
 
+VALUE ray_set_window_title(VALUE self, VALUE title) {
+   char *icon = NULL;
+
+   if (!NIL_P(title)) title = rb_String(title);
+
+   SDL_WM_GetCaption(NULL, &icon);
+   SDL_WM_SetCaption(NIL_P(title) ? NULL : StringValuePtr(title), icon);
+
+   return title;
+}
+
+VALUE ray_set_text_icon(VALUE self, VALUE icon) {
+   char *title;
+   
+   if (!NIL_P(icon)) icon = rb_String(icon);
+
+   SDL_WM_GetCaption(&title, NULL);
+   SDL_WM_SetCaption(title, NIL_P(icon) ? NULL : StringValuePtr(icon));
+
+   return icon;
+}
+
 VALUE ray_has_image_support(VALUE self) {
 #ifdef HAVE_SDL_IMAGE
    return Qtrue;
@@ -114,6 +136,8 @@ void Init_ray_ext() {
 
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
    rb_define_module_function(ray_mRay, "icon=", ray_set_icon, 1);
+   rb_define_module_function(ray_mRay, "window_title=", ray_set_window_title, 1);
+   rb_define_module_function(ray_mRay, "text_icon=", ray_set_text_icon, 1);
 
    rb_define_module_function(ray_mRay, "has_image_support?", ray_has_image_support, 0);
 
