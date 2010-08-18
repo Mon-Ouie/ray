@@ -12,4 +12,29 @@ describe Ray do
       end
     end
   end
+
+  context "after being initialized" do
+    before :all do Ray.init end
+
+    subject { Ray }
+
+    its(:window_title) { should be_nil }
+    its(:text_icon) { should be_nil }
+
+    after :all do Ray.stop end
+  end
+
+  context "after changing the title" do
+    before :all do Ray.init end
+
+    it "should change the window title and text icon" do
+      Ray.text_icon = "foo"
+      Ray.text_icon.should == "foo"
+
+      Ray.window_title = "bar"
+      Ray.window_title == "bar"
+    end
+
+    after :all do Ray.stop end
+  end
 end
