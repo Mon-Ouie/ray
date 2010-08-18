@@ -16,6 +16,10 @@ unless defined? Ray
   end
 end
 
+def path_of(res)
+  File.expand_path(File.join(File.dirname(__FILE__), "spec", "res", res))
+end
+
 require 'ray'
 
 require 'spec'
