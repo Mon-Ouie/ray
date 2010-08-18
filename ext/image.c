@@ -18,24 +18,7 @@ SDL_Surface *ray_rb2surface(VALUE object) {
    return ray_rb2image(object)->surface;
 }
 
-/*
-  Creates a new image. You must call Ray.create_window before
-  this function.
-
-  @overload initialize(hash)
-    @option hash [Integer] :width Width of the surface
-    @option hash [Integer] :height Height of the surface
-    
-    @option hash [Integer] :w Alias for width
-    @option hash [Integer] :h Alias for height
-
-    @option hash [Integer] :bits_per_pixel See Ray.create_window
-    @option hash [Integer] :pp Alias for bits_per_pixel
-
-    @option hash [true, false] :hw_surface See Ray.create_window
-    @option hash [true, false] :sw_surface See Ray.create_window
- */
-VALUE ray_init_image(VALUE self, VALUE arg) {
+void ray_init_image_with_hash(VALUE self, VALUE arg) {
    VALUE width = rb_hash_aref(arg, RAY_SYM("width"));
    if (NIL_P(width)) width = rb_hash_aref(arg, RAY_SYM("w"));
 
@@ -63,7 +46,32 @@ VALUE ray_init_image(VALUE self, VALUE arg) {
       rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
                SDL_GetError());
    }
-   
+}
+
+/*
+  Creates a new image.
+
+  @overload initialize(hash)
+    @option hash [Integer] :width Width of the surface
+    @option hash [Integer] :height Height of the surface
+    
+    @option hash [Integer] :w Alias for width
+    @option hash [Integer] :h Alias for height
+
+    @option hash [Integer] :bits_per_pixel See Ray.create_window
+    @option hash [Integer] :pp Alias for bits_per_pixel
+
+    @option hash [true, false] :hw_surface See Ray.create_window
+    @option hash [true, false] :sw_surface See Ray.create_window
+ */
+VALUE ray_init_image(VALUE self, VALUE arg) {
+   if (RAY_IS_A(arg, rb_cHash))
+      ray_init_image_with_hash(self, arg);
+   else {
+      rb_raise(rb_eTypeError, "Can't convert %s into Hash",
+               RAY_OBJ_CLASSNAME(arg));
+   }
+
    return Qnil;
 }
 

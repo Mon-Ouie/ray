@@ -4,7 +4,7 @@ describe Ray::Image do
     @win = Ray.create_window(:w => 100, :h => 100)
   end
 
- describe "#blit" do
+  describe "#blit" do
     context "when trying to blit on a non-surface" do
       it "should raise a type error" do
         img = Ray::Image.new(:w => 50, :h => 50)
@@ -23,6 +23,16 @@ describe Ray::Image do
 
         lambda {
           img.blit(:on => @win, :at => Ray::Color.new(10, 20, 30))
+        }.should raise_exception(TypeError)
+      end
+    end
+  end
+
+  describe "#initialize" do
+    context "when the argument isn't a hash" do
+      it "should raise a type error" do
+        lambda {
+          Ray::Image.new(3)
         }.should raise_exception(TypeError)
       end
     end
