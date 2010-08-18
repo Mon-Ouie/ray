@@ -6,6 +6,15 @@
 # include <SDL/SDL.h>
 #endif
 
+
+#if defined(HAVE_SDL_IMAGE)
+# if defined(HAVE_SDL_IMAGE_H) || defined(RAY_USE_FRAMEWORK)
+#  include <SDL_image.h>
+# else
+#  include <SDL/SDL_image.h>
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #if 0

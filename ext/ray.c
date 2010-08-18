@@ -93,12 +93,22 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
    return ray_create_image(screen);
 }
 
+VALUE ray_has_image_support(VALUE self) {
+#ifdef HAVE_SDL_IMAGE
+   return Qtrue;
+#else
+   return Qfalse;
+#endif
+}
+
 void Init_ray_ext() {
    ray_mRay = rb_define_module("Ray");
 
    rb_define_module_function(ray_mRay, "init", ray_init, 0);
    rb_define_module_function(ray_mRay, "stop", ray_stop, 0);
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
+
+   rb_define_module_function(ray_mRay, "has_image_support?", ray_has_image_support, 0);
 
    Init_ray_image();
    Init_ray_color();

@@ -52,6 +52,22 @@ describe Ray::Image do
         }.should raise_exception
       end
     end
+
+    if Ray.has_image_support?
+      it "should be able to load other formats" do
+        lambda {
+          Ray::Image.new(path_of("aqua.png"))
+        }.should_not raise_exception
+      end
+
+      context "if the extension does not match the file type" do
+        it "should still load it correctly" do
+          lambda {
+            Ray::Image.new(path_of("not_a_jpeg.jpeg"))
+          }.should_not raise_exception
+        end
+      end
+    end
   end
 
   after :each do

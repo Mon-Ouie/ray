@@ -52,12 +52,21 @@ void ray_init_image_with_filename(VALUE self, VALUE filename) {
    char *c_filename = StringValuePtr(filename);
    ray_image *image = ray_rb2image(self);
 
+#ifdef HAVE_SDL_IMAGE
+   image->surface = IMG_Load(c_filename);
+
+   if (!image->surface) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               IMG_GetError());
+   }
+#else
    image->surface = SDL_LoadBMP(c_filename);
    
    if (!image->surface) {
       rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
                SDL_GetError());
    }
+#endif
 }
 
 /*
