@@ -76,7 +76,7 @@ SDL_Surface *ray_rb2surface(VALUE object);
 /** Converts a ruby object into a rect */
 ray_rect ray_rb2rect(VALUE object);
 
-/* Initilizers */
+/* Initializers */
 
 void Init_ray_ext();
 void Init_ray_image();
