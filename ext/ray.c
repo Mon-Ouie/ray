@@ -93,6 +93,11 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
    return ray_create_image(screen);
 }
 
+VALUE ray_set_icon(VALUE self, VALUE icon) {
+   SDL_WM_SetIcon(ray_rb2surface(icon), NULL);
+   return icon;
+}
+
 VALUE ray_has_image_support(VALUE self) {
 #ifdef HAVE_SDL_IMAGE
    return Qtrue;
@@ -106,7 +111,9 @@ void Init_ray_ext() {
 
    rb_define_module_function(ray_mRay, "init", ray_init, 0);
    rb_define_module_function(ray_mRay, "stop", ray_stop, 0);
+
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
+   rb_define_module_function(ray_mRay, "icon=", ray_set_icon, 1);
 
    rb_define_module_function(ray_mRay, "has_image_support?", ray_has_image_support, 0);
 
