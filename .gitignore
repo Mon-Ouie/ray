@@ -8,3 +8,4 @@ pkg/
 *.bundle
 Makefile
 ext/ray
+/ext/mkmf.log
