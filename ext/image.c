@@ -224,6 +224,15 @@ VALUE ray_image_set_alpha(VALUE self, VALUE alpha) {
    return alpha;
 }
 
+/*
+  Returns the flags of an image (an OR'd combination of the Ray::Image::FLAG_*
+  constants)
+*/
+VALUE ray_image_flags(VALUE self) {
+   uint32_t flags = ray_rb2surface(self)->flags;
+   return INT2NUM(flags);
+}
+
 void Init_ray_image() {
    ray_cImage = rb_define_class_under(ray_mRay, "Image", rb_cObject);
    
@@ -236,4 +245,21 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "blit", ray_image_blit, 1);
 
    rb_define_method(ray_cImage, "alpha=", ray_image_set_alpha, 1);
+
+   rb_define_method(ray_cImage, "flags", ray_image_flags, 0);
+
+   rb_define_const(ray_cImage, "FLAG_ANYFORMAT", INT2FIX(SDL_ANYFORMAT));
+   rb_define_const(ray_cImage, "FLAG_ASYNCBLIT", INT2FIX(SDL_ASYNCBLIT));
+   rb_define_const(ray_cImage, "FLAG_DOUBLEBUF", INT2FIX(SDL_DOUBLEBUF));
+   rb_define_const(ray_cImage, "FLAG_HWPALETTE", INT2FIX(SDL_HWPALETTE));
+   rb_define_const(ray_cImage, "FLAG_HWACCEL", INT2FIX(SDL_HWACCEL));
+   rb_define_const(ray_cImage, "FLAG_HWSURFACE", INT2FIX(SDL_HWSURFACE));
+   rb_define_const(ray_cImage, "FLAG_FULLSCREEN", INT2FIX(SDL_FULLSCREEN));
+   rb_define_const(ray_cImage, "FLAG_OPENGL", INT2FIX(SDL_OPENGL));
+   rb_define_const(ray_cImage, "FLAG_OPENGLBLIT", INT2FIX(SDL_OPENGLBLIT));
+   rb_define_const(ray_cImage, "FLAG_RESIZABLE", INT2FIX(SDL_RESIZABLE));
+   rb_define_const(ray_cImage, "FLAG_RLEACCEL", INT2FIX(SDL_RLEACCEL));
+   rb_define_const(ray_cImage, "FLAG_SRCALPHA", INT2FIX(SDL_SRCALPHA));
+   rb_define_const(ray_cImage, "FLAG_SRCCOLORKEY", INT2FIX(SDL_SRCCOLORKEY));
+   rb_define_const(ray_cImage, "FLAG_PREALLOC", INT2FIX(SDL_PREALLOC));
 }
