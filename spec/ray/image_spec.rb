@@ -29,11 +29,27 @@ describe Ray::Image do
   end
 
   describe "#initialize" do
-    context "when the argument isn't a hash" do
+    context "when the argument isn't a hash or a string" do
       it "should raise a type error" do
         lambda {
           Ray::Image.new(3)
         }.should raise_exception(TypeError)
+      end
+    end
+
+    context "when loading an existing file" do
+      it "should not raise an error" do
+        lambda {
+          Ray::Image.new(path_of("aqua.bmp"))
+        }.should_not raise_exception
+      end
+    end
+
+    context "when loading an unexising file" do
+      it "should raise a runtime error" do
+        lambda {
+          Ray::Image.new("does_not_exist.bmp")
+        }.should raise_exception
       end
     end
   end
