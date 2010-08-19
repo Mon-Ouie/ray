@@ -1,3 +1,5 @@
+require 'profile'
+
 $: << "./ext/" << "./lib/"
 path = File.expand_path(File.join(File.dirname(__FILE__), "ext/ray"))
 our_path = File.expand_path(File.join(File.dirname(__FILE__), "spec_runner.rb"))

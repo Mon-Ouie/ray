@@ -208,6 +208,8 @@ void Init_ray_ext() {
    Init_ray_rect();
 }
 
+#ifndef PSP
+
 int main(int argc, char *argv[]) {
 #if defined(HAVE_RUBY_RUN_NODE)
    ruby_init();
@@ -226,3 +228,117 @@ int main(int argc, char *argv[]) {
 
    return 0;
 }
+
+#endif
+
+#ifdef PSP
+
+PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
+PSP_HEAP_SIZE_KB(-512);
+
+#include <unistd.h>
+
+#define RGB(r, g, b) ((r) | ((g)<<8) | ((b)<<16) | (0xff<<24))
+
+VALUE ray_safe_load(VALUE self) {
+   return rb_require("./script.rb");
+}
+
+int SDL_main(int argc, char *argv[]) {
+   ruby_init();
+
+   ruby_incpush("./ruby/1.8");
+   ruby_incpush("./ruby/site_ruby");
+   ruby_incpush("./ruby/site_ruby/1.8");
+
+   ruby_incpush("ms0:/ruby/1.8");
+   ruby_incpush("ms0:/ruby/site_ruby");
+   ruby_incpush("ms0:/ruby/site_ruby/1.8");
+
+   ruby_incpush(".");
+
+   Init_ray_ext();
+
+   int error = 0;
+   VALUE res = rb_protect(ray_safe_load, 0, &error);
+
+   if (error != 0) {
+      pspDebugScreenInit();
+
+      pspDebugScreenSetBackColor(RGB(0, 0, 0));
+      pspDebugScreenEnableBackColor(1);
+
+      pspDebugScreenClear();
+      pspDebugScreenSetXY(0, 0);
+
+      pspDebugScreenSetTextColor(RGB(255, 0, 0));
+      pspDebugScreenPrintf("Ray - error manager\n\n\n");
+      pspDebugScreenSetTextColor(RGB(255, 255, 255));
+
+      pspDebugScreenPrintf("This is Ray's error manager.An exception ");
+      pspDebugScreenPrintf("has been thrown, and the script ");
+      pspDebugScreenPrintf("cannot be run. If you're the developper of");
+      pspDebugScreenPrintf(" this application,\ncheck yout script.");
+      pspDebugScreenPrintf(" If it seems fine to you, consider ");
+      pspDebugScreenPrintf("filling a bug report.\n");
+      pspDebugScreenPrintf("If you're not the developper, consider");
+      pspDebugScreenPrintf(" contacting him.\n\n\n");
+
+      pspDebugScreenSetTextColor(RGB(255, 0, 0));
+      pspDebugScreenPrintf("Errors informations :\n\n\n");
+      pspDebugScreenSetTextColor(RGB(255, 255, 255));
+
+      // Now, we get the error.
+      VALUE error = rb_gv_get("$!");
+
+      // And the information we want to have about it.
+      VALUE backtrace = rb_funcall(error, RAY_METH("backtrace"), 0);
+      VALUE type      = rb_funcall(error, RAY_METH("class"), 0);
+      VALUE msg       = rb_funcall(error, RAY_METH("message"), 0);
+
+      type = rb_funcall(type, RAY_METH("to_s"), 0);
+
+      VALUE first = rb_ary_entry(backtrace, 0);
+
+      FILE *log = fopen("ray-error.log", "w");
+      if (!log) {
+         sceKernelExitGame();
+         return 1;
+      }
+
+      pspDebugScreenPrintf("%s: %s: %s\n", StringValuePtr(first),
+                                           StringValuePtr(type),
+                                           StringValuePtr(msg));
+      fprintf(log, "%s: %s: %s\n", StringValuePtr(first), StringValuePtr(type),
+              StringValuePtr(msg));
+
+      for (int i = 1; i < RARRAY_LEN(backtrace); ++i) {
+         VALUE entry = rb_ary_entry(backtrace, i);
+         pspDebugScreenPrintf("%s\n", StringValuePtr(entry));
+         fprintf(log, "%s\n", StringValuePtr(entry));
+      }
+
+      fclose(log);
+
+      pspDebugScreenPrintf("\nThese informations can be found in ");
+      pspDebugScreenPrintf("ray-error.log\n\n");
+
+      pspDebugScreenPrintf("Press X to quit.");
+
+      SceCtrlData pad;
+
+      sceCtrlSetSamplingCycle(0);
+      sceCtrlSetSamplingMode(PSP_CTRL_MODE_ANALOG);
+      sceCtrlReadBufferPositive(&pad, 1);
+
+      while (!(pad.Buttons & PSP_CTRL_CROSS))
+         sceCtrlReadBufferPositive(&pad, 1);
+
+      sceKernelExitGame();
+      return 0;
+   }
+
+   return res;
+}
+
+#endif
