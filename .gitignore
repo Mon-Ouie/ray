@@ -14,3 +14,7 @@ ext/Makefile
 *.so
 *.SFO
 /script.rb
+*.bundle
+Makefile
+ext/ray
+/ext/mkmf.log

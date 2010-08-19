@@ -18,24 +18,7 @@ SDL_Surface *ray_rb2surface(VALUE object) {
    return ray_rb2image(object)->surface;
 }
 
-/*
-  Creates a new image. You must call Ray.create_window before
-  this function.
-
-  @overload initialize(hash)
-    @option hash [Integer] :width Width of the surface
-    @option hash [Integer] :height Height of the surface
-    
-    @option hash [Integer] :w Alias for width
-    @option hash [Integer] :h Alias for height
-
-    @option hash [Integer] :bits_per_pixel See Ray.create_window
-    @option hash [Integer] :pp Alias for bits_per_pixel
-
-    @option hash [true, false] :hw_surface See Ray.create_window
-    @option hash [true, false] :sw_surface See Ray.create_window
- */
-VALUE ray_init_image(VALUE self, VALUE arg) {
+void ray_init_image_with_hash(VALUE self, VALUE arg) {
    VALUE width = rb_hash_aref(arg, RAY_SYM("width"));
    if (NIL_P(width)) width = rb_hash_aref(arg, RAY_SYM("w"));
 
@@ -63,7 +46,59 @@ VALUE ray_init_image(VALUE self, VALUE arg) {
       rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
                SDL_GetError());
    }
+}
+
+void ray_init_image_with_filename(VALUE self, VALUE filename) {
+   char *c_filename = StringValuePtr(filename);
+   ray_image *image = ray_rb2image(self);
+
+#ifdef HAVE_SDL_IMAGE
+   image->surface = IMG_Load(c_filename);
+
+   if (!image->surface) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               IMG_GetError());
+   }
+#else
+   image->surface = SDL_LoadBMP(c_filename);
    
+   if (!image->surface) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               SDL_GetError());
+   }
+#endif
+}
+
+/*
+  Creates a new image.
+
+  @overload initialize(hash)
+    @option hash [Integer] :width Width of the surface
+    @option hash [Integer] :height Height of the surface
+    
+    @option hash [Integer] :w Alias for width
+    @option hash [Integer] :h Alias for height
+
+    @option hash [Integer] :bits_per_pixel See Ray.create_window
+    @option hash [Integer] :pp Alias for bits_per_pixel
+
+    @option hash [true, false] :hw_surface See Ray.create_window
+    @option hash [true, false] :sw_surface See Ray.create_window
+
+  @overload initialize(filename)
+    Loads the image from a file.
+    @param [String, #to_str] filename The name of the file to open 
+ */
+VALUE ray_init_image(VALUE self, VALUE arg) {
+   if (RAY_IS_A(arg, rb_cHash))
+      ray_init_image_with_hash(self, arg);
+   else if (rb_respond_to(arg, RAY_METH("to_str")))
+      ray_init_image_with_filename(self, rb_String(arg));
+   else {
+      rb_raise(rb_eTypeError, "Can't convert %s into Hash",
+               RAY_OBJ_CLASSNAME(arg));
+   }
+
    return Qnil;
 }
 
@@ -179,6 +214,40 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
    return surf;
 }
 
+/*
+  Sets the alpha transparency.
+  @param [Integer, 0..255] alpha the new transparency
+*/
+VALUE ray_image_set_alpha(VALUE self, VALUE alpha) {
+   SDL_SetAlpha(ray_rb2surface(self), SDL_SRCALPHA | SDL_RLEACCEL,
+                NUM2INT(alpha));
+   return alpha;
+}
+
+/*
+  Returns the flags of an image (an OR'd combination of the Ray::Image::FLAG_*
+  constants)
+*/
+VALUE ray_image_flags(VALUE self) {
+   uint32_t flags = ray_rb2surface(self)->flags;
+   return INT2NUM(flags);
+}
+
+/* @return [Integer] Width of the surface */
+VALUE ray_image_width(VALUE self) {
+   return INT2FIX(ray_rb2surface(self)->w);
+}
+
+/* @return [Integer] Height of the surface */
+VALUE ray_image_height(VALUE self) {
+   return INT2FIX(ray_rb2surface(self)->h);
+}
+
+/* @return [Integer] Bits per pixel */
+VALUE ray_image_bpp(VALUE self) {
+   return INT2FIX(ray_rb2surface(self)->format->BitsPerPixel);
+}
+
 void Init_ray_image() {
    ray_cImage = rb_define_class_under(ray_mRay, "Image", rb_cObject);
    
@@ -189,4 +258,27 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "flip", ray_image_flip, 0);
 
    rb_define_method(ray_cImage, "blit", ray_image_blit, 1);
+
+   rb_define_method(ray_cImage, "alpha=", ray_image_set_alpha, 1);
+
+   rb_define_method(ray_cImage, "flags", ray_image_flags, 0);
+
+   rb_define_method(ray_cImage, "width", ray_image_width, 0);
+   rb_define_method(ray_cImage, "height", ray_image_height, 0);
+   rb_define_method(ray_cImage, "bpp", ray_image_bpp, 0);
+
+   rb_define_const(ray_cImage, "FLAG_ANYFORMAT", INT2FIX(SDL_ANYFORMAT));
+   rb_define_const(ray_cImage, "FLAG_ASYNCBLIT", INT2FIX(SDL_ASYNCBLIT));
+   rb_define_const(ray_cImage, "FLAG_DOUBLEBUF", INT2FIX(SDL_DOUBLEBUF));
+   rb_define_const(ray_cImage, "FLAG_HWPALETTE", INT2FIX(SDL_HWPALETTE));
+   rb_define_const(ray_cImage, "FLAG_HWACCEL", INT2FIX(SDL_HWACCEL));
+   rb_define_const(ray_cImage, "FLAG_HWSURFACE", INT2FIX(SDL_HWSURFACE));
+   rb_define_const(ray_cImage, "FLAG_FULLSCREEN", INT2FIX(SDL_FULLSCREEN));
+   rb_define_const(ray_cImage, "FLAG_OPENGL", INT2FIX(SDL_OPENGL));
+   rb_define_const(ray_cImage, "FLAG_OPENGLBLIT", INT2FIX(SDL_OPENGLBLIT));
+   rb_define_const(ray_cImage, "FLAG_RESIZABLE", INT2FIX(SDL_RESIZABLE));
+   rb_define_const(ray_cImage, "FLAG_RLEACCEL", INT2FIX(SDL_RLEACCEL));
+   rb_define_const(ray_cImage, "FLAG_SRCALPHA", INT2FIX(SDL_SRCALPHA));
+   rb_define_const(ray_cImage, "FLAG_SRCCOLORKEY", INT2FIX(SDL_SRCCOLORKEY));
+   rb_define_const(ray_cImage, "FLAG_PREALLOC", INT2FIX(SDL_PREALLOC));
 }

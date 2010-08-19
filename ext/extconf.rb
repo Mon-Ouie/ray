@@ -29,7 +29,7 @@ def have_framework(name)
     $LDFLAGS << " -F#{File.dirname(ret)}"
     $LDFLAGS << " -framework #{name}"
     $CFLAGS  << " -I#{File.join(ret, "Headers")}"
-    $CFLAGS  << " -DHAVE_FRAMEWORK_#{name.upcase}"
+    $CFLAGS  << " -DHAVE_#{name.upcase}"
   else
     puts "no"
   end
@@ -56,6 +56,10 @@ unless RUBY_PLATFORM =~ /darwin/
     exit 1
   end
 
+  if have_library("SDL_image")
+    have_header("SDL/SDL_image.h") or have_header("SDL_image.h")
+  end
+
   create_makefile("ray_ext")
 
   data = File.read("Makefile").gsub("SDLMain.o", "")
@@ -74,6 +78,8 @@ else
     $stderr.puts "missing frameworks"
     exit 1
   end
+
+  have_framework("SDL_image")
 
   have_library("ruby", "ruby_init")
 

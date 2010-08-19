@@ -80,7 +80,7 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
 
    if (RTEST(rb_hash_aref(hash, RAY_SYM("no_frame"))))
       flags |= SDL_NOFRAME;
-
+   
    SDL_Surface *screen = SDL_SetVideoMode(NUM2INT(width),
                                           NUM2INT(height),
                                           NUM2INT(bitsperpixel),
@@ -93,12 +93,115 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
    return ray_create_image(screen);
 }
 
+/*
+  Sets the window icon
+  @param [Ray::Image] icon The icon to display
+*/
+VALUE ray_set_icon(VALUE self, VALUE icon) {
+   SDL_WM_SetIcon(ray_rb2surface(icon), NULL);
+   return icon;
+}
+
+/* @return [String, nil] The window title */
+VALUE ray_window_title(VALUE self) {
+   char *title = NULL;
+   SDL_WM_GetCaption(&title, NULL);
+
+   if (!title)
+      return Qnil;
+   return rb_str_new2(title);
+}
+
+/* Sets the window title */
+VALUE ray_set_window_title(VALUE self, VALUE title) {
+   char *icon = NULL;
+
+   if (!NIL_P(title)) title = rb_String(title);
+
+   SDL_WM_GetCaption(NULL, &icon);
+   SDL_WM_SetCaption(NIL_P(title) ? NULL : StringValuePtr(title), icon);
+
+   return title;
+}
+
+/* @return [String, nil] The window text icon */
+VALUE ray_text_icon(VALUE self) {
+   char *icon = NULL;
+   SDL_WM_GetCaption(NULL, &icon);
+
+   if (!icon)
+      return Qnil;
+   return rb_str_new2(icon);   
+}
+
+/* Sets the window title */
+VALUE ray_set_text_icon(VALUE self, VALUE icon) {
+   char *title;
+   
+   if (!NIL_P(icon)) icon = rb_String(icon);
+
+   SDL_WM_GetCaption(&title, NULL);
+   SDL_WM_SetCaption(title, NIL_P(icon) ? NULL : StringValuePtr(icon));
+
+   return icon;
+}
+
+/*
+  @return [true, false] True if the input is grabbed, which means the mouse
+                        is confined in the window, and keyboard input is sent
+                        directly to the window.
+*/
+VALUE ray_grab_input(VALUE self) {
+   SDL_GrabMode mode = SDL_WM_GrabInput(SDL_GRAB_QUERY);
+   return (mode == SDL_GRAB_ON) ? Qtrue : Qfalse;
+}
+
+/* Sets the grab input to true or false */
+VALUE ray_set_grab_input(VALUE self, VALUE grab) {
+   SDL_WM_GrabInput(RTEST(grab) ? SDL_GRAB_ON : SDL_GRAB_OFF);
+   return grab;
+}
+
+/* @return [Ray::Image, nil] The current screen, created by create_window */
+VALUE ray_screen(VALUE self) {
+   SDL_Surface *surf = SDL_GetVideoSurface();
+   
+   if (!surf)
+      return Qnil;
+   return ray_create_image(surf);
+}
+
+/* @return [true, false] true if Ray supports other image formats than BMP */
+VALUE ray_has_image_support(VALUE self) {
+#ifdef HAVE_SDL_IMAGE
+   return Qtrue;
+#else
+   return Qfalse;
+#endif
+}
+
 void Init_ray_ext() {
    ray_mRay = rb_define_module("Ray");
 
    rb_define_module_function(ray_mRay, "init", ray_init, 0);
    rb_define_module_function(ray_mRay, "stop", ray_stop, 0);
+
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
+   rb_define_module_function(ray_mRay, "screen", ray_screen, 0);
+   
+   rb_define_module_function(ray_mRay, "icon=", ray_set_icon, 1);
+   rb_define_module_function(ray_mRay, "window_title=", ray_set_window_title,
+                             1);
+   rb_define_module_function(ray_mRay, "text_icon=", ray_set_text_icon, 1);
+
+   rb_define_module_function(ray_mRay, "window_title", ray_window_title, 0);
+   rb_define_module_function(ray_mRay, "text_icon", ray_text_icon, 0);
+
+   rb_define_module_function(ray_mRay, "grab_input", ray_grab_input, 0);
+   rb_define_module_function(ray_mRay, "grab_input=", ray_set_grab_input, 1);
+
+   rb_define_module_function(ray_mRay, "has_image_support?",
+                             ray_has_image_support, 0);
 
    Init_ray_image();
    Init_ray_color();

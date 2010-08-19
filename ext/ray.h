@@ -16,6 +16,14 @@
 # include <pspctrl.h>
 #endif
 
+#if defined(HAVE_SDL_IMAGE)
+# if defined(HAVE_SDL_IMAGE_H) || defined(RAY_USE_FRAMEWORK)
+#  include <SDL_image.h>
+# else
+#  include <SDL/SDL_image.h>
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #if 0
@@ -77,7 +85,7 @@ SDL_Surface *ray_rb2surface(VALUE object);
 /** Converts a ruby object into a rect */
 ray_rect ray_rb2rect(VALUE object);
 
-/* Initilizers */
+/* Initializers */
 
 void Init_ray_ext();
 void Init_ray_image();
