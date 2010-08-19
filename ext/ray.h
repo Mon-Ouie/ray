@@ -1,9 +1,19 @@
-#include "ruby.h"
+#ifndef PSP
+# include "ruby.h"
+#else
+# include <ruby/ruby.h>
+#endif
 
 #if defined(HAVE_SDL_H) || defined(RAY_USE_FRAMEWORK)
 # include <SDL.h>
 #else
 # include <SDL/SDL.h>
+#endif
+
+#ifdef PSP
+# include <pspkernel.h>
+# include <pspdebug.h>
+# include <pspctrl.h>
 #endif
 
 #ifdef __cplusplus

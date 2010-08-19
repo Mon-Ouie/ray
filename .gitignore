@@ -5,3 +5,12 @@ pkg/
 *.gems
 *.o
 *.gemspec
+*.elf
+*.tar.gz
+*.prx
+*.PBP
+*.log
+ext/Makefile
+*.so
+*.SFO
+/script.rb

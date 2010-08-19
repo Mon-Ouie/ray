@@ -56,3 +56,37 @@ end
 
 desc "Builds the C extension"
 task :ext => ["ext:build"]
+
+begin
+  require 'rake/psp_task'
+
+  PSPTask.new do |t|
+    t.objdir  = "./obj/"
+    t.srcs    = Dir['ext/*.c', 'psp/*.c']
+    t.libs    = ["-LSDLmain", "-lSDL", "-lGL", "-lpspvfpu", "-lpspgu",
+                 "-lpspaudio", "-lpsprtc", "-lpsphprm", "-lruby",
+                 "-lm"] | t.libs
+    t.cflags |= ["-Wall", "-std=c99", "-Wno-unused-parameter",
+                 "-D_PSP_ -DHAVE_STRUCT_TIMESPEC"]
+    t.target  = "ray_release"
+
+    t.build_prx   = true
+    t.build_eboot = true
+  end
+
+  PSPTask.new(:debug) do |t|
+    t.objdir  = "./obj_dbg/"
+    t.srcs    = Dir['ext/*.c', 'psp/*.c']
+    t.libs    = ["-LSDLmain", "-lSDL", "-lGL", "-lpspvfpu", "-lpspgu",
+                 "-lpspaudio", "-lpsprtc", "-lpsphprm", "-lruby",
+                 "-lm"] | t.libs
+    t.cflags |= ["-Wall", "-std=c99", "-Wno-unused-parameter",
+                 "-D_PSP_ -DHAVE_STRUCT_TIMESPEC", "-g", "-O0"]
+    t.target  = "ray"
+
+    t.build_prx = true
+  end
+rescue LoadError
+  $stderr.puts("psp_task is not installed. Please install it " +
+               "with the following command: gem intall psp_task")
+end
