@@ -49,8 +49,8 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
    VALUE width  = rb_hash_aref(hash, RAY_SYM("width"));
    VALUE height = rb_hash_aref(hash, RAY_SYM("height"));
 
-   if (NIL_P(width))  width  = rb_hash_aref(hash, RAY_SYM("h"));
-   if (NIL_P(height)) height = rb_hash_aref(hash, RAY_SYM("w"));
+   if (NIL_P(width))  width  = rb_hash_aref(hash, RAY_SYM("w"));
+   if (NIL_P(height)) height = rb_hash_aref(hash, RAY_SYM("h"));
 
    if (NIL_P(width) || NIL_P(height))
       rb_raise(rb_eArgError, "Missing parameter: width or height");
