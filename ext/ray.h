@@ -28,6 +28,7 @@ extern VALUE ray_mRay;
 extern VALUE ray_cImage;
 extern VALUE ray_cColor;
 extern VALUE ray_cRect;
+extern VALUE ray_cEvent;
 
 /* Macros for Ruby's C API */
 
@@ -76,12 +77,16 @@ SDL_Surface *ray_rb2surface(VALUE object);
 /** Converts a ruby object into a rect */
 ray_rect ray_rb2rect(VALUE object);
 
+/** Converts a ruby object into an event */
+SDL_Event *ray_rb2event(VALUE object);
+
 /* Initializers */
 
 void Init_ray_ext();
 void Init_ray_image();
 void Init_ray_color();
 void Init_ray_rect();
+void Init_ray_event();
 
 #ifdef __cplusplus
 #if 0
