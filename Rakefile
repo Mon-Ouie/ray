@@ -81,16 +81,18 @@ begin
           syck/token.c syck/emitter.c syck/handler.c syck/node.c syck/syck.c
           syck/yaml2byte.c).map { |i| "psp/#{i}" }
 
-  static_libs = ["-LSDLmain", "-lSDL", "-lGL", "-lpspvfpu", "-lpspgu",
-                 "-lpspaudio", "-lpsprtc", "-lpsphprm", "-lpspwlan",
-                 "-lruby", "-lz", "-lm"]
+  static_libs = ["-lSDL_image", "-lSDL", "-lGL", "-lpspvfpu",
+                 "-lpspgu", "-lpspaudio", "-lpsprtc", "-lpsphprm", "-lpspwlan",
+                 "-lruby", "-lpng", "-ljpeg", "-lz","-lm", "-lc"]
+
+  flags = ["-Wall", "-Wno-unused-parameter", "-D_PSP_ -DHAVE_STRUCT_TIMESPEC",
+           "-DHAVE_SDL_IMAGE"]
 
   PSPTask.new do |t|
     t.objdir  = "./obj/"
     t.srcs    = Dir['ext/*.c', 'psp/*.c'] | libs
     t.libs    = static_libs | t.libs
-    t.cflags |= ["-Wall", "-Wno-unused-parameter",
-                 "-D_PSP_ -DHAVE_STRUCT_TIMESPEC"]
+    t.cflags |= flags
     t.incdir << "-I./ext" << "-I./psp"
     t.target  = "ray_release"
 
@@ -102,9 +104,7 @@ begin
     t.objdir  = "./obj_dbg/"
     t.srcs    = Dir['ext/*.c', 'psp/*.c'] | libs
     t.libs    = static_libs | t.libs
-    t.cflags |= ["-Wall", "-Wno-unused-parameter",
-                 "-D_PSP_ -DHAVE_STRUCT_TIMESPEC", "-g",
-                 "-O0", "-G0"]
+    t.cflags |= (flags | ["-O0", "-G0"])
     t.incdir << "-I./ext" << "-I./psp"
     t.target  = "ray"
 
