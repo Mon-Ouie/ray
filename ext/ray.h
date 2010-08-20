@@ -38,6 +38,11 @@ extern VALUE ray_cImage;
 extern VALUE ray_cColor;
 extern VALUE ray_cRect;
 
+#ifdef PSP
+extern VALUE ray_eTimeoutError;
+extern VALUE ray_mWlan;
+#endif
+
 /* Macros for Ruby's C API */
 
 #define RAY_IS_A(obj, klass) (RTEST(rb_obj_is_kind_of(obj, klass)))
@@ -91,6 +96,10 @@ void Init_ray_ext();
 void Init_ray_image();
 void Init_ray_color();
 void Init_ray_rect();
+
+#ifdef PSP
+void Init_ray_psp();
+#endif
 
 #ifdef __cplusplus
 #if 0

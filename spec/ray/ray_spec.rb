@@ -1,3 +1,5 @@
+require 'rbconfig'
+
 describe Ray do
   describe "#create_window" do
     context "when given an unappropriate configuration" do
@@ -36,11 +38,13 @@ describe Ray do
       Ray.window_title = "bar"
       Ray.window_title == "bar"
 
-      Ray.grab_input = false
-      Ray.grab_input.should be_false
+      unless RbConfig::CONFIG["target_vendor"] == "psp"
+        Ray.grab_input = false
+        Ray.grab_input.should be_false
 
-      Ray.grab_input = true
-      Ray.grab_input.should be_true
+        Ray.grab_input = true
+        Ray.grab_input.should be_true
+      end
     end
 
     after :all do Ray.stop end

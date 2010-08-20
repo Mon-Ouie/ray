@@ -7,6 +7,7 @@ pkg/
 *.gemspec
 *.elf
 *.tar.gz
+*.tar.bz2
 *.prx
 *.PBP
 *.log
@@ -18,3 +19,5 @@ ext/Makefile
 Makefile
 ext/ray
 /ext/mkmf.log
+ruby-1.8.*/
+ruby_stdlib/

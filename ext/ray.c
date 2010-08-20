@@ -206,6 +206,10 @@ void Init_ray_ext() {
    Init_ray_image();
    Init_ray_color();
    Init_ray_rect();
+
+#ifdef PSP
+   Init_ray_psp();
+#endif
 }
 
 #ifndef PSP
@@ -256,6 +260,8 @@ int SDL_main(int argc, char *argv[]) {
    ruby_incpush("ms0:/ruby/site_ruby/1.8");
 
    ruby_incpush(".");
+   
+   ruby_script("ray");
 
    Init_ray_ext();
 
@@ -312,7 +318,8 @@ int SDL_main(int argc, char *argv[]) {
       fprintf(log, "%s: %s: %s\n", StringValuePtr(first), StringValuePtr(type),
               StringValuePtr(msg));
 
-      for (int i = 1; i < RARRAY_LEN(backtrace); ++i) {
+      int i = 1;
+      for (i = 1; i < RARRAY_LEN(backtrace); ++i) {
          VALUE entry = rb_ary_entry(backtrace, i);
          pspDebugScreenPrintf("%s\n", StringValuePtr(entry));
          fprintf(log, "%s\n", StringValuePtr(entry));
