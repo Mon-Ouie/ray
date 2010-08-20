@@ -206,6 +206,7 @@ void Init_ray_ext() {
    Init_ray_image();
    Init_ray_color();
    Init_ray_rect();
+   Init_ray_event();
 
 #ifdef PSP
    Init_ray_psp();
