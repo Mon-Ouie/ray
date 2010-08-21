@@ -126,6 +126,42 @@ VALUE ray_event_is_gain(VALUE self) {
    return ev->active.gain ? Qtrue : Qfalse;
 }
 
+/*
+  @return [Integer, nil] The position of the mouse
+*/
+VALUE ray_event_mouse_x(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_MOUSEBUTTONUP || ev->type == SDL_MOUSEBUTTONDOWN)
+      return INT2FIX(ev->button.x);
+   else if (ev->type == SDL_MOUSEMOTION)
+      return INT2FIX(ev->motion.x);
+   
+   return Qnil; 
+}
+/*
+  @return [Integer, nil] The position of the mouse
+*/
+VALUE ray_event_mouse_y(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_MOUSEBUTTONUP || ev->type == SDL_MOUSEBUTTONDOWN)
+      return INT2FIX(ev->button.y);
+   else if (ev->type == SDL_MOUSEMOTION)
+      return INT2FIX(ev->motion.y);
+   
+   return Qnil;
+}
+
+/*
+  @return [Integer, nil] the button that has been pressed
+*/
+VALUE ray_event_mouse_button(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type != SDL_MOUSEBUTTONUP && ev->type != SDL_MOUSEBUTTONDOWN)
+      return Qnil;
+
+   return INT2FIX(ev->button.button);
+}
+
 void Init_ray_event() {
    ray_cEvent = rb_define_class_under(ray_mRay, "Event", rb_cObject);
    rb_define_alloc_func(ray_cEvent, ray_alloc_event);
@@ -144,6 +180,10 @@ void Init_ray_event() {
    
    rb_define_method(ray_cEvent, "focus_state", ray_event_focus_state, 0);
    rb_define_method(ray_cEvent, "is_gain?", ray_event_is_gain, 0);
+
+   rb_define_method(ray_cEvent, "mouse_x", ray_event_mouse_x, 0);
+   rb_define_method(ray_cEvent, "mouse_y", ray_event_mouse_y, 0);
+   rb_define_method(ray_cEvent, "mouse_button", ray_event_mouse_button, 0);
 
    rb_define_const(ray_cEvent, "TYPE_NOEVENT", INT2FIX(SDL_NOEVENT));
    rb_define_const(ray_cEvent, "TYPE_ACTIVEEVENT", INT2FIX(SDL_ACTIVEEVENT));
@@ -416,4 +456,11 @@ void Init_ray_event() {
    rb_define_const(ray_cEvent, "APPMOUSEFOCUS", INT2FIX(SDL_APPMOUSEFOCUS));
    rb_define_const(ray_cEvent, "APPINPUTFOCUS", INT2FIX(SDL_APPINPUTFOCUS));
    rb_define_const(ray_cEvent, "APPACTIVE", INT2FIX(SDL_APPACTIVE));
+
+   rb_define_const(ray_cEvent, "BUTTON_LEFT", INT2FIX(SDL_BUTTON_LEFT));
+   rb_define_const(ray_cEvent, "BUTTON_MIDDLE", INT2FIX(SDL_BUTTON_MIDDLE));
+   rb_define_const(ray_cEvent, "BUTTON_RIGHT", INT2FIX(SDL_BUTTON_RIGHT));
+   rb_define_const(ray_cEvent, "BUTTON_WHEELUP", INT2FIX(SDL_BUTTON_WHEELUP));
+   rb_define_const(ray_cEvent, "BUTTON_WHEELDOWN",
+                   INT2FIX(SDL_BUTTON_WHEELDOWN));
 }
