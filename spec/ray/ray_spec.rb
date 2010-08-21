@@ -1,7 +1,7 @@
 require 'rbconfig'
 
 describe Ray do
-  describe "#create_window" do
+  describe ".create_window" do
     context "when given an unappropriate configuration" do
       it "should raise runtime error" do
         Ray.init
