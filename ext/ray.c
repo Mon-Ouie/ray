@@ -4,7 +4,7 @@ VALUE ray_mRay = Qnil;
 
 /* Inits ray */
 VALUE ray_init(VALUE self) {
-   SDL_Init(SDL_INIT_VIDEO);
+   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
    return Qnil;
 }
 
@@ -207,6 +207,7 @@ void Init_ray_ext() {
    Init_ray_color();
    Init_ray_rect();
    Init_ray_event();
+   Init_ray_joystick();
 
 #ifdef PSP
    Init_ray_psp();

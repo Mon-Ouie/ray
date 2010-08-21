@@ -68,6 +68,10 @@ typedef struct {
 
 typedef SDL_Rect ray_rect;
 
+typedef struct {
+   SDL_Joystick *joystick;
+} ray_joystick;
+
 /* Convertion functions */
 
 /** Converts a surface into a ruby object */
@@ -94,6 +98,9 @@ ray_rect ray_rb2rect(VALUE object);
 /** Converts a ruby object into an event */
 SDL_Event *ray_rb2event(VALUE object);
 
+/** Converts a ruby object into a joystick */
+SDL_Joystick *ray_rb2joystick(VALUE object);
+
 /* Initializers */
 
 void Init_ray_ext();
@@ -101,6 +108,7 @@ void Init_ray_image();
 void Init_ray_color();
 void Init_ray_rect();
 void Init_ray_event();
+void Init_ray_joystick();
 
 #ifdef PSP
 void Init_ray_psp();
