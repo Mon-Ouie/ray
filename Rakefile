@@ -86,7 +86,7 @@ begin
                  "-lruby", "-lpng", "-ljpeg", "-lz","-lm", "-lc"]
 
   flags = ["-Wall", "-Wno-unused-parameter", "-D_PSP_ -DHAVE_STRUCT_TIMESPEC",
-           "-DHAVE_SDL_IMAGE"]
+           "-DHAVE_SDL_IMAGE", "-G0"]
 
   PSPTask.new do |t|
     t.objdir  = "./obj/"
@@ -104,7 +104,7 @@ begin
     t.objdir  = "./obj_dbg/"
     t.srcs    = Dir['ext/*.c', 'psp/*.c'] | libs
     t.libs    = static_libs | t.libs
-    t.cflags |= (flags | ["-O0", "-G0"])
+    t.cflags |= (flags | ["-O0", "-g"])
     t.incdir << "-I./ext" << "-I./psp"
     t.target  = "ray"
 
