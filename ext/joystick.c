@@ -123,7 +123,7 @@ VALUE ray_joystick_hat_count(VALUE self) {
 }
 
 void Init_ray_joystick() {
-   VALUE ray_cJoystick = rb_define_class_under(ray_mRay, "Joystick", rb_cObject);
+   ray_cJoystick = rb_define_class_under(ray_mRay, "Joystick", rb_cObject);
    rb_define_alloc_func(ray_cJoystick, ray_alloc_joystick);
    rb_define_method(ray_cJoystick, "initialize", ray_init_joystick, 1);
 
