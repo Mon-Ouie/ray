@@ -12,6 +12,20 @@ describe Ray do
 
         Ray.stop
       end
+
+      it "should create a window of the expected size" do
+        Ray.init
+
+        win = Ray.create_window(:w => 100, :h => 50)
+        win.width.should == 100
+        win.height.should == 50
+
+        win = Ray.create_window(:width => 50, :height => 100)
+        win.width.should == 50
+        win.height.should == 100
+
+        Ray.stop
+      end
     end
   end
 
