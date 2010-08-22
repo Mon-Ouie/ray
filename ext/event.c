@@ -162,6 +162,44 @@ VALUE ray_event_mouse_button(VALUE self) {
    return INT2FIX(ev->button.button);
 }
 
+/* @return [Integer, nil] The joystick device index */
+VALUE ray_event_joystick_id(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_JOYAXISMOTION)
+      return INT2FIX(ev->jaxis.which);
+   else if (ev->type == SDL_JOYBUTTONDOWN || ev->type == SDL_JOYBUTTONUP)
+      return INT2FIX(ev->jbutton.which);
+
+   return Qnil;
+}
+
+/* @return [Integer, nil] The joystick axis index */
+VALUE ray_event_axis_id(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_JOYAXISMOTION)
+      return INT2FIX(ev->jaxis.axis);
+
+   return Qnil;
+}
+
+/* @return [Integer, nil] The axis value, from -32768 upto 32767 */
+VALUE ray_event_axis_value(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_JOYAXISMOTION)
+      return INT2FIX(ev->jaxis.value);
+
+   return Qnil;
+}
+
+/* @return [Integer, nil] The button which was pressed or released */
+VALUE ray_event_joystick_button(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_JOYBUTTONDOWN || ev->type == SDL_JOYBUTTONUP)
+      return INT2FIX(ev->jbutton.button);
+
+   return Qnil;
+}
+
 void Init_ray_event() {
    ray_cEvent = rb_define_class_under(ray_mRay, "Event", rb_cObject);
    rb_define_alloc_func(ray_cEvent, ray_alloc_event);
@@ -184,6 +222,11 @@ void Init_ray_event() {
    rb_define_method(ray_cEvent, "mouse_x", ray_event_mouse_x, 0);
    rb_define_method(ray_cEvent, "mouse_y", ray_event_mouse_y, 0);
    rb_define_method(ray_cEvent, "mouse_button", ray_event_mouse_button, 0);
+
+   rb_define_method(ray_cEvent, "joystick_id", ray_event_joystick_id, 0);
+   rb_define_method(ray_cEvent, "axis_id", ray_event_axis_id, 0);
+   rb_define_method(ray_cEvent, "axis_value", ray_event_axis_value, 0);
+   rb_define_method(ray_cEvent, "joystick_button", ray_event_joystick_button, 0);
 
    rb_define_const(ray_cEvent, "TYPE_NOEVENT", INT2FIX(SDL_NOEVENT));
    rb_define_const(ray_cEvent, "TYPE_ACTIVEEVENT", INT2FIX(SDL_ACTIVEEVENT));
@@ -463,4 +506,30 @@ void Init_ray_event() {
    rb_define_const(ray_cEvent, "BUTTON_WHEELUP", INT2FIX(SDL_BUTTON_WHEELUP));
    rb_define_const(ray_cEvent, "BUTTON_WHEELDOWN",
                    INT2FIX(SDL_BUTTON_WHEELDOWN));
+
+#ifdef PSP
+
+/* Buttonss are declared in the following order:
+     PSP_CTRL_TRIANGLE, PSP_CTRL_CIRCLE, PSP_CTRL_CROSS, PSP_CTRL_SQUARE,
+     PSP_CTRL_LTRIGGER, PSP_CTRL_RTRIGGER,
+     PSP_CTRL_DOWN, PSP_CTRL_LEFT, PSP_CTRL_UP, PSP_CTRL_RIGHT,
+     PSP_CTRL_SELECT, PSP_CTRL_START, PSP_CTRL_HOME, PSP_CTRL_HOLD
+*/
+
+   rb_define_const(ray_cEvent, "PSP_BUTTON_TRIANGLE", INT2FIX(0));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_CIRCLE", INT2FIX(1));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_CROSS", INT2FIX(2));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_SQUARE", INT2FIX(3));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_L", INT2FIX(4));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_R", INT2FIX(5));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_DOWN", INT2FIX(6));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_LEFT", INT2FIX(7));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_UP", INT2FIX(8));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_RIGHT", INT2FIX(9));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_SELECT", INT2FIX(10));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_START", INT2FIX(11));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_HOME", INT2FIX(12));
+   rb_define_const(ray_cEvent, "PSP_BUTTON_HOLD", INT2FIX(13));
+
+#endif
 }
