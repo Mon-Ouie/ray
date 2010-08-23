@@ -1,3 +1,4 @@
+require 'ray/dsl/type'
 require 'ray/dsl/converter'
 
 require 'ray/dsl/event'
