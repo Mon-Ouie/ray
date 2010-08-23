@@ -88,27 +88,31 @@ begin
   flags = ["-Wall", "-Wno-unused-parameter", "-D_PSP_ -DHAVE_STRUCT_TIMESPEC",
            "-DHAVE_SDL_IMAGE", "-G0"]
 
-  PSPTask.new do |t|
-    t.objdir  = "./obj/"
-    t.srcs    = Dir['ext/*.c', 'psp/*.c'] | libs
-    t.libs    = static_libs | t.libs
-    t.cflags |= flags
-    t.incdir << "-I./ext" << "-I./psp"
-    t.target  = "ray_release"
+  begin
+    PSPTask.new do |t|
+      t.objdir  = "./obj/"
+      t.srcs    = Dir['ext/*.c', 'psp/*.c'] | libs
+      t.libs    = static_libs | t.libs
+      t.cflags |= flags
+      t.incdir << "-I./ext" << "-I./psp"
+      t.target  = "ray_release"
 
-    t.build_prx   = true
-    t.build_eboot = true
-  end
+      t.build_prx   = true
+      t.build_eboot = true
+    end
 
-  PSPTask.new(:debug) do |t|
-    t.objdir  = "./obj_dbg/"
-    t.srcs    = Dir['ext/*.c', 'psp/*.c'] | libs
-    t.libs    = static_libs | t.libs
-    t.cflags |= (flags | ["-O0", "-g"])
-    t.incdir << "-I./ext" << "-I./psp"
-    t.target  = "ray"
+    PSPTask.new(:debug) do |t|
+      t.objdir  = "./obj_dbg/"
+      t.srcs    = Dir['ext/*.c', 'psp/*.c'] | libs
+      t.libs    = static_libs | t.libs
+      t.cflags |= (flags | ["-O0", "-g"])
+      t.incdir << "-I./ext" << "-I./psp"
+      t.target  = "ray"
 
-    t.build_prx = true
+      t.build_prx = true
+    end
+  rescue
+    $stderr.puts "could not create PSP tasks"
   end
 rescue LoadError
   $stderr.puts("psp_task is not installed. Please install it " +
