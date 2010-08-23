@@ -5,10 +5,14 @@ module Ray
 
       class << self
         def add_converter(from, to, &block)
-          @@converters[from => to] = block
+          @@converters[Ray.resolve_type(from) => Ray.resolve_type(to)] = block
         end
 
         def convert(obj, target)
+          unless target.is_a? Module
+            return convert(obj, Ray.resolve_type(target))
+          end
+
           if converter = @@converters[obj.class => target] # Direct converter
             return converter.call(obj)
           end
@@ -37,8 +41,8 @@ module Ray
     end
   end
 
-  describe_conversion(String => Integer) { |o| o.to_i }
-  describe_conversion(String => Float)   { |o| o.to_f }
-  describe_conversion(String => Numeric) { |o| o.to_f }
-  describe_conversion(Numeric => String) { |o| o.to_s }
+  describe_conversion(:string  => :integer) { |o| o.to_i }
+  describe_conversion(:string  => :float)   { |o| o.to_f }
+  describe_conversion(:string  => :numeric) { |o| o.to_f }
+  describe_conversion(:numeric => :string)  { |o| o.to_s }
 end
