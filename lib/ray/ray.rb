@@ -9,3 +9,4 @@ end
 
 require 'ray/color'
 require 'ray/rect'
+require 'ray/dsl'
