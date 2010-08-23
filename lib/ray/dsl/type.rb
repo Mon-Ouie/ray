@@ -28,7 +28,11 @@ module Ray
   end
 
   def self.resolve_type(name)
-    DSL::Type.resolve_type(name)
+    if name.is_a? Module
+      name
+    else
+      DSL::Type.resolve_type(name)
+    end
   end
 
   register_type(:image, Ray::Image)
