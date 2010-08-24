@@ -10,6 +10,9 @@ module Ray
 
         if desc = Ray.description_for_event(@type)
           desc.each_with_index do |type, i|
+            next if @args[i].is_a? Matcher
+            next if @args[i].is_a? Regexp
+
             begin
               @args[i] = Ray.convert(@args[i], type)
             rescue TypeError
