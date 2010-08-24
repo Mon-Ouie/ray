@@ -21,6 +21,8 @@ module Ray
         true
       end
 
+      alias :=== :match?
+
       def call(event)
         if @block.arity == 0
           @block.call
