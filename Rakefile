@@ -2,8 +2,23 @@
 begin
   require 'yard'
 
+  class MatcherHandler < YARD::Handlers::Ruby::Base
+    handles method_call(:describe_matcher)
+
+    def process
+      p statement.children.select { |o| p o.source, o.methods - Array.instance_methods }
+      src = statement.parameters.children.first.source[1..-1]
+      MethodObject.new(Proxy.new(nil, "Ray::Matchers"), src) do |o|
+        o.source     = statement.source
+        o.docstring  = statement.comments
+        o.visibility = :private
+      end
+    end
+  end
+
   YARD::Rake::YardocTask.new do |t|
     t.files = ['lib/**/*.rb', 'ext/**/*.c']
+    t.options |= ["--private"]
   end
 rescue LoadError
   $stderr.puts("YARD is not installed. Please install it " +
