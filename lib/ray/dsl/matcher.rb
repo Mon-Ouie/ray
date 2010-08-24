@@ -45,4 +45,8 @@ module Ray
       private name
     end
   end
+
+  describe_matcher(:where) do |&block|
+    lambda { |o| block(o) }
+  end
 end
