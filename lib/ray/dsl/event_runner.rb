@@ -1,5 +1,9 @@
 module Ray
   module DSL
+    # This class is the one that dispatches events in your program, the one that
+    # makes everything work. You may want to create one by yourself if you don't
+    # want to use the other classes that use it. You just have to call run every
+    # time you need the events to be said.
     class EventRunner
       def initialize
         @handlers    = []
@@ -9,6 +13,7 @@ module Ray
         @mutex = Mutex.new
       end
 
+      # Sends all the known events to our listeners.
       def run
         @mutex.synchronize do
           @event_list  = @next_events

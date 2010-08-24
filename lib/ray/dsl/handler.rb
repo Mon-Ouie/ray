@@ -1,5 +1,9 @@
 module Ray
   module DSL
+    # This is another class kept by your greedy EventRunner. You don't need
+    # to know it exist. When you say on :foo do something end a handler is
+    # created, so that your EventRunner can see if you are interested in
+    # a specific event.
     class Handler
       def initialize(type, args, block)
         @type, @args, @block = type, args, block

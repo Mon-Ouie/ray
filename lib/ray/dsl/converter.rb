@@ -1,5 +1,7 @@
 module Ray
   module DSL
+    # Module sroing all the regitred converters. You should never
+    # need to use it directly.
     module Converter
       @@converters = {}
 
@@ -31,10 +33,22 @@ module Ray
     end
   end
 
+  # Converts an object to a given type. target can be a Module or
+  # an object registred as a type.
+  #
+  # If there is a converter that can directly convert from obj.class to target,
+  # it will be used. If there isn't, it will see it will search in
+  # obj.class.ancestors and in target's subclasses.
   def self.convert(obj, target)
     DSL::Converter.convert(obj, target)
   end
 
+  # Adds a block telling to ray how to convert from a type to another one.
+  # @example Converting from String to Array
+  #   Ray.describe_conversion(:string => Array) do |s| # registred type or module
+  #     s.split('')
+  #   end
+  # @example declaring multiple conversions at once
   def self.describe_conversion(hash, &block)
     hash.each do |from, to|
       DSL::Converter.add_converter(from, to, &block)
