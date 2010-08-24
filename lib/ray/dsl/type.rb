@@ -53,4 +53,6 @@ module Ray
   register_type(:integer, Integer)
   register_type(:float, Float)
   register_type(:numeric, Numeric)
+
+  register_type(:anything, Object)
 end
