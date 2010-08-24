@@ -35,7 +35,7 @@ describe "the event DSL" do
     end
 
     context "with some arguments" do
-      it "should receive the ones with the same arguments" do
+      it "should send the ones with the same arguments" do
         var = 0
         @obj.on :foo, "danger", "bar" do
           var += 1
@@ -109,6 +109,41 @@ describe "the event DSL" do
 
         @runner.run
         count.should == 1
+      end
+
+      context "if the event was described" do
+         before :all do
+          Ray.describe_event(:weird_thing, :string, :integer)
+        end
+
+        it "should convert arguments at creation" do
+          ev = Ray::DSL::Event.new(:weird_thing, [3, "3"])
+          ev.args.should == ["3", 3]
+        end
+
+        it "should not raise an error if it can't convert objects" do
+          ev = Ray::DSL::Event.new(:weird_thing, [String])
+          ev.args.should == [String]
+        end
+
+        it "should try to convert arguments for handlers" do
+          count = 0
+
+          @obj.instance_eval do
+            on :weird_thing, 3 do |x|
+              x.should == "3"
+              count += 1
+            end
+
+            raise_event(:weird_thing, 0)
+            raise_event(:weird_thing, 3)
+            raise_event(:weird_thing, "3")
+            raise_event(:weird_thing, String)
+          end
+
+          @runner.run
+          count.should == 2
+        end
       end
     end
 
