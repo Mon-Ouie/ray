@@ -38,8 +38,8 @@ module Ray
   #   end
   def self.describe_matcher(name, target = :anything, &create_block)
     Matchers.module_eval do
-      define_method(name) do |*args|
-        DSL::Matcher.new(target, &create_block.call(*args))
+      define_method(name) do |*args, &block|
+        DSL::Matcher.new(target, &create_block.call(*args, &block))
       end
 
       private name
