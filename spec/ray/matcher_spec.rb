@@ -7,6 +7,22 @@ describe Ray::Matchers do
 
       Ray::Matchers.private_instance_methods.should include(:match)
     end
+
+    context "without a defined target" do
+      it "should create one operate on anything" do
+        Ray.describe_matcher(:foo_matcher) do |something|
+          lambda { |x| x == something }
+        end
+
+        obj = Object.new
+        obj.extend Ray::Matchers
+
+        obj.instance_eval do
+          matcher = foo_matcher("")
+          matcher.can_match_on?(Object).should == true
+        end
+      end
+    end
   end
 
   describe "'s private methods" do
