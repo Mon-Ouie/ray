@@ -10,5 +10,7 @@ end
 require 'ray/color'
 require 'ray/rect'
 
+require 'ray/config'
+
 require 'ray/dsl'
 require 'ray/helper'
