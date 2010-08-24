@@ -20,6 +20,8 @@ module Ray
       def match?(obj)
         can_match_on?(obj.class) && @block.call(obj)
       end
+
+      alias :=== :match?
     end
   end
 
