@@ -27,6 +27,14 @@ module Ray
             end
           end
 
+          if target == Integer
+            return obj.to_i if obj.respond_to? :to_i
+          elsif target == Float
+            return obj.to_f if obj.respond_to? :to_f
+          elsif target == String
+            return obj.to_s if obj.respond_to? :to_s
+          end
+
           raise TypeError, "Can't convert #{obj.class} into #{target}"
         end
       end
@@ -54,9 +62,4 @@ module Ray
       DSL::Converter.add_converter(from, to, &block)
     end
   end
-
-  describe_conversion(:string  => :integer) { |o| o.to_i }
-  describe_conversion(:string  => :float)   { |o| o.to_f }
-  describe_conversion(:string  => :numeric) { |o| o.to_f }
-  describe_conversion(:numeric => :string)  { |o| o.to_s }
 end

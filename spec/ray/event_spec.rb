@@ -123,8 +123,16 @@ describe "the event DSL" do
       end
 
       it "should not raise an error if it can't convert objects" do
-        ev = Ray::DSL::Event.new(:weird_thing, [String])
-        ev.args.should == [String]
+        ev = Ray::DSL::Event.new(:weird_thing, ["str", String])
+        ev.args.should == ["str", String]
+      end
+
+      it "should always convert if a method like #to_i is available" do
+        obj = Object.new
+        class << obj; def to_i; 3; end; end
+
+        ev = Ray::DSL::Event.new(:weird_thing, [String, obj])
+        ev.args.should == ["String", 3]
       end
 
       it "should try to convert arguments for handlers" do
@@ -168,16 +176,16 @@ describe "the event DSL" do
         count.should == 1
       end
     end
-  end
 
-  context "when the proc takes arguments" do
-    it "should pass the arguments given to the event" do
-      @obj.on :foo do |*args|
-        args.should == ["a", "b", "c"]
+    context "when the proc takes arguments" do
+      it "should pass the arguments given to the event" do
+        @obj.on :foo do |*args|
+          args.should == ["a", "b", "c"]
+        end
+
+        @obj.raise_event(:foo, "a", "b", "c")
+        @runner.run
       end
-
-      @obj.raise_event(:foo, "a", "b", "c")
-      @runner.run
     end
   end
 end
