@@ -48,7 +48,7 @@ module Ray
 
   # This is the universal matcher, using a lambda so you can create
   # an anonymous matcher if you only need it once, hence you don't want
-  #.to name it.
+  # to name it.
   #
   # @example
   #   on :foo, where { |i| i > 10 } do |i|

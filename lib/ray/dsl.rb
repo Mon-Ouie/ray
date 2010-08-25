@@ -15,3 +15,5 @@ require 'ray/dsl/event_runner'
 
 require 'ray/dsl/listener'
 require 'ray/dsl/event_raiser'
+
+require 'ray/dsl/event_translator'

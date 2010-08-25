@@ -37,7 +37,19 @@ module Ray
 
     def run
       until @exit
+        ev = DSL::EventTranslator.translate_event(Ray::Event.new)
+        raise_event(*ev) if ev
+
+        @always.call if @always
+
         listener_runner.run
+
+        if @need_render
+          @need_render = false
+
+          @render.call(@window)
+          @window.flip
+        end
       end
     end
 
@@ -50,6 +62,19 @@ module Ray
       game.pop_scene
     end
 
+    def always(&block)
+      @always = block
+    end
+
+    def need_render!
+      @need_render = true
+    end
+
+    def render(&block)
+      @render = block
+    end
+
     attr_accessor :game
+    attr_accessor :window
   end
 end
