@@ -16,7 +16,7 @@ begin
   end
 
   YARD::Rake::YardocTask.new do |t|
-    t.files = ['lib/**/*.rb', 'ext/**/*.c']
+    t.files = ['lib/**/*.rb', 'ext/**/*.c', 'psp/*.c']
     t.options |= ["--private"]
   end
 rescue LoadError
