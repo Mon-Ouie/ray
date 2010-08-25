@@ -56,6 +56,15 @@ extern VALUE ray_mWlan;
 /* Data types */
 
 typedef struct {
+   int width;
+   int height;
+
+   int bpp;
+
+   uint32_t flags;
+} ray_video_mode;
+
+typedef struct {
    VALUE self;
    SDL_Surface *surface;
 
@@ -85,6 +94,9 @@ VALUE ray_rect2rb(ray_rect rect);
 
 /** Converts a ruby object into a color */
 ray_color ray_rb2col(VALUE object);
+
+/** Parses a hash to create a video mode */
+ray_video_mode ray_parse_video_mode(VALUE hash);
 
 /** Converts a ruby object into an image*/
 ray_image *ray_rb2image(VALUE object);
