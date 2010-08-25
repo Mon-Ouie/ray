@@ -12,7 +12,9 @@ describe Ray do
 
         Ray.stop
       end
+    end
 
+    context "when given a correct configuration" do
       it "should create a window of the expected size" do
         Ray.init
 
@@ -24,6 +26,24 @@ describe Ray do
         win.width.should == 50
         win.height.should == 100
 
+        Ray.stop
+      end
+    end
+  end
+
+  describe ".can_use_mode?" do
+    context "when given an unappropriate configuration" do
+      it "should return false" do
+        Ray.init
+        Ray.can_use_mode?(:w => 100, :h => 100, :bpp => 1).should be_false
+        Ray.stop
+      end
+    end
+
+    context "when given a correct configuration" do
+      it "should return true" do
+        Ray.init
+        Ray.can_use_mode?(:w => 100, :h => 100).should be_true
         Ray.stop
       end
     end

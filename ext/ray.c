@@ -107,6 +107,17 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
 }
 
 /*
+  @return [true, false] True if the video mode described by hash
+                        can be used.
+*/
+VALUE ray_can_use_mode(VALUE self, VALUE hash) {
+   ray_video_mode mode = ray_parse_video_mode(hash);
+   
+   int res = SDL_VideoModeOK(mode.width, mode.height, mode.bpp, mode.flags);
+   return res ? Qtrue : Qfalse;
+}
+
+/*
   Sets the window icon
   @param [Ray::Image] icon The icon to display
 */
@@ -200,6 +211,7 @@ void Init_ray_ext() {
    rb_define_module_function(ray_mRay, "stop", ray_stop, 0);
 
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
+   rb_define_module_function(ray_mRay, "can_use_mode?", ray_can_use_mode, 1);
    rb_define_module_function(ray_mRay, "screen", ray_screen, 0);
    
    rb_define_module_function(ray_mRay, "icon=", ray_set_icon, 1);
