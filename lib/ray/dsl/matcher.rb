@@ -55,6 +55,6 @@ module Ray
   #     puts "#{i} is greater than 10!"
   #   end
   describe_matcher(:where) do |&block|
-    lambda { |o| block(o) }
+    lambda { |o| block.call(o) }
   end
 end
