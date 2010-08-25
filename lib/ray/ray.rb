@@ -14,3 +14,6 @@ require 'ray/config'
 
 require 'ray/dsl'
 require 'ray/helper'
+
+require 'ray/scene'
+require 'ray/game'
