@@ -50,8 +50,9 @@ module Ray
     # to directly listen to a such event.
     def run
       until @exit
-        ev = DSL::EventTranslator.translate_event(Ray::Event.new)
-        raise_event(*ev) if ev
+        DSL::EventTranslator.translate_event(Ray::Event.new).each do |args|
+          raise_event(*args)
+        end
 
         @always.call if @always
 

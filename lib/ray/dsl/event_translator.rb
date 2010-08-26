@@ -13,24 +13,24 @@ module Ray
         # @return [Array, nil] The arguments you should pass to raise_event.
         def translate_event(ev)
           case ev.type
-          when 0 then nil
+          when 0 then []
           when Ray::Event::TYPE_QUIT then quit(ev)
           when Ray::Event::TYPE_ACTIVEEVENT then active_event(ev)
           when Ray::Event::TYPE_MOUSEMOTION then mouse_motion(ev)
-          else nil
+          else []
           end
         end
 
         def quit(ev)
-          [:quit]
+          [[:quit]]
         end
 
         def active_event(ev)
-          [ev.is_gain? ? :focus_gain : :focus_loss, FOCUS_TYPE[ev.focus_state]]
+          [[ev.is_gain? ? :focus_gain : :focus_loss, FOCUS_TYPE[ev.focus_state]]]
         end
 
         def mouse_motion(ev)
-          [:mouse_motion, Ray::Rect.new(ev.mouse_x, ev.mouse_y)]
+          [[:mouse_motion, Ray::Rect.new(ev.mouse_x, ev.mouse_y)]]
         end
       end
     end
