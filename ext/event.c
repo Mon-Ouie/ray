@@ -200,6 +200,24 @@ VALUE ray_event_joystick_button(VALUE self) {
    return Qnil;
 }
 
+/* @return [Integer, nil] The new width of the window */
+VALUE ray_event_window_w(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_VIDEORESIZE)
+      return INT2FIX(ev->resize.w);
+
+   return Qnil;
+}
+
+/* @return [Integer, nil] The new height of the window */
+VALUE ray_event_window_h(VALUE self) {
+   SDL_Event *ev = ray_rb2event(self);
+   if (ev->type == SDL_VIDEORESIZE)
+      return INT2FIX(ev->resize.h);
+
+   return Qnil;
+}
+
 void Init_ray_event() {
    ray_cEvent = rb_define_class_under(ray_mRay, "Event", rb_cObject);
    rb_define_alloc_func(ray_cEvent, ray_alloc_event);
@@ -227,6 +245,9 @@ void Init_ray_event() {
    rb_define_method(ray_cEvent, "axis_id", ray_event_axis_id, 0);
    rb_define_method(ray_cEvent, "axis_value", ray_event_axis_value, 0);
    rb_define_method(ray_cEvent, "joystick_button", ray_event_joystick_button, 0);
+
+   rb_define_method(ray_cEvent, "window_w", ray_event_window_w, 0);
+   rb_define_method(ray_cEvent, "window_h", ray_event_window_h, 0);
 
    rb_define_const(ray_cEvent, "TYPE_NOEVENT", INT2FIX(SDL_NOEVENT));
    rb_define_const(ray_cEvent, "TYPE_ACTIVEEVENT", INT2FIX(SDL_ACTIVEEVENT));

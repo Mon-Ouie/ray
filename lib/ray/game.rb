@@ -35,6 +35,7 @@ module Ray
         :async_blit => options[:async_blit],
         :double_buf => options[:double_buf],
         :fullscreen => options[:fullscreen],
+        :resizable  => options[:resizable],
         :no_frame   => options[:no_frame]
       }
 

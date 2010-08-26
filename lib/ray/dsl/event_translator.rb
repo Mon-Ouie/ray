@@ -29,6 +29,7 @@ module Ray
           when Ray::Event::TYPE_MOUSEBUTTONUP then mouse_release(ev)
           when Ray::Event::TYPE_KEYDOWN then key_press(ev)
           when Ray::Event::TYPE_KEYUP then key_release(ev)
+          when Ray::Event::TYPE_VIDEORESIZE then resize(ev)
           else []
           end
         end
@@ -64,6 +65,10 @@ module Ray
 
         def key_release(ev)
           [[:key_release, ev.key, ev.mod_keys]]
+        end
+
+        def resize(ev)
+          [[:window_resize, Ray::Rect.new(0, 0, ev.window_w, ev.window_h)]]
         end
       end
     end

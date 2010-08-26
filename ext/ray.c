@@ -50,6 +50,9 @@ ray_video_mode ray_parse_video_mode(VALUE hash) {
    if (RTEST(rb_hash_aref(hash, RAY_SYM("no_frame"))))
       flags |= SDL_NOFRAME;
 
+   if (RTEST(rb_hash_aref(hash, RAY_SYM("resizable"))))
+      flags |= SDL_RESIZABLE;
+
    ray_video_mode mode = {
       NUM2INT(width),
       NUM2INT(height),
