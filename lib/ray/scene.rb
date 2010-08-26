@@ -43,6 +43,7 @@ module Ray
 
     def register_events
       instance_eval(&@block)
+      @exit = false
     end
 
     # Runs until you exit the scene.
