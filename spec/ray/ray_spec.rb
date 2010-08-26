@@ -43,7 +43,7 @@ describe Ray do
     context "when given a correct configuration" do
       it "should return true" do
         Ray.init
-        Ray.can_use_mode?(:w => 100, :h => 100).should be_true
+        Ray.can_use_mode?(:w => 480, :h => 272).should be_true
         Ray.stop
       end
     end

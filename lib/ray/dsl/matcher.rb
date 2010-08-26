@@ -1,7 +1,21 @@
 module Ray
   # This is the module including all of your matchers as private methods,
   # allowing you to use them when you call on.
-  module Matchers; end
+  module Matchers
+    private
+
+    # This is an anonymous matcher, using a lambda so you can do
+    # write a short lambda if you only need it once, hence you don't want
+    # to name it.
+    #
+    # @example
+    #   on :foo, where { |i| i > 10 } do |i|
+    #     puts "#{i} is greater than 10!"
+    #   end
+    def where(&block)
+      DSL::Matcher.new(:anything) { |o| block.call(o) }
+    end
+  end
 
   module DSL
     class Matcher
@@ -38,23 +52,11 @@ module Ray
   #   end
   def self.describe_matcher(name, target = :anything, &create_block)
     Matchers.module_eval do
-      define_method(name) do |*args, &block|
-        DSL::Matcher.new(target, &create_block.call(*args, &block))
+      define_method(name) do |*args|
+        DSL::Matcher.new(target, &create_block.call(*args))
       end
 
       private name
     end
-  end
-
-  # This is the universal matcher, using a lambda so you can create
-  # an anonymous matcher if you only need it once, hence you don't want
-  # to name it.
-  #
-  # @example
-  #   on :foo, where { |i| i > 10 } do |i|
-  #     puts "#{i} is greater than 10!"
-  #   end
-  describe_matcher(:where) do |&block|
-    lambda { |o| block.call(o) }
   end
 end

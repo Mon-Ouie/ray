@@ -7,7 +7,7 @@ module Ray
 
       class << self
         def add_converter(from, to, &block)
-          @@converters[Ray.resolve_type(from) => Ray.resolve_type(to)] = block
+          @@converters[[Ray.resolve_type(from), Ray.resolve_type(to)]] = block
         end
 
         def convert(obj, target)
@@ -15,13 +15,11 @@ module Ray
             return convert(obj, Ray.resolve_type(target))
           end
 
-          if converter = @@converters[obj.class => target] # Direct converter
+          if converter = @@converters[[obj.class, target]] # Direct converter
             return converter.call(obj)
           end
 
-          @@converters.each do |hash, converter|
-            from, to = hash.keys.first, hash.values.first
-
+          @@converters.each do |(from, to), converter|
             if obj.is_a?(from) && to.ancestors.include?(target)
               return converter.call(obj)
             end

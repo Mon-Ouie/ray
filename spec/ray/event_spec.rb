@@ -139,7 +139,7 @@ describe "the event DSL" do
         count = 0
 
         @obj.instance_eval do
-          on :weird_thing, 3 do |x|
+          on :weird_thing, 3 do |x, *rest|
             x.should == "3"
             count += 1
           end

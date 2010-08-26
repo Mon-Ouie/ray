@@ -5,7 +5,8 @@ describe Ray::Matchers do
         lambda { |str| str =~ reg }
       end
 
-      Ray::Matchers.private_instance_methods.should include(:match)
+      ary = Ray::Matchers.private_instance_methods
+      ary.any? { |i| i == :match or i == "match" }.should be_true
     end
 
     context "without a defined target" do
@@ -39,6 +40,30 @@ describe Ray::Matchers do
 
     it "should return a matcher" do
       @obj.instance_eval { match("foo") }.should be_a(Ray::DSL::Matcher)
+    end
+  end
+
+  describe "#where" do
+    it "should return true if the block returns true" do
+      obj = Object.new
+      obj.extend Ray::Helper
+
+      res = 0
+      obj.instance_eval do
+        self.event_runner = Ray::DSL::EventRunner.new
+
+        on :foo, where { |x| x > 10 } do |x|
+          x.should > 10
+          res += 1
+        end
+
+        raise_event(:foo, 10)
+        raise_event(:foo, 15)
+
+        listener_runner.run
+      end
+
+      res.should == 1
     end
   end
 end
