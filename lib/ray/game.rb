@@ -91,12 +91,11 @@ module Ray
           scene.game         = self
           scene.window       = @window
           scene.event_runner = @runner
-
-          scene.register_events
         end
 
         scene = @scenes.last
 
+        scene.register_events
         scene.need_render!
         scene.run
       end
