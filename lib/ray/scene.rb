@@ -34,8 +34,8 @@ module Ray
       end
     end
 
-    # Creates a new scene. block will be instance evaluated
-    # every time the current scene changes.
+    # Creates a new scene. block will be instance evaluated when
+    # this scene becomes the current one.
     def initialize(&block)
       @exit = false
       @block = block
