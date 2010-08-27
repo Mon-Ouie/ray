@@ -31,6 +31,14 @@ module Ray
             return obj.to_f if obj.respond_to? :to_f
           elsif target == String
             return obj.to_s if obj.respond_to? :to_s
+          elsif target == Symbol
+            return obj.to_sym if obj.respond_to? :to_sym
+          elsif target == Array
+            return obj.to_a if obj.respond_to? :to_a
+          elsif target == Hash
+            return obj.to_hash if obj.respond_to? :to_hash
+          elsif target == Time
+            return obj.to_time if obj.respond_to? :to_time
           end
 
           raise TypeError, "Can't convert #{obj.class} into #{target}"
