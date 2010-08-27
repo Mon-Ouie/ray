@@ -1,3 +1,5 @@
+require 'thread'
+
 module Ray
   module DSL
     # This class is the one that dispatches events in your program, the one that
