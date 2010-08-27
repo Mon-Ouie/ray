@@ -75,4 +75,16 @@ module Ray
       DSL::Converter.add_converter(from, to, &block)
     end
   end
+
+  describe_conversion(:string => :image) do |str|
+    Ray::Image.new(str)
+  end
+
+  describe_conversion(:array => :rect) do |ary|
+    Ray::Rect.new(*ary)
+  end
+
+  describe_conversion(:array => :color) do |ary|
+    Ray::Color.new(*ary)
+  end
 end
