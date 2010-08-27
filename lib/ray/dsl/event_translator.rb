@@ -30,6 +30,9 @@ module Ray
           when Ray::Event::TYPE_KEYDOWN then key_press(ev)
           when Ray::Event::TYPE_KEYUP then key_release(ev)
           when Ray::Event::TYPE_VIDEORESIZE then resize(ev)
+          when Ray::Event::TYPE_JOYAXISMOTION then joy_motion(ev)
+          when Ray::Event::TYPE_JOYBUTTONDOWN then joy_press(ev)
+          when Ray::Event::TYPE_JOYBUTTONUP then joy_release(ev)
           else []
           end
         end
@@ -69,6 +72,18 @@ module Ray
 
         def resize(ev)
           [[:window_resize, Ray::Rect.new(0, 0, ev.window_w, ev.window_h)]]
+        end
+
+        def joy_motion(ev)
+          [[:joy_motion, ev.joystick_id, ev.axis_id, ev.avis_value]]
+        end
+
+        def joy_press(ev)
+          [[:joy_press, ev.joystick_id, ev.joystick_button]]
+        end
+
+        def joy_release(ev)
+          [[:joy_release, ev.joystick_id, ev.joystick_button]]
         end
       end
     end
