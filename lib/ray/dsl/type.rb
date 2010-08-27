@@ -46,6 +46,7 @@ module Ray
   end
 
   register_type(:image, Ray::Image)
+  register_type(:rect, Ray::Rect)
   register_type(:color, Ray::Color)
 
   register_type(:string, String)
