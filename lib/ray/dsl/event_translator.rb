@@ -75,7 +75,7 @@ module Ray
         end
 
         def joy_motion(ev)
-          [[:joy_motion, ev.joystick_id, ev.axis_id, ev.avis_value]]
+          [[:joy_motion, ev.joystick_id, ev.axis_id, ev.axis_value]]
         end
 
         def joy_press(ev)
