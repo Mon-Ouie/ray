@@ -56,7 +56,6 @@ describe "the event DSL" do
             end
 
             raise_event(:foo, 5)
-            raise_event(:foo, "a")
             raise_event(:foo, 15)
           end
 
