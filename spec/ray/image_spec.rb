@@ -70,6 +70,17 @@ describe Ray::Image do
     end
   end
 
+  describe ".[]" do
+    it "should return a new image" do
+      Ray::Image[path_of("aqua.bmp")].should be_a(Ray::Image)
+    end
+
+    it "should always return the same image" do
+      obj = Ray::Image[path_of("aqua2.bmp")]
+      obj.object_id.should == Ray::Image[path_of("aqua2.bmp")].object_id
+    end
+  end
+
   after :each do
     Ray.stop
   end
