@@ -1,6 +1,7 @@
 module Ray
   class Joystick
-    @@joysticks = Hash.new { |h, k| new(k) }
+    @@joysticks = Hash.new { |h, k| h[k] = new(k) }
+
     class << self
       def [](id)
         joy = @@joysticks[id]
