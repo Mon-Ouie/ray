@@ -15,3 +15,11 @@ describe "Ray.resolve_type" do
     end
   end
 end
+
+describe "Ray.know_type?" do
+  context "when given a module" do
+    it "should return true" do
+      Ray.know_type?(Class.new).should be_true
+    end
+  end
+end

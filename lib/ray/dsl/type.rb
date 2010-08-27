@@ -31,7 +31,7 @@ module Ray
 
   # @return [true, false] True if name is a known type
   def self.know_type?(name)
-    DSL::Type.know_type?(name)
+    name.is_a? Module or DSL::Type.know_type?(name)
   end
 
   # @param [Module, Symbol] name An object supposed to identify a module or a
