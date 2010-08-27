@@ -1,11 +1,5 @@
 describe "the event DSL" do
   context "when someone listens to an event" do
-    before :all do
-      Ray.describe_matcher(:more_than, :integer) do |x|
-        lambda { |i| i > x }
-      end
-    end
-
     before :each do
       @runner = Ray::DSL::EventRunner.new
 
@@ -109,71 +103,6 @@ describe "the event DSL" do
           @runner.run
           count.should == 1
         end
-      end
-    end
-
-    context "if the event was described" do
-      before :all do
-        Ray.describe_event(:weird_thing, :string, :integer)
-      end
-
-      it "should convert arguments at creation" do
-        ev = Ray::DSL::Event.new(:weird_thing, [3, "3"])
-        ev.args.should == ["3", 3]
-      end
-
-      it "should not raise an error if it can't convert objects" do
-        ev = Ray::DSL::Event.new(:weird_thing, ["str", String])
-        ev.args.should == ["str", String]
-      end
-
-      it "should always convert if a method like #to_i is available" do
-        obj = Object.new
-        class << obj; def to_i; 3; end; end
-
-        ev = Ray::DSL::Event.new(:weird_thing, [String, obj])
-        ev.args.should == ["String", 3]
-      end
-
-      it "should try to convert arguments for handlers" do
-        count = 0
-
-        @obj.instance_eval do
-          on :weird_thing, 3 do |x, *rest|
-            x.should == "3"
-            count += 1
-          end
-
-          raise_event(:weird_thing, 0)
-          raise_event(:weird_thing, 3)
-          raise_event(:weird_thing, "3")
-          raise_event(:weird_thing, String)
-        end
-
-        @runner.run
-        count.should == 2
-      end
-
-      it "should not try to convert matchers and regexps in handlers" do
-        count = 0
-
-        Ray.describe_conversion(Ray::DSL::Matcher => :integer,
-                                Regexp => :string) {}
-
-        Ray.describe_matcher(:more_than, :integer) do |x|
-          lambda { |val| val > x }
-        end
-
-        @obj.instance_eval do
-          on :weird_thing, /\d/, more_than(10) do |x, y|
-            count += 1
-          end
-
-          raise_event(:weird_thing, "1", 15)
-        end
-
-        @runner.run
-        count.should == 1
       end
     end
 
