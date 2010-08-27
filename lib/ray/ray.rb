@@ -9,6 +9,8 @@ end
 
 require 'ray/color'
 require 'ray/rect'
+require 'ray/image'
+require 'ray/joystick'
 
 require 'ray/config'
 
