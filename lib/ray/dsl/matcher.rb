@@ -58,4 +58,32 @@ module Ray
       private name
     end
   end
+
+  # @return [DSL::Matcher] A matcher matching anything (always true)
+  describe_matcher(:anything) do
+    lambda { |o| true }
+  end
+
+  # @return [DSL::Matcher] A matcher matching anything greater than x
+  #                        (comparaison using >)
+  describe_matcher(:more_than) do |x|
+    lambda { |o| o > x }
+  end
+
+  # @return [DSL::Matcher] A matcher matching anything that is less than x
+  #                        (comparaison using <)
+  describe_matcher(:less_than) do |x|
+    lambda { |o| o < x }
+  end
+
+  # @return [DSL::Matcher] A matcher matching a value close of x.
+  # @note the maximum and the minimum will only be computed once.
+  #
+  # @example
+  #   on :win, almost(10_000, 500) do ... end
+  #   on :win, where { |x| x <= 10_000 + 500 && x >= 10_000 - 500 } do ... end
+  describe_matcher(:almost) do |x, precision|
+    min, max = (x - precision), (x + precision)
+    lambda { |o| (o <= max) && (o >= min) }
+  end
 end
