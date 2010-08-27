@@ -44,21 +44,7 @@ module Ray
 
         @args.each_with_index do |elem, i|
           other = args[i]
-
-          case elem
-          when Ray::DSL::Matcher
-            return false unless elem.match?(other)
-          when Regexp
-            if other.is_a? Regexp
-              return false unless elem == other
-            elsif other.is_a? String
-              return false unless elem =~ other
-            else
-              return false
-            end
-          else
-            return false unless elem == other
-          end
+          return false unless (elem === args[i]) || (elem == args[i])
         end
 
         return true
