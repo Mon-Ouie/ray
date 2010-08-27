@@ -5,7 +5,7 @@ module Ray
     end
 
     alias :bits_per_pixel :bpp
-    alias :width :w
-    alias :height :h
+    alias :w :width
+    alias :h :height
   end
 end
