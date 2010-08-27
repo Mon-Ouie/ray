@@ -40,4 +40,11 @@ describe "conversions" do
       }.should raise_exception(TypeError)
     end
   end
+
+  context "when the target has already the right type" do
+    it "should return it" do
+      obj = SubTest.new
+      Ray.convert(obj, TestClass).should == obj
+    end
+  end
 end

@@ -15,6 +15,8 @@ module Ray
             return convert(obj, Ray.resolve_type(target))
           end
 
+          return obj if obj.is_a? target
+
           if converter = @@converters[[obj.class, target]] # Direct converter
             return converter.call(obj)
           end
