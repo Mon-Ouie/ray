@@ -40,7 +40,7 @@ module Ray
 
       private
       def match_args?(args)
-        return false if @args.size != args.size
+        return false if @args.size > args.size
 
         @args.each_with_index do |elem, i|
           other = args[i]

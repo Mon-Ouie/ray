@@ -48,7 +48,7 @@ describe "the event DSL" do
         @obj.raise_event(:foo, "danger", "bar", "test")
 
         @runner.run
-        var.should == 1
+        var.should == 2
       end
 
       context "if a matcher is one of them" do
