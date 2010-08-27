@@ -22,6 +22,7 @@ module Ray
 
   # Registers a type. It allows you to say name instead of klass
   # when Ray asks you for a typename.
+  #
   # @param [Symbol] name The object that will represent klass
   # @param [Module] klass The class name will be resolved as
   def self.register_type(name, klass)

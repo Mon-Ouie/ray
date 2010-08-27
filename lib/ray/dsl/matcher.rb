@@ -4,9 +4,8 @@ module Ray
   module Matchers
     private
 
-    # This is an anonymous matcher, using a lambda so you can do
-    # write a short lambda if you only need it once, hence you don't want
-    # to name it.
+    # @return [DSL::Matcher] An anonymous matcher, using your block to
+    #                        know if the argument matches.
     #
     # @example
     #   on :foo, where { |i| i > 10 } do |i|

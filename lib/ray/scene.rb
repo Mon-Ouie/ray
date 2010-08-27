@@ -68,19 +68,22 @@ module Ray
       end
     end
 
-    # Exits the scene, but does not pops the scene (the next scene
-    # will be the same one)
+    # Exits the scene, but does not pop the scene.
+    #
+    # You may want to call this if you pushed a new scene, to switch to
+    # the new scene.
     def exit
       @exit = true
     end
 
-    # Exits the scene and pops it.
+    # Exits the scene and pops it (may not work as expected if the current
+    # scene is not the last one)
     def exit!
       exit
       game.pop_scene
     end
 
-    # Register a block to be excuted as often as possible.
+    # Registers a block to be excuted as often as possible.
     def always(&block)
       @always = block
     end

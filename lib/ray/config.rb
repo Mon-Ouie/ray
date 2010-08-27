@@ -2,6 +2,7 @@ require 'singleton'
 
 module Ray
   # A class holding program wide settings.
+  #
   # @example
   #   Ray::Config.config do
   #     set :value, :string => 3 # Conversion
@@ -55,13 +56,20 @@ module Ray
       @settings.clear
     end
 
-    # Sets the value for a key.
-    # If value is a Hash, and if it contains only one element, and if the
-    # only key of this hash is a known type, it will convert the value to
-    # the one represented by the key.
+    # @overload set(key, value)
+    #   Sets a value for a key.
     #
-    # @example A conversion
-    #   set :foo, :string => 3 # set :foo, "3"
+    # @overload set(key, hash)
+    #   Sets a value for a key.
+    #   @param [Hash] hash If hash.size == 1, and if its only key is a type,
+    #                      its value will be converted to that type and assigned
+    #                      to key. Otherwise, it will set key to hash.
+    #
+    #   @example A conversion
+    #     set :foo, :string => 3 # set :foo, "3"
+    #   @example No conversion
+    #     set :foo, :string => 3, :array => 3
+    #     set :foo, "foobar" => 3
     def set(key, value)
       if value.is_a?(Hash) && value.size == 1
         type, val = value.keys.first, value.values.first
@@ -76,7 +84,7 @@ module Ray
       end
     end
 
-    # Removes the value for this key.
+    # Removes the value for a key.
     def unset(key)
       @settings.delete(key)
     end

@@ -1,10 +1,6 @@
 module Ray
   module DSL
-    # The events you can raise and listen to are instances of this class.
-    # You should not manipulate them directly. In fact, they are created
-    # and handled by the event runner, which happens to be greedy, and
-    # therefore won't give an event to you. It will only give you its
-    # arguments (you already know its type anyway.)
+    # Used internally to store event when raise_event is caled.
     class Event
       @@descriptions = {}
 
