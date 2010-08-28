@@ -86,4 +86,19 @@ module Ray
     min, max = (x - precision), (x + precision)
     lambda { |o| (o <= max) && (o >= min) }
   end
+
+  describe_matcher(:inside) do |*args|
+    rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args, :rect)
+    lambda { |o| o.inside? rect }
+  end
+
+  describe_matcher(:outside) do |*args|
+    rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args, :rect)
+    lambda { |o| o.outside? rect }
+  end
+
+  describe_matcher(:colliding_with) do |*args|
+    rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args, :rect)
+    lambda { |o| o.collide? rect }
+  end
 end
