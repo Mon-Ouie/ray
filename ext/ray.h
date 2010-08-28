@@ -69,7 +69,7 @@ typedef struct {
 
 typedef struct {
    SDL_Surface *surface;
-   int mustFree; /* Should we call SDL_FreeSurface? */
+   int must_free; /* Should we call SDL_FreeSurface? */
 } ray_image;
 
 typedef struct {

@@ -152,7 +152,7 @@ VALUE ray_init_image_copy(VALUE self, VALUE obj) {
 }
 
 void ray_free_image(ray_image *ptr) {
-   if (ptr->mustFree && ptr->surface) SDL_FreeSurface(ptr->surface);
+   if (ptr->must_free && ptr->surface) SDL_FreeSurface(ptr->surface);
    free(ptr);
 }
 
@@ -161,7 +161,7 @@ VALUE ray_create_image(SDL_Surface *surface) {
    VALUE ret = Data_Wrap_Struct(ray_cImage, 0, ray_free_image, ptr);
 
    ptr->surface = surface;
-   ptr->mustFree = 0;
+   ptr->must_free = 0;
 
    return ret;
 }
@@ -171,7 +171,7 @@ VALUE ray_alloc_image(VALUE self) {
    VALUE ret = Data_Wrap_Struct(self, 0, ray_free_image, ptr);
 
    ptr->surface = NULL;
-   ptr->mustFree = 1;
+   ptr->must_free = 1;
 
    return ret;
 }
