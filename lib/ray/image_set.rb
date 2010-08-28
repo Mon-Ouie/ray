@@ -56,4 +56,6 @@ module Kernel
   def image_set(regex, &block)
     Ray.image_set(regex, &block)
   end
+
+  module_function :image_set
 end
