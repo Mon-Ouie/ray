@@ -117,6 +117,28 @@ describe Ray::Image do
     end
   end
 
+  describe "#[]" do
+    it "should return nil for pixel outsides the image" do
+      Ray::Image.new(:w => 10, :h => 10)[10, 10].should be_nil
+    end
+
+    it "should return a color for pixels inside the image" do
+      Ray::Image.new(:w => 10, :h => 10)[5, 5].should be_a(Ray::Color)
+    end
+  end
+
+  describe "#[]=" do
+    it "should change the color of the pixel" do
+      img = Ray::Image.new(:w => 10, :h => 10)
+      img.lock { img[5, 5] = Ray::Color.new(10, 15, 20) }
+
+      col = img[5, 5]
+      col.r.should == 10
+      col.g.should == 15
+      col.b.should == 20
+    end
+  end
+
   after :each do
     Ray.stop
   end

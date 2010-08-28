@@ -301,6 +301,135 @@ VALUE ray_image_is_equal(VALUE self, VALUE obj) {
    return (first_surface == sec_surface) ? Qtrue : Qfalse;
 }
 
+VALUE ray_image_ensure_unlock(VALUE self) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_UnlockSurface(surface);
+
+   return self;
+}
+
+/*
+  Locks the image (allow pixel-per-pixel modifications).
+  Don't forget to call unlock when you're done. You can also
+  pass a bock which will be called before the image gets unlocked
+  automatically.
+*/
+VALUE ray_image_lock(VALUE self) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_LockSurface(surface);
+
+   if (rb_block_given_p())
+      rb_ensure(rb_yield, Qnil, ray_image_ensure_unlock, self);
+
+   return self;
+}
+
+/*
+  Unlocks the image. You must call this once you are done
+  modifying the image.
+*/
+VALUE ray_image_unlock(VALUE self) {
+   return ray_image_ensure_unlock(self);
+}
+
+/*
+  @return [Ray::Color, nil] Pixel at (x, y). Nil if the point is outside the
+                            image.
+ */
+VALUE ray_image_at(VALUE self, VALUE rb_x, VALUE rb_y) {
+   SDL_Surface *surface = ray_rb2surface(self);
+
+   int x = NUM2INT(rb_x);
+   int y = NUM2INT(rb_y);
+
+   /* (w, h) is not a valid point. Surfaces use 0-based indexing. */
+   if (x >= surface->w || y >= surface->h)
+      return Qnil;
+
+   int bytes = surface->format->BytesPerPixel;
+   
+   uint8_t *pix = (uint8_t*)surface->pixels + y * surface->pitch + x * bytes;
+   
+   uint32_t res;
+   switch (bytes) {
+      case 1:
+         res = *pix;
+         break;
+      case 2:
+         res = *(uint16_t*)pix;
+         break;
+      case 3:
+         if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+            res = pix[0] << 16 | pix[1] << 8 | pix[2];
+         else
+            res = pix[0] | pix[1] << 8 | pix[2] << 16;
+         break;
+      case 4:
+         res = *(uint32_t*)pix;
+         break;
+      default: /* should never happen */
+         res = 0;
+         break;
+   }
+
+   ray_color col;
+   SDL_GetRGBA(res, surface->format, &(col.r), &(col.g), &(col.b), &(col.a));
+   
+   return ray_col2rb(col);
+}
+
+/*
+  Sets the color of the point at (x, y)
+  @raise ArgumentError If (x, y) is outside the image.
+*/
+VALUE ray_image_set_at(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_col) {
+   SDL_Surface *surface = ray_rb2surface(self);
+      
+   int x = NUM2INT(rb_x);
+   int y = NUM2INT(rb_y);
+
+   if (x >= surface->w || y >= surface->h) {
+      VALUE inspect = rb_inspect(self);
+      rb_raise(rb_eArgError, "(%d, %d) is outside %s",
+               x, y, StringValuePtr(inspect));
+   }
+
+   int bytes = surface->format->BytesPerPixel;
+   
+   uint8_t *pix = (uint8_t*)surface->pixels + y * surface->pitch + x * bytes;
+   
+   ray_color col = ray_rb2col(rb_col);
+
+   uint32_t val = SDL_MapRGBA(surface->format, col.r, col.g, col.b, col.a);
+   SDL_GetRGBA(val, surface->format, &(col.r), &(col.g), &(col.b), &(col.a));
+
+   switch (bytes) {
+      case 1:
+         *pix = val;
+         break;
+      case 2:
+         *(uint16_t*)pix = val;
+         break;
+      case 3:
+         if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            pix[0] = (val >> 16) & 0xff;
+            pix[1] = (val >> 8) & 0xff;
+            pix[2] = val & 0xff;
+         }
+         else {
+            pix[0] = val & 0xff;
+            pix[1] = (val >> 8) & 0xff;
+            pix[2] = (val >> 16) & 0xff;
+         }
+         break;
+      case 4:
+         *(uint32_t*)pix = val;
+         break;
+   }
+
+   return rb_col;
+}
+
 void Init_ray_image() {
    ray_cImage = rb_define_class_under(ray_mRay, "Image", rb_cObject);
    
@@ -322,6 +451,11 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "bpp", ray_image_bpp, 0);
 
    rb_define_method(ray_cImage, "==", ray_image_is_equal, 1);
+   
+   rb_define_method(ray_cImage, "lock", ray_image_lock, 0);
+   rb_define_method(ray_cImage, "unlock", ray_image_unlock, 0);
+   rb_define_method(ray_cImage, "[]", ray_image_at, 2);
+   rb_define_method(ray_cImage, "[]=", ray_image_set_at, 3);
 
    rb_define_const(ray_cImage, "FLAG_ANYFORMAT", INT2FIX(SDL_ANYFORMAT));
    rb_define_const(ray_cImage, "FLAG_ASYNCBLIT", INT2FIX(SDL_ASYNCBLIT));
