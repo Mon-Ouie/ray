@@ -1,3 +1,6 @@
+#ifndef RAY_H_
+#define RAT_H_
+
 #ifndef PSP
 # include "ruby.h"
 #else
@@ -129,4 +132,6 @@ void Init_ray_psp();
 {
 #endif
 }
+#endif
+
 #endif
