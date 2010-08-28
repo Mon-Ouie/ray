@@ -10,6 +10,7 @@ end
 require 'ray/color'
 require 'ray/rect'
 require 'ray/image'
+require 'ray/image_set'
 require 'ray/joystick'
 
 require 'ray/config'
