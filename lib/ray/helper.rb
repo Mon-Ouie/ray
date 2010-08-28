@@ -10,5 +10,10 @@ module Ray
       self.listener_runner = value
       self.raiser_runner   = value
     end
+
+    # @see Ray::ImageSet.[]
+    def image(name)
+      Ray::ImageSet[name]
+    end
   end
 end
