@@ -97,6 +97,26 @@ describe Ray::Image do
     end
   end
 
+  describe "#==" do
+    it "should be true if the parameter uses the same surface" do
+      @win.should == Ray.screen
+
+      first = Ray::Image.new(:w => 10, :h => 10).fill(Ray::Color.red)
+      sec = Ray::Image.new(:w => 10, :h => 10).fill(Ray::Color.red)
+
+      first.should_not == sec
+    end
+  end
+
+  describe "#dup" do
+    it "should create a new surface" do
+      first = Ray::Image.new(:w => 10, :h => 10).fill(Ray::Color.red)
+      sec = first.dup
+
+      first.should_not == sec
+    end
+  end
+
   after :each do
     Ray.stop
   end

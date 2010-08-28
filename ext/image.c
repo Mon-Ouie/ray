@@ -138,6 +138,19 @@ VALUE ray_init_image(VALUE self, VALUE arg) {
    return Qnil;
 }
 
+VALUE ray_init_image_copy(VALUE self, VALUE obj) {
+   ray_image *img = ray_rb2image(self);
+   
+   SDL_Surface *src = ray_rb2surface(obj);
+   img->surface = SDL_ConvertSurface(src, src->format, src->flags);
+   if (!img->surface) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               SDL_GetError());
+   }
+
+   return self;
+}
+
 void ray_free_image(ray_image *ptr) {
    if (ptr->mustFree && ptr->surface) SDL_FreeSurface(ptr->surface);
    free(ptr);
@@ -280,11 +293,20 @@ VALUE ray_image_bpp(VALUE self) {
    return INT2FIX(ray_rb2surface(self)->format->BitsPerPixel);
 }
 
+/* @return [true, false] true if obj's manipulates the same surface as self */
+VALUE ray_image_is_equal(VALUE self, VALUE obj) {
+   SDL_Surface *first_surface = ray_rb2surface(self);
+   SDL_Surface *sec_surface = ray_rb2surface(obj);
+
+   return (first_surface == sec_surface) ? Qtrue : Qfalse;
+}
+
 void Init_ray_image() {
    ray_cImage = rb_define_class_under(ray_mRay, "Image", rb_cObject);
    
    rb_define_alloc_func(ray_cImage, ray_alloc_image);
    rb_define_method(ray_cImage, "initialize", ray_init_image, 1);
+   rb_define_method(ray_cImage, "initialize_copy", ray_init_image_copy, 1);
 
    rb_define_method(ray_cImage, "fill", ray_image_fill, 1);
    rb_define_method(ray_cImage, "flip", ray_image_flip, 0);
@@ -298,6 +320,8 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "width", ray_image_width, 0);
    rb_define_method(ray_cImage, "height", ray_image_height, 0);
    rb_define_method(ray_cImage, "bpp", ray_image_bpp, 0);
+
+   rb_define_method(ray_cImage, "==", ray_image_is_equal, 1);
 
    rb_define_const(ray_cImage, "FLAG_ANYFORMAT", INT2FIX(SDL_ANYFORMAT));
    rb_define_const(ray_cImage, "FLAG_ASYNCBLIT", INT2FIX(SDL_ASYNCBLIT));
