@@ -111,9 +111,7 @@ VALUE ray_create_image(SDL_Surface *surface) {
    ray_image *ptr = malloc(sizeof(ray_image));
    VALUE ret = Data_Wrap_Struct(ray_cImage, 0, ray_free_image, ptr);
 
-   ptr->self    = ret;
    ptr->surface = surface;
-
    ptr->mustFree = 0;
 
    return ret;
@@ -123,9 +121,7 @@ VALUE ray_alloc_image(VALUE self) {
    ray_image *ptr = malloc(sizeof(ray_image));
    VALUE ret = Data_Wrap_Struct(self, 0, ray_free_image, ptr);
 
-   ptr->self    = ret;
    ptr->surface = NULL;
-
    ptr->mustFree = 1;
 
    return ret;

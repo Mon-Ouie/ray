@@ -65,9 +65,7 @@ typedef struct {
 } ray_video_mode;
 
 typedef struct {
-   VALUE self;
    SDL_Surface *surface;
-
    int mustFree; /* Should we call SDL_FreeSurface? */
 } ray_image;
 
