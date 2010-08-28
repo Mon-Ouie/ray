@@ -69,6 +69,36 @@ void ray_init_image_with_filename(VALUE self, VALUE filename) {
 #endif
 }
 
+void ray_init_image_with_io(VALUE self, VALUE io) {
+   VALUE string = rb_funcall2(io, RAY_METH("read"), 0, NULL);
+   char *content = StringValuePtr(string);
+
+   SDL_RWops *data = SDL_RWFromMem(content, (int)RSTRING_LEN(string));
+   
+   if (!data) {
+      rb_raise(rb_eRuntimeError, "Could not create image data (%s)",
+               SDL_GetError());
+   }
+
+   ray_image *image = ray_rb2image(self);
+
+#ifdef HAVE_SDL_IMAGE
+   image->surface = IMG_Load_RW(data, 1);
+   
+   if (!image->surface) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               IMG_GetError());
+   }
+#else
+   image->surface = SDL_LoadBMP_RW(data, 1);
+
+   if (!image->surface) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               SDL_GetError());
+   }
+#endif
+}
+
 /*
   Creates a new image.
 
@@ -87,13 +117,19 @@ void ray_init_image_with_filename(VALUE self, VALUE filename) {
 
   @overload initialize(filename)
     Loads the image from a file.
-    @param [String, #to_str] filename The name of the file to open 
- */
+    @param [String, #to_str] filename The name of the file to open
+
+  @overload initialize(io)
+    Loads the image friom an IO object.
+    @param [IO, #read] io Object the data will be loaded from.
+*/
 VALUE ray_init_image(VALUE self, VALUE arg) {
    if (RAY_IS_A(arg, rb_cHash))
       ray_init_image_with_hash(self, arg);
    else if (rb_respond_to(arg, RAY_METH("to_str")))
       ray_init_image_with_filename(self, rb_String(arg));
+   else if (rb_respond_to(arg, RAY_METH("read")))
+      ray_init_image_with_io(self, arg);
    else {
       rb_raise(rb_eTypeError, "Can't convert %s into Hash",
                RAY_OBJ_CLASSNAME(arg));

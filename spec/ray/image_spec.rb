@@ -53,11 +53,27 @@ describe Ray::Image do
       end
     end
 
+    it "should be able to load a file from an IO" do
+      File.open(path_of("aqua.bmp")) do |io|
+        lambda {
+          img = Ray::Image.new(io)
+        }.should_not raise_exception
+      end
+    end
+
     if Ray.has_image_support?
-      it "should be able to load other formats" do
+      it "should be able to load other kind of images" do
         lambda {
           Ray::Image.new(path_of("aqua.png"))
         }.should_not raise_exception
+      end
+
+      it "should be able to load other kind of images from an IO" do
+        File.open(path_of("aqua.png")) do |io|
+          lambda {
+            Ray::Image.new(io)
+          }.should_not raise_exception
+        end
       end
 
       context "if the extension does not match the file type" do
