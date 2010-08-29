@@ -117,3 +117,14 @@ module Ray
     end
   end
 end
+
+module Kernel
+  # Creates a new game, with the given title.
+  # @see Ray::Game#initialize
+  def game(title, opts = {}, &block)
+    opts = {:title => title, :video_modes => %w(480x272 640x480)}.merge(opts)
+    Ray::Game.new(opts, &block)
+  end
+
+  module_function :game
+end
