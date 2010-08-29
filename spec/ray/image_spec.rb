@@ -106,6 +106,12 @@ describe Ray::Image do
 
       first.should_not == sec
     end
+
+    it "should not raise an exception for non-images" do
+      lambda {
+        @win == 3
+      }.should_not raise_exception
+    end
   end
 
   describe "#dup" do

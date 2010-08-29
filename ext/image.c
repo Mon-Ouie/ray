@@ -295,6 +295,9 @@ VALUE ray_image_bpp(VALUE self) {
 
 /* @return [true, false] true if obj's manipulates the same surface as self */
 VALUE ray_image_is_equal(VALUE self, VALUE obj) {
+   if (!RAY_IS_A(obj, ray_cImage))
+      return Qfalse;
+
    SDL_Surface *first_surface = ray_rb2surface(self);
    SDL_Surface *sec_surface = ray_rb2surface(obj);
 
