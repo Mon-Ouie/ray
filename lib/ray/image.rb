@@ -33,5 +33,67 @@ module Ray
 
       alias :delete_if :reject!
     end
+
+    # @yield [pixel]
+    # @yieldparam [Ray::Color] pixel Color of a point
+    def each
+      (0...w).each do |x|
+        (0...h).each do |y|
+          yield self[x, y]
+        end
+      end
+
+      self
+    end
+
+    # Same as each, but also yields the position of each point.
+    # @yield [x, y, pixel]
+    def each_with_pos
+      (0...w).each do |x|
+        (0...h).each do |y|
+          yield x, y, self[x, y]
+        end
+      end
+
+      self
+    end
+
+    # @yield [pixel] Block returning the new color of this pixel.
+    def map!
+      lock do
+        (0...w).each do |x|
+          (0...h).each do |y|
+            self[x, y] = yield self[x, y]
+          end
+        end
+      end
+
+      self
+    end
+
+    # @yield [x, y, pixel] Block returning the new color of this pixel
+    def map_with_pos!
+      lock do
+        (0...w).each do |x|
+          (0...h).each do |y|
+            self[x, y] = yield x, y, self[x, y]
+          end
+        end
+      end
+
+      self
+    end
+
+    # @return [Ray::Image] New image created according to a block.
+    def map(&block)
+      dup.map!(&block)
+    end
+
+    # @return [Ray::Image] New image created according to a block.
+    def map_with_pos(&block)
+      dup.map_with_pos!(&block)
+    end
+
+    include Enumerable
   end
 end
