@@ -206,6 +206,14 @@ VALUE ray_has_image_support(VALUE self) {
    return Qfalse;
 #endif
 }
+/* @return [true, false] true if Ray supports graphical effect like rotations */
+VALUE ray_has_gfx_support(VALUE self) {
+#ifdef HAVE_SDL_GFX
+   return Qtrue;
+#else
+   return Qfalse;
+#endif
+}
 
 void Init_ray_ext() {
    ray_mRay = rb_define_module("Ray");
@@ -230,6 +238,8 @@ void Init_ray_ext() {
 
    rb_define_module_function(ray_mRay, "has_image_support?",
                              ray_has_image_support, 0);
+   rb_define_module_function(ray_mRay, "has_gfx_support?",
+                             ray_has_gfx_support, 0);
 
    Init_ray_image();
    Init_ray_color();

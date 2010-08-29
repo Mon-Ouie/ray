@@ -19,25 +19,35 @@
 # include <pspctrl.h>
 #endif
 
-#if defined(HAVE_SDL_IMAGE)
-# if defined(HAVE_SDL_IMAGE_H)
-#  include <SDL_image.h>
-# else
+#if defined(HAVE_SDL_IMAGE_H)
+# if !defined(HAVE_SDL_IMAGE)
+#  define HAVE_SDL_IMAGE
+# endif
+# include <SDL_image.h>
+#else
+# if defined(HAVE_SDL_SDL_IMAGE_H)
+#  if !defined(HAVE_SDL_IMAGE)
+#   define HAVE_SDL_IMAGE
+#  endif
 #  include <SDL/SDL_image.h>
 # endif
 #endif
 
-#if defined(HAVE_SDL_GFX)
-# if defined(HAVE_SDL_ROTOZOOM_H)
-#  include <SDL_gfxPrimitives.h>
-#  include <SDL_rotozoom.h>
-#  include <SDL_imageFilter.h>
-#  include <SDL_gfxBlitFunc.h>
-# else
+#if defined(HAVE_SDL_ROTOZOOM_H)
+# if !defined(HAVE_SDL_GFX)
+#  define HAVE_SDL_GFX
+# endif
+# include <SDL_gfxPrimitives.h>
+# include <SDL_rotozoom.h>
+# include <SDL_imageFilter.h>
+#else
+# if defined(HAVE_SDL_SDL_ROTOZOOM_H)
+#  if !defined(HAVE_SDL_GFX)
+#   define HAVE_SDL_GFX
+#  endif
 #  include <SDL/SDL_gfxPrimitives.h>
 #  include <SDL/SDL_rotozoom.h>
 #  include <SDL/SDL_imageFilter.h>
-#  include <SDL/SDL_gfxBlitFunc.h>
 # endif
 #endif
 
@@ -98,8 +108,11 @@ typedef struct {
 
 /* Convertion functions */
 
-/** Converts a surface into a ruby object */
+/** Converts a surface into a ruby object (won't free it) */
 VALUE ray_create_image(SDL_Surface *surface);
+
+/** Converts a surface into a ruby object (will free it) */
+VALUE ray_create_gc_image(SDL_Surface *surface);
 
 /** Converts a color into a ruby object */
 VALUE ray_col2rb(ray_color color);

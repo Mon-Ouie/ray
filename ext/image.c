@@ -160,8 +160,18 @@ VALUE ray_create_image(SDL_Surface *surface) {
    ray_image *ptr = malloc(sizeof(ray_image));
    VALUE ret = Data_Wrap_Struct(ray_cImage, 0, ray_free_image, ptr);
 
-   ptr->surface = surface;
+   ptr->surface   = surface;
    ptr->must_free = 0;
+
+   return ret;
+}
+
+VALUE ray_create_gc_image(SDL_Surface *surface) {
+   ray_image *ptr = malloc(sizeof(ray_image));
+   VALUE ret = Data_Wrap_Struct(ray_cImage, 0, ray_free_image, ptr);
+
+   ptr->surface   = surface;
+   ptr->must_free = 1;
 
    return ret;
 }
@@ -216,11 +226,14 @@ VALUE ray_image_flip(VALUE self) {
                                           be drawn.
 
   @option hash [Ray::Image, required] :to Alias for on.
+
+  @option hash [Float] :angle Rotation in degrees.
+  @option hash [Float] :zoom 1.0 for the current size
 */
 VALUE ray_image_blit(VALUE self, VALUE hash) {
    SDL_Surface *origin = ray_rb2surface(self);
 
-   SDL_Rect from_rect = {0, 0, origin->w, origin->h};
+   SDL_Rect from_rect = {0, 0, 0, 0};
    SDL_Rect to_rect   = {0, 0, 0, 0};
    
    VALUE rect = rb_hash_aref(hash, RAY_SYM("at"));
@@ -247,13 +260,44 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
                RAY_OBJ_CLASSNAME(rect));
    }
 
+   VALUE surf = rb_hash_aref(hash, RAY_SYM("on"));
+   if (surf == Qnil) surf = rb_hash_aref(hash, RAY_SYM("to"));
+
+#ifdef HAVE_SDL_GFX
+   VALUE rb_angle = Qnil, rb_zoom = Qnil;
+   double angle = 0.0, zoom = 1.0; 
+
+   if (!NIL_P(rb_angle = rb_hash_aref(hash, RAY_SYM("angle"))))
+      angle = NUM2DBL(rb_angle);
+
+   if (!NIL_P(rb_zoom = rb_hash_aref(hash, RAY_SYM("zoom"))))
+      zoom = NUM2DBL(rb_zoom);
+
+   if (!NIL_P(rb_angle) || !NIL_P(rb_zoom)) {
+      SDL_Surface *res = rotozoomSurface(origin, angle, zoom, 1);
+      if (!res) {
+         rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+                  SDL_GetError());
+      }
+
+      if (from_rect.w == 0 && from_rect.h == 0) {
+         from_rect.w = res->w;
+         from_rect.h = res->h;
+      }
+
+      SDL_BlitSurface(res, &from_rect,  ray_rb2surface(surf), &to_rect);
+
+      SDL_FreeSurface(res);
+      
+      return surf;
+   }
+#endif
+
    if (from_rect.w == 0 && from_rect.h == 0) {
       from_rect.w = origin->w;
       from_rect.h = origin->h;
    }
 
-   VALUE surf = rb_hash_aref(hash, RAY_SYM("on"));
-   if (surf == Qnil) surf = rb_hash_aref(hash, RAY_SYM("to"));
    SDL_BlitSurface(origin, &from_rect,  ray_rb2surface(surf), &to_rect);
 
    return surf;
@@ -433,6 +477,52 @@ VALUE ray_image_set_at(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_col) {
    return rb_col;
 }
 
+#ifdef HAVE_SDL_GFX
+
+/*
+  Rotates and zoomes on the image.
+  @param [Float] angle Angle in degrees
+  @param [Float] zoom
+  @return [SDL::Image] the modified image.
+*/
+VALUE ray_image_rotozoom(VALUE self, VALUE angle, VALUE zoom) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_Surface *res = rotozoomSurface(surface, NUM2DBL(angle),
+                                      NUM2DBL(zoom), 1);
+   
+   if (!res) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               SDL_GetError());
+   }
+
+   return ray_create_gc_image(res);
+}
+
+/*
+  Rotates and zoomes on the image, but does not create a new instance
+  of Ray::Image, which may be better for memory management.
+*/
+VALUE ray_image_rotozoom_bang(VALUE self, VALUE angle, VALUE zoom) {
+   ray_image *img = ray_rb2image(self);
+   SDL_Surface *res = rotozoomSurface(img->surface, NUM2DBL(angle),
+                                      NUM2DBL(zoom), 1);
+   
+   if (!res) {
+      rb_raise(rb_eRuntimeError, "Could not create the image (%s)",
+               SDL_GetError());
+   }
+
+   if (img->must_free)
+      SDL_FreeSurface(img->surface);
+
+   img->surface   = res;
+   img->must_free = 1;
+
+   return self;
+}
+
+#endif
+
 void Init_ray_image() {
    ray_cImage = rb_define_class_under(ray_mRay, "Image", rb_cObject);
    
@@ -459,6 +549,11 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "unlock", ray_image_unlock, 0);
    rb_define_method(ray_cImage, "[]", ray_image_at, 2);
    rb_define_method(ray_cImage, "[]=", ray_image_set_at, 3);
+
+#ifdef HAVE_SDL_GFX
+   rb_define_method(ray_cImage, "rotozoom", ray_image_rotozoom, 2);
+   rb_define_method(ray_cImage, "rotozoom!", ray_image_rotozoom_bang, 2);
+#endif
 
    rb_define_const(ray_cImage, "FLAG_ANYFORMAT", INT2FIX(SDL_ANYFORMAT));
    rb_define_const(ray_cImage, "FLAG_ASYNCBLIT", INT2FIX(SDL_ASYNCBLIT));
