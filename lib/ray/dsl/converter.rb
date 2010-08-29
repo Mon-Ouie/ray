@@ -79,7 +79,7 @@ module Ray
   end
 
   describe_conversion(:string => :image) do |str|
-    Ray::Image.new(str)
+    Ray::ImageSet[str]
   end
 
   describe_conversion(:array => :rect) do |ary|
