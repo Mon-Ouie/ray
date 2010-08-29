@@ -36,6 +36,18 @@ def have_framework(name)
   ret
 end
 
+def have_sdl_ext(name, header)
+  if res = have_library(name)
+    unless have_header(header) or have_header("SDL/#{header}")
+      return false
+    end
+
+    return res
+  end
+
+  have_framework(name)
+end
+
 has_run_node = have_func("ruby_run_node")
 has_run      = have_func("ruby_run")
 
@@ -65,6 +77,9 @@ unless RUBY_PLATFORM =~ /darwin/
   data = File.read("Makefile").gsub("SDLMain.o", "")
   open("Makefile", 'w') { |f| f.write(data) }
 else
+  $CFLAGS  << " #{ENV["CFLAGS"]}"
+  $LDFLAGS << " #{ENV["LDFLAGS"]}"
+
   if !has_run and !has_run_node
     $stderr.puts "Unsupported configuration: Mac OS X and a ruby " +
                  "implementation that does not implement ruby_run"
@@ -79,9 +94,7 @@ else
     exit 1
   end
 
-  have_framework("SDL_image")
-
-  have_library("ruby", "ruby_init")
+  have_sdl_ext("SDL_image", "SDL_image.h")
 
   create_makefile("ray_ext")
 end
