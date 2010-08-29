@@ -17,6 +17,11 @@ module Ray
       "RGBA(#{r}, #{g}, #{b}, #{a})"
     end
 
+    def ==(obj)
+      return false unless obj.is_a? Color
+      r == obj.r && g == obj.g && b == obj.b && a == obj.a
+    end
+
     alias :red :r
     alias :green :g
     alias :blue :b

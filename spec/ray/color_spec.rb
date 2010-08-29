@@ -41,4 +41,15 @@ describe Ray::Color do
       end
     end
   end
+
+  describe "#==" do
+    it "should return true if both colors are identical" do
+      Ray::Color.new(10, 15, 20, 30).should == Ray::Color.new(10, 15, 20, 30)
+      Ray::Color.new(10, 15, 20, 30).should_not == Ray::Color.new(1, 15, 2, 3)
+    end
+
+    it "should not raise an exception if the argument isn't a color" do
+      Ray::Color.new(1, 1, 1, 1).should_not == 1
+    end
+  end
 end
