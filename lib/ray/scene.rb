@@ -64,6 +64,8 @@ module Ray
       if val.is_a? Symbol
         val = key(val)
         @held_keys.any? { |o| val === o }
+      elsif val.is_a? DSL::Matcher
+        @held_keys.any? { |o| val === o }
       else
         @held_keys.include? val
       end
