@@ -101,4 +101,57 @@ module Ray
     rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args, :rect)
     lambda { |o| o.collide? rect }
   end
+
+  KEYS = Ray::Event.constants.inject({}) do |hash, const|
+    if const =~ /^KEY_(.+)$/
+      hash[$1.downcase.to_sym] = [Ray::Event.const_get(const)]
+    elsif const =~ /^PSP_BUTTON_(.+)$/
+      hash["psp_#{$1.downcase.to_sym}".to_sym] = [Ray::Event.const_get(const)]
+    end
+
+    hash
+  end
+
+  KEYS[:number] = Ray::Event.constants.select { |c| c =~ /^KEY_\d$/ }.map do |c|
+    Ray::Event.const_get(c)
+  end
+
+  KEYS[:number] |= Ray::Event.constants.select { |c| c =~ /^KEY_KP\d$/ }.map do |c|
+    Ray::Event.const_get(c)
+  end
+
+  KEYS[:letter] = Ray::Event.constants.select { |c| c =~ /^KEY_[a-z]$/ }.map do |c|
+    Ray::Event.const_get(c)
+  end
+
+  KEYS[:function] = Ray::Event.constants.select { |c| c =~ /^KEY_F\d$/ }.map do |c|
+    Ray::Event.const_get(c)
+  end
+
+  KEYS[:mod] = [Ray::Event::KEY_RSHIFT, Ray::Event::KEY_LSHIFT,
+                Ray::Event::KEY_RCTRL, Ray::Event::KEY_LCTRL,
+                Ray::Event::KEY_RALT, Ray::Event::KEY_LALT,
+                Ray::Event::KEY_RMETA, Ray::Event::KEY_LMETA,
+                Ray::Event::KEY_RSUPER, Ray::Event::KEY_LSUPER]
+
+  KEYS[:arrow] = [Ray::Event::KEY_UP, Ray::Event::KEY_DOWN,
+                  Ray::Event::KEY_LEFT, Ray::Event::KEY_RIGHT]
+
+  MOD = Ray::Event.constants.inject({}) do |hash, const|
+    if const =~ /^KMOD_(.+)$/
+      hash[$1.downcase.to_sym] = [Ray::Event.const_get(const)]
+    end
+
+    hash
+  end
+
+  describe_matcher(:key) do |sym|
+    ary = KEYS[sym.to_sym]
+    lambda { |o| ary.include? o }
+  end
+
+  describe_matcher(:key_mod) do |sym|
+    ary = MOD[sym.to_sym]
+    lambda { |o| ary.detect { |const| o & const } }
+  end
 end
