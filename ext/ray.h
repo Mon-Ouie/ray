@@ -7,7 +7,7 @@
 # include <ruby/ruby.h>
 #endif
 
-#if defined(HAVE_SDL_H) || defined(RAY_USE_FRAMEWORK)
+#if defined(HAVE_SDL_H)
 # include <SDL.h>
 #else
 # include <SDL/SDL.h>
@@ -20,10 +20,24 @@
 #endif
 
 #if defined(HAVE_SDL_IMAGE)
-# if defined(HAVE_SDL_IMAGE_H) || defined(RAY_USE_FRAMEWORK)
+# if defined(HAVE_SDL_IMAGE_H)
 #  include <SDL_image.h>
 # else
 #  include <SDL/SDL_image.h>
+# endif
+#endif
+
+#if defined(HAVE_SDL_GFX)
+# if defined(HAVE_SDL_ROTOZOOM_H)
+#  include <SDL_gfxPrimitives.h>
+#  include <SDL_rotozoom.h>
+#  include <SDL_imageFilter.h>
+#  include <SDL_gfxBlitFunc.h>
+# else
+#  include <SDL/SDL_gfxPrimitives.h>
+#  include <SDL/SDL_rotozoom.h>
+#  include <SDL/SDL_imageFilter.h>
+#  include <SDL/SDL_gfxBlitFunc.h>
 # endif
 #endif
 

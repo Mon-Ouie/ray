@@ -37,6 +37,13 @@ def have_framework(name)
 end
 
 def have_sdl_ext(name, header)
+  if res = have_framework(name)
+    ending = header.upcase.tr('/', '_').gsub(/\.H$/, "_H")
+    $CFLAGS << " -DHAVE_#{ending}"
+
+    return res
+  end
+
   if res = have_library(name)
     unless have_header(header) or have_header("SDL/#{header}")
       return false
@@ -44,8 +51,6 @@ def have_sdl_ext(name, header)
 
     return res
   end
-
-  have_framework(name)
 end
 
 has_run_node = have_func("ruby_run_node")
@@ -72,6 +77,10 @@ unless RUBY_PLATFORM =~ /darwin/
     have_header("SDL/SDL_image.h") or have_header("SDL_image.h")
   end
 
+  if have_library("SDL_gfx")
+    have_header("SDL/SDL_rotozoom.h") or have_header("SDL_rotozoom.h")
+  end
+
   create_makefile("ray_ext")
 
   data = File.read("Makefile").gsub("SDLMain.o", "")
@@ -95,6 +104,7 @@ else
   end
 
   have_sdl_ext("SDL_image", "SDL_image.h")
+  have_sdl_ext("SDL_gfx", "SDL_rotozoom.h")
 
   create_makefile("ray_ext")
 end
