@@ -39,11 +39,34 @@ module Ray
     def initialize(&block)
       @exit = false
       @block = block
+
+      @held_keys = []
     end
 
     def register_events
+      on :key_press do |key, mod|
+        @held_keys << key
+      end
+
+      on :key_release do |key, mod|
+        @held_keys.reject! { |i| i == key }
+      end
+
       instance_eval(&@block)
       @exit = false
+    end
+
+    # @param [Symbol, Integer] val A symbol to find the key (its name)
+    #                              or an integer (Ray::Event::KEY_*)
+    #
+    # @return [true, false] True if the user is holding key.
+    def holding?(val)
+      if val.is_a? Symbol
+        val = key(val)
+        @held_keys.any? { |o| val === o }
+      else
+        @held_keys.include? val
+      end
     end
 
     # Runs until you exit the scene.
