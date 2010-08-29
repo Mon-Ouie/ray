@@ -51,6 +51,15 @@ module Ray
       last_mode = modes.select { |mode| Ray.can_use_mode? mode }.last
       raise ArgumentError, "No valid mode found" unless last_mode
 
+      if title = options[:title]
+        Ray.window_title = title
+        Ray.text_icon    = title
+      end
+
+      if icon = options[:icon]
+        Ray.icon = Ray.convert(icon, :image)
+      end
+
       @window = Ray.create_window(last_mode)
 
       if block
