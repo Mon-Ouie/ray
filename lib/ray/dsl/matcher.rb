@@ -87,16 +87,32 @@ module Ray
     lambda { |o| (o <= max) && (o >= min) }
   end
 
+  # @overload inside(x, y[, w, h])
+  # @overload inside(rect)
+  # @overload inside(array)
+  #
+  # @return [DSL::Matcher] A matching matching any rect inside the argument.
   describe_matcher(:inside) do |*args|
     rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args, :rect)
     lambda { |o| o.inside? rect }
   end
 
+  # @overload inside(x, y[, w, h])
+  # @overload inside(rect)
+  # @overload inside(array)
+  #
+  # @return [DSL::Matcher] A matching matching any rect outside the argument.
   describe_matcher(:outside) do |*args|
     rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args, :rect)
     lambda { |o| o.outside? rect }
   end
 
+  # @overload inside(x, y[, w, h])
+  # @overload inside(rect)
+  # @overload inside(array)
+  #
+  # @return [DSL::Matcher] A matching matching any rect colliding with the
+  #                        argument.
   describe_matcher(:colliding_with) do |*args|
     rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args, :rect)
     lambda { |o| o.collide? rect }
@@ -145,11 +161,15 @@ module Ray
     hash
   end
 
+  # @return [DSL::Matcher] A matcher matching the given key, which is a symbol
+  #                        like :space, :a, :b, :number, :letter, :arrow, ...
   describe_matcher(:key) do |sym|
     ary = KEYS[sym.to_sym]
     lambda { |o| ary.include? o }
   end
 
+  # @return [DSL::Matcher] A matcher matching the given modifier key
+  #                        (:rctrl, :lctrl, :rmeta, :lmeta, ...)
   describe_matcher(:key_mod) do |sym|
     ary = MOD[sym.to_sym]
     lambda { |o| ary.detect { |const| o & const } }
