@@ -2,8 +2,6 @@ module Ray
   # This is the module including all of your matchers as private methods,
   # allowing you to use them when you call on.
   module Matchers
-    private
-
     # @return [DSL::Matcher] An anonymous matcher, using your block to
     #                        know if the argument matches.
     #
@@ -54,8 +52,6 @@ module Ray
       define_method(name) do |*args|
         DSL::Matcher.new(target, &create_block.call(*args))
       end
-
-      private name
     end
   end
 

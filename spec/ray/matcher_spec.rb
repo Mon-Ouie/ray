@@ -1,12 +1,15 @@
 describe Ray::Matchers do
   context "when a matcher is described" do
-    it "should add it as a private method" do
-      Ray.describe_matcher(:match, :string) do |reg|
-        lambda { |str| str =~ reg }
-      end
-
-      ary = Ray::Matchers.private_instance_methods
-      ary.any? { |i| i == :match or i == "match" }.should be_true
+    it "should add it as a public method" do
+      lambda {
+        Ray.describe_matcher(:awesome_matcher, :string) do |reg|
+          lambda { |str| str =~ reg }
+        end
+      }.should change {
+        Ray::Matchers.instance_methods.any? do |i|
+          i == :awesome_matcher or i == "awesome_matcher"
+        end
+      }.from(false).to(true)
     end
 
     context "without a defined target" do

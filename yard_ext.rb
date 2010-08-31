@@ -7,7 +7,6 @@ class MatcherHandler < YARD::Handlers::Ruby::Base
     src = statement.parameters.children.first.source[1..-1]
     MethodObject.new(P("Ray::Matchers"), src) do |o|
       register(o)
-      o.visibility = :private
 
       args = statement.last.first
       if args
