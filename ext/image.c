@@ -521,6 +521,255 @@ VALUE ray_image_rotozoom_bang(VALUE self, VALUE angle, VALUE zoom) {
    return self;
 }
 
+/*
+  Draws a point.
+
+  @param [Ray::Rect, Array<Integer>] rb_point The point which should be changed.
+  @param [Ray::Color] rb_color Its new color.
+*/
+VALUE ray_image_draw_pixel(VALUE self, VALUE rb_point, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+
+   SDL_Rect point = ray_convert_to_rect(rb_point);
+   ray_color color = ray_rb2col(rb_color);
+   
+   pixelRGBA(surface, point.x, point.y, color.r, color.g, color.b, color.a);
+
+   return self;
+}
+
+/*
+  Draws a line.
+  
+  @param [Ray::Rect, Array<Integer>] p1 First point of the line.
+  @param [Ray::Rect, Array<Integer>] p2 Second point of the line.
+  @param [Ray::Color] rb_color color of the line
+*/
+VALUE ray_image_draw_line(VALUE self, VALUE p1, VALUE p2, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+
+   SDL_Rect first_point  = ray_convert_to_rect(p1);
+   SDL_Rect second_point = ray_convert_to_rect(p2);   
+   ray_color color = ray_rb2col(rb_color);
+   
+   aalineRGBA(surface, first_point.x, first_point.y,
+              second_point.x, second_point.y,
+              color.r, color.g, color.b, color.a);
+   return self;
+}
+
+/*
+  Draws a rect.
+
+  @param [Ray::Rect, Array<Integer>] rb_rect Rect to draw
+  @param [Ray::Color] rb_color color of the rect
+*/
+VALUE ray_image_draw_rect(VALUE self, VALUE rb_rect, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_Rect rect = ray_convert_to_rect(rb_rect);
+   ray_color color = ray_rb2col(rb_color);
+
+   rectangleRGBA(surface, rect.x, rect.y, rect.x + rect.w, rect.y + rect.h,
+                 color.r, color.g, color.b, color.a);
+
+   return self;
+}
+
+/*
+  Draws a filled rect.
+
+  @param [Ray::Rect, Array<Integer>] rb_rect Rect to draw
+  @param [Ray::Color] rb_color color of the rect
+*/
+VALUE ray_image_draw_filled_rect(VALUE self, VALUE rb_rect, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_Rect rect = ray_convert_to_rect(rb_rect);
+   ray_color color = ray_rb2col(rb_color);
+
+   boxRGBA(surface, rect.x, rect.y, rect.x + rect.w, rect.y + rect.h,
+           color.r, color.g, color.b, color.a);
+
+   return self;
+}
+
+/*
+  Draws a circle
+
+  @param [Ray::Rect, Array<Integer>] center Center of the circle
+  @param [Integer] radius Radius of the circle
+  @param [Ray::Color] rb_color Color of the circle
+*/
+VALUE ray_image_draw_circle(VALUE self, VALUE center, VALUE radius,
+                            VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_Rect rect = ray_convert_to_rect(center);
+   ray_color color = ray_rb2col(rb_color);
+
+   aacircleRGBA(surface, rect.x, rect.y, NUM2INT(radius),
+                color.r, color.g, color.b, color.a);
+
+   return self;
+}
+
+/*
+  Draws a filled circle
+
+  @param [Ray::Rect, Array<Integer>] center Center of the circle
+  @param [Integer] radius Radius of the circle
+  @param [Ray::Color] rb_color Color of the circle
+*/
+VALUE ray_image_draw_filled_circle(VALUE self, VALUE center, VALUE radius,
+                            VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_Rect rect = ray_convert_to_rect(center);
+   ray_color color = ray_rb2col(rb_color);
+
+   filledCircleRGBA(surface, rect.x, rect.y, NUM2INT(radius),
+                color.r, color.g, color.b, color.a);
+
+   return self;
+}
+
+/*
+  Draws an ellipse.
+  
+  @param [Ray::Rect, Array<Integer>] rect Rect in which the ellipse should be drawn.
+  @param [Ray::Color] color Color in which the ellipse should be drawn.
+*/
+VALUE ray_image_draw_ellipse(VALUE self, VALUE rb_rect, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_Rect rect = ray_convert_to_rect(rb_rect);
+   ray_color color = ray_rb2col(rb_color);
+
+   aaellipseRGBA(surface, rect.x + rect.w / 2,
+                 rect.y + rect.h / 2, rect.w / 2, rect.h / 2,
+                 color.r, color.g, color.b, color.a);
+   return self;
+}
+
+/*
+  Draws a filled ellipse.
+  
+  @param [Ray::Rect, Array<Integer>] rect Rect in which the ellipse should be drawn.
+  @param [Ray::Color] color Color in which the ellipse should be drawn.
+*/
+VALUE ray_image_draw_filled_ellipse(VALUE self, VALUE rb_rect, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+   SDL_Rect rect = ray_convert_to_rect(rb_rect);
+   ray_color color = ray_rb2col(rb_color);
+
+   filledEllipseRGBA(surface, rect.x + rect.w / 2,
+                     rect.y + rect.h / 2, rect.w / 2, rect.h / 2,
+                     color.r, color.g, color.b, color.a);
+   return self;
+}
+
+/*
+  Draws a triangle.
+*/
+VALUE ray_image_draw_triangle(VALUE self, VALUE p1, VALUE p2, VALUE p3,
+                              VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+
+   SDL_Rect first_point  = ray_convert_to_rect(p1);
+   SDL_Rect second_point = ray_convert_to_rect(p2);
+   SDL_Rect third_point  = ray_convert_to_rect(p3);
+   
+   ray_color color = ray_rb2col(rb_color);
+
+   aatrigonRGBA(surface, first_point.x, first_point.y,
+              second_point.x, second_point.y,
+              third_point.x, third_point.y,
+              color.r, color.g, color.b, color.a);
+
+   return self;
+}
+
+/*
+  Draws a filled triangle.
+*/
+VALUE ray_image_draw_filled_triangle(VALUE self, VALUE p1, VALUE p2, VALUE p3,
+                                     VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+
+   SDL_Rect first_point  = ray_convert_to_rect(p1);
+   SDL_Rect second_point = ray_convert_to_rect(p2);
+   SDL_Rect third_point  = ray_convert_to_rect(p3);
+   
+   ray_color color = ray_rb2col(rb_color);
+
+   filledTrigonRGBA(surface, first_point.x, first_point.y,
+                    second_point.x, second_point.y,
+                    third_point.x, third_point.y,
+                    color.r, color.g, color.b, color.a);
+
+   return self;
+}
+
+/*
+  Draws a polygon.
+
+  @param [Array<Array<Integer>, Ray::Rect>] points Points which should be joined
+                                                   to draw the polygon.
+  @param [Ray::Color] color The color in which the polygon should be drawn.
+*/
+VALUE ray_image_draw_polygon(VALUE self, VALUE points, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+
+   size_t size = RARRAY_LEN(points);
+   int16_t *x_array = malloc(sizeof(int16_t) * size);
+   int16_t *y_array = malloc(sizeof(int16_t) * size);
+
+   size_t i = 0;
+   for (; i < size; i++) {
+      SDL_Rect rect = ray_convert_to_rect(rb_ary_entry(points, i));
+      
+      x_array[i] = (int16_t)rect.x;
+      y_array[i] = (int16_t)rect.y;
+   }
+
+   ray_color color = ray_rb2col(rb_color);
+   aapolygonRGBA(surface, x_array, y_array, (int)size,
+                 color.r, color.g, color.b, color.a);
+
+   free(x_array);
+   free(y_array);
+
+   return self;
+}
+
+/*
+  Draws a filled polygon.
+
+  @param [Array<Array<Integer>, Ray::Rect>] points Points which should be joined
+                                                   to draw the polygon.
+  @param [Ray::Color] color The color in which the polygon should be drawn.
+*/
+VALUE ray_image_draw_filled_polygon(VALUE self, VALUE points, VALUE rb_color) {
+   SDL_Surface *surface = ray_rb2surface(self);
+
+   size_t size = RARRAY_LEN(points);
+   int16_t *x_array = malloc(sizeof(int16_t) * size);
+   int16_t *y_array = malloc(sizeof(int16_t) * size);
+
+   size_t i = 0;
+   for (; i < size; i++) {
+      SDL_Rect rect = ray_convert_to_rect(rb_ary_entry(points, i));
+      
+      x_array[i] = (int16_t)rect.x;
+      y_array[i] = (int16_t)rect.y;
+   }
+
+   ray_color color = ray_rb2col(rb_color);
+   filledPolygonRGBA(surface, x_array, y_array, (int)size,
+                 color.r, color.g, color.b, color.a);
+
+   free(x_array);
+   free(y_array);
+
+   return self;
+}
+
 #endif
 
 void Init_ray_image() {
@@ -553,6 +802,24 @@ void Init_ray_image() {
 #ifdef HAVE_SDL_GFX
    rb_define_method(ray_cImage, "rotozoom", ray_image_rotozoom, 2);
    rb_define_method(ray_cImage, "rotozoom!", ray_image_rotozoom_bang, 2);
+   
+   rb_define_method(ray_cImage, "draw_pixel", ray_image_draw_pixel, 2);
+   rb_define_method(ray_cImage, "draw_line", ray_image_draw_line, 3);
+   rb_define_method(ray_cImage, "draw_rect", ray_image_draw_rect, 2);
+   rb_define_method(ray_cImage, "draw_filled_rect", ray_image_draw_filled_rect,
+                    2);
+   rb_define_method(ray_cImage, "draw_circle", ray_image_draw_circle, 3);
+   rb_define_method(ray_cImage, "draw_filled_circle",
+                    ray_image_draw_filled_circle, 3);
+   rb_define_method(ray_cImage, "draw_ellipse", ray_image_draw_ellipse, 2);
+   rb_define_method(ray_cImage, "draw_filled_ellipse",
+                    ray_image_draw_filled_ellipse, 2);
+   rb_define_method(ray_cImage, "draw_triangle", ray_image_draw_triangle, 4);
+   rb_define_method(ray_cImage, "draw_filled_triangle",
+                    ray_image_draw_filled_triangle, 4);
+   rb_define_method(ray_cImage, "draw_polygon", ray_image_draw_polygon, 2);
+   rb_define_method(ray_cImage, "draw_filled_polygon",
+                    ray_image_draw_filled_polygon, 2);
 #endif
 
    rb_define_const(ray_cImage, "FLAG_ANYFORMAT", INT2FIX(SDL_ANYFORMAT));

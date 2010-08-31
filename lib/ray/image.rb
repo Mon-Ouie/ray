@@ -34,6 +34,12 @@ module Ray
       alias :delete_if :reject!
     end
 
+    # Instance evaluates a block for convenience, to draw something on
+    # the image.
+    def draw(&block)
+      instance_eval(&block)
+    end
+
     # @yield [pixel]
     # @yieldparam [Ray::Color] pixel Color of a point
     def each

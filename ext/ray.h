@@ -135,6 +135,12 @@ SDL_Surface *ray_rb2surface(VALUE object);
 /** Converts a ruby object into a rect */
 ray_rect ray_rb2rect(VALUE object);
 
+/**
+   Converts a ruby object into a rect even if it's not an intance
+   of Ray::Rect.
+ */
+ray_rect ray_convert_to_rect(VALUE obj);
+
 /** Converts a ruby object into an event */
 SDL_Event *ray_rb2event(VALUE object);
 

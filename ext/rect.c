@@ -26,6 +26,21 @@ ray_rect ray_rb2rect(VALUE obj) {
    return *rect;
 }
 
+ray_rect ray_convert_to_rect(VALUE obj) {
+   if (RAY_IS_A(obj, ray_cRect))
+      return ray_rb2rect(obj);
+   else if (RAY_IS_A(obj, rb_cArray))
+      return ray_rb2rect(rb_apply(ray_cRect, RAY_METH("new"), obj));
+   else {
+      rb_raise(rb_eTypeError, "Can't convert %s into Ray::Rect",
+               RAY_OBJ_CLASSNAME(obj));
+   }
+
+   /* Should never happe */
+   ray_rect empty_rect = {0, 0, 0, 0};
+   return empty_rect;
+}
+
 VALUE ray_alloc_rect(VALUE self) {
    ray_rect *rect = malloc(sizeof(ray_rect));
    VALUE ret = Data_Wrap_Struct(self, 0, ray_free_rect, rect);
