@@ -2,22 +2,9 @@
 begin
   require 'yard'
 
-  class MatcherHandler < YARD::Handlers::Ruby::Base
-    handles method_call(:describe_matcher)
-
-    def process
-      src = statement.parameters.children.first.source[1..-1]
-      MethodObject.new(Proxy.new(nil, "Ray::Matchers"), src) do |o|
-        o.source     = statement.source
-        o.docstring  = statement.comments
-        o.visibility = :private
-      end
-    end
-  end
-
   YARD::Rake::YardocTask.new do |t|
     t.files = ['lib/**/*.rb', 'ext/**/*.c', 'psp/*.c']
-    t.options |= ["--private"]
+    t.options |= ["--private", "-p", "yard_template", "-e", "./yard_ext.rb"]
   end
 rescue LoadError
   $stderr.puts("YARD is not installed. Please install it " +

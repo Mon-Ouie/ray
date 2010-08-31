@@ -1,0 +1,12 @@
+<% if types = object[:registred_types] %>
+  <div class='tags'>
+    <h3>Registred types:</h3>
+    <ul class='param'>
+      <% types.select { |(t, k)| t[0] == ':' }.each do |(type_name, klass)| %>
+        <li> 
+          <span class='type'>(<tt><%= linkify klass %></tt>)</span>
+          <span class='name'><tt><%= h type_name %></tt></span>
+       <% end %>
+    </ul>
+  </div>
+<% end %>
