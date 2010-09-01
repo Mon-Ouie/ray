@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../spec_helper'
+
 describe Ray::Config do
   describe ".config" do
     it "should allow to add new settings" do

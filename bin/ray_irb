@@ -1,4 +1,0 @@
-#!/usr/bin/env ruby
-system <<-COMMAND
-ray -e "require 'irb'; IRB.start"
-COMMAND

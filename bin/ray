@@ -1,5 +1,0 @@
-#!/usr/bin/env ruby
-
-path = File.expand_path(File.join(File.dirname(__FILE__), "../ext/ray"))
-args = ARGV.map { |i| '"' + i.gsub('"', "\\\"") + '"' }.join(' ')
-system "#{path} #{args}"

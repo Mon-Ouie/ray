@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../spec_helper'
+
 describe "the event DSL" do
   context "when someone listens to an event" do
     before :each do

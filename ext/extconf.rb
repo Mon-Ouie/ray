@@ -83,17 +83,11 @@ unless RUBY_PLATFORM =~ /darwin/
 
   create_makefile("ray_ext")
 
-  data = File.read("Makefile").gsub("SDLMain.o", "")
+  data = File.read("Makefile").gsub("ray_osx.o", "")
   open("Makefile", 'w') { |f| f.write(data) }
 else
   $CFLAGS  << " #{ENV["CFLAGS"]}"
   $LDFLAGS << " #{ENV["LDFLAGS"]}"
-
-  if !has_run and !has_run_node
-    $stderr.puts "Unsupported configuration: Mac OS X and a ruby " +
-                 "implementation that does not implement ruby_run"
-    exit 1
-  end
 
   $CFLAGS << " -DRAY_USE_FRAMEWORK"
 
@@ -107,15 +101,4 @@ else
   have_sdl_ext("SDL_gfx", "SDL_rotozoom.h")
 
   create_makefile("ray_ext")
-end
-
-if has_run or has_run_node
-  open("Makefile", 'a') do |file|
-    file.puts "ray: $(OBJS)"
-    file.puts "\t$(CC) -o ray $(OBJS) $(LIBPATH) $(DLDFLAGS) " +
-      "$(LOCAL_LIBS) $(LIBS) -lruby"
-  end
-
-  data = File.read("Makefile").gsub("all:", "all: ray")
-  open("Makefile", 'w') { |f| f.write(data) }
 end

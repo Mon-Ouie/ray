@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../spec_helper'
+
 describe Ray::Rect do
   [:x, :y, :width, :height].each do |meth|
     describe "##{meth}=" do

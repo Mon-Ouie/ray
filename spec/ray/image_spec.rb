@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../spec_helper'
+
 describe Ray::Image do
   before :each do
     Ray.init

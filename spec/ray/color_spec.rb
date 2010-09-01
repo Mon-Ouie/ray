@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../spec_helper'
+
 describe Ray::Color do
   describe "#initialize" do
     it "should accept 3 integers" do

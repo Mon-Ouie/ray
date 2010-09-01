@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../spec_helper'
+
 describe Ray::Matchers do
   context "when a matcher is described" do
     it "should add it as a public method" do

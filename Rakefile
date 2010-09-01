@@ -25,20 +25,25 @@ begin
 
     s.files |= FileList["lib/**/*.rb"]
     s.files |= FileList["ext/**/*.{c,h,m}"]
-    s.files |= FileList["bin/ray{,_irb}"]
 
     s.extensions << "ext/extconf.rb"
-
-    s.executables << "ray" << "ray_irb"
   end
 rescue LoadError
   $stderr.puts("Jeweler is not installed. Please install it " +
                "with the following command: gem intall jeweler")
 end
 
-desc "Run specs"
-task :spec do
-  load "spec_runner.rb"
+begin
+  require 'spec/rake/spectask'
+
+  Spec::Rake::SpecTask.new('spec') do |t|
+    t.spec_files = FileList['spec/**/*_spec\.rb']
+    t.spec_opts = ["--format", "html:report.html", "--diff"]
+    t.fail_on_error = false
+  end
+rescue LoadError
+  $stderr.puts("RSpec is not installed. Please install it " +
+               "with the following command: gem install rspec")
 end
 
 namespace :ext do

@@ -1,3 +1,5 @@
+require File.dirname(__FILE__) + '/../spec_helper'
+
 describe Ray::Joystick do
   describe ".handle_event" do
     context "when handle_event= is called" do

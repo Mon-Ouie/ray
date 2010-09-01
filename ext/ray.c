@@ -1,9 +1,18 @@
 #include "ray.h"
 
+#ifdef HAVE_COCOA
+extern void ray_osx_init();
+extern void ray_osx_close();
+#endif
+
 VALUE ray_mRay = Qnil;
 
 /* Inits ray */
 VALUE ray_init(VALUE self) {
+#ifdef HAVE_COCOA
+   ray_osx_init();
+#endif
+
    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
    return Qnil;
 }
@@ -11,6 +20,7 @@ VALUE ray_init(VALUE self) {
 /* Stops ray */
 VALUE ray_stop(VALUE self) {
    SDL_Quit();
+   /* The pool is never drained on OSX */
    return Qnil;
 }
 
@@ -251,29 +261,6 @@ void Init_ray_ext() {
    Init_ray_psp();
 #endif
 }
-
-#ifndef PSP
-
-int main(int argc, char *argv[]) {
-#if defined(HAVE_RUBY_RUN_NODE)
-   ruby_init();
-   Init_ray_ext();
-   ruby_run_node(ruby_options(argc, argv));
-#elif defined(HAVE_RUBY_RUN)
-   ruby_init();
-   Init_ray_ext();
-   ruby_init_loadpath();
-   ruby_options(argc, argv);
-   ruby_run();
-#else
-   fprintf(stderr, "Please use \"require 'ray'\" on this platform\n");
-   return 1;
-#endif
-
-   return 0;
-}
-
-#endif
 
 #ifdef PSP
 
