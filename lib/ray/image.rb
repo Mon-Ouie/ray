@@ -1,7 +1,7 @@
 module Ray
   class Image
     def inspect
-      "#<#{self} w=#{w} h=#{h} bpp=#{bpp}>"
+      "#<#{self.class} w=#{w} h=#{h} bpp=#{bpp}>"
     end
 
     alias :bits_per_pixel :bpp
