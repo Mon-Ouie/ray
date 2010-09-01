@@ -36,7 +36,7 @@ ray_rect ray_convert_to_rect(VALUE obj) {
                RAY_OBJ_CLASSNAME(obj));
    }
 
-   /* Should never happe */
+   /* Should never happen */
    ray_rect empty_rect = {0, 0, 0, 0};
    return empty_rect;
 }
