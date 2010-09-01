@@ -101,6 +101,7 @@ module Ray
     def run
       until @scenes.empty?
         create_event_runner
+        @register.call if @register
 
         @scenes.each do |scene|
           scene.game         = self
@@ -116,6 +117,27 @@ module Ray
       end
 
       Ray.stop
+    end
+
+    # Registers a block to listen to events
+    def register(&block)
+      @register = block
+    end
+
+    # Removes the current scene of this game
+    def exit
+      return if @scenes.empty?
+
+      @scenes.last.exit
+      pop_scene
+    end
+
+    # Kills the game, removing all the scenes of this game
+    def exit!
+      return if @scenes.empty?
+
+      @scenes.last.exit
+      @scenes.clear
     end
   end
 end
