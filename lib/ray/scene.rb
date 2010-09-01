@@ -126,6 +126,14 @@ module Ray
       @render = block
     end
 
+    # Pushes a scene in the stack, and exits that one
+    def push_scene(scene)
+      game.push_scene(scene)
+      exit
+    end
+
+    alias :pop_scene :exit!
+
     attr_accessor :game
     attr_accessor :window
   end
