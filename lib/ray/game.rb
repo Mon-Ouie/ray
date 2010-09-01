@@ -2,6 +2,8 @@ module Ray
   # A game is represented as a stack of scenes, running until there are no more
   # scenes.
   class Game
+    include Ray::Helper
+
     # Creates a new game.
     #
     # You can poss all the argument you would pass to create_window,
@@ -98,12 +100,12 @@ module Ray
     # Runs the game until the last scene gets popped, and stop ray.
     def run
       until @scenes.empty?
-        @runner = Ray::DSL::EventRunner.new
+        create_event_runner
 
         @scenes.each do |scene|
           scene.game         = self
           scene.window       = @window
-          scene.event_runner = @runner
+          scene.event_runner = event_runner
         end
 
         scene = @scenes.last

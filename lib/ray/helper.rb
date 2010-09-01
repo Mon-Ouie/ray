@@ -6,9 +6,20 @@ module Ray
 
     include Ray::Matchers
 
+    # Sets the event runner for this object.
     def event_runner=(value)
       self.listener_runner = value
       self.raiser_runner   = value
+    end
+
+    # @return [DSL::EventRunner] The event runner used to document
+    def event_runner
+      listener_runner
+    end
+
+    # Creates an event runner for this object
+    def create_event_runner
+      self.event_runner = Ray::DSL::EventRunner.new
     end
 
     # @see Ray::ImageSet.[]
