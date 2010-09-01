@@ -82,12 +82,12 @@ begin
           syck/token.c syck/emitter.c syck/handler.c syck/node.c syck/syck.c
           syck/yaml2byte.c).map { |i| "psp/#{i}" }
 
-  static_libs = ["-lSDL_image", "-lSDL", "-lGL", "-lpspvfpu",
+  static_libs = ["-lSDL_gfx", "-lSDL_image", "-lSDL", "-lGL", "-lpspvfpu",
                  "-lpspgu", "-lpspaudio", "-lpsprtc", "-lpsphprm", "-lpspwlan",
                  "-lruby", "-lpng", "-ljpeg", "-lz","-lm", "-lc"]
 
   flags = ["-Wall", "-Wno-unused-parameter", "-D_PSP_ -DHAVE_STRUCT_TIMESPEC",
-           "-DHAVE_SDL_IMAGE", "-G0"]
+           "-DHAVE_SDL_SDL_IMAGE_H", "-G0", "-DHAVE_SDL_SDL_ROTOZOOM_H"]
 
   begin
     PSPTask.new do |t|
