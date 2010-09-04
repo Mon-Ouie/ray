@@ -38,7 +38,6 @@ begin
 
   Spec::Rake::SpecTask.new('spec') do |t|
     t.spec_files = FileList['spec/**/*_spec\.rb']
-    t.spec_opts = ["--format", "html:report.html", "--diff"]
     t.fail_on_error = false
   end
 rescue LoadError
