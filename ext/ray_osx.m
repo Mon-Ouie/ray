@@ -6,6 +6,22 @@
 
 #include <Cocoa/Cocoa.h>
 
+struct CPSProcessSerNum {
+   UInt32 lo;
+   UInt32 hi;
+};
+
+typedef struct CPSProcessSerNum CPSProcessSerNum;
+
+extern OSErr CPSGetCurrentProcess(CPSProcessSerNum *psn);
+extern OSErr CPSEnableForegroundOperation(CPSProcessSerNum *psn,
+                                          UInt32 _arg2,
+                                          UInt32 _arg3,
+                                          UInt32 _arg4,
+                                          UInt32 _arg5);
+extern OSErr CPSSetFrontProcess(CPSProcessSerNum *psn);
+extern OSErr CPSSetProcessName(CPSProcessSerNum *psn, const char *processname);
+
 static NSAutoreleasePool *ray_pool = nil;
 
 @interface NSApplication (SDL_Missing_Methods)
@@ -117,11 +133,22 @@ void ray_osx_init() {
       return;
 
    ray_pool = [[NSAutoreleasePool alloc] init];
+
    [RayApplication sharedApplication];
 
    [NSApp setMainMenu:[[[NSMenu alloc] init] autorelease]];
    ray_osx_setup_application_menu();
    ray_osx_setup_window_menu();
+
+   CPSProcessSerNum psn;
+
+   CPSGetCurrentProcess(&psn);
+   NSString *nameNSString = ray_osx_appname();
+   const char *nameString = [nameNSString UTF8String];
+   CPSSetProcessName(&psn, nameString);
+
+   CPSEnableForegroundOperation(&psn, 0x03, 0x3C, 0x2C, 0x1103);
+   CPSSetFrontProcess(&psn);   
 
    [NSApp finishLaunching];
    [NSApp updateWindows];
