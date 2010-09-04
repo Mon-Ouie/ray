@@ -53,9 +53,6 @@ def have_sdl_ext(name, header)
   end
 end
 
-has_run_node = have_func("ruby_run_node")
-has_run      = have_func("ruby_run")
-
 $CFLAGS << " -pedantic -Wall -std=c99 -Wno-unused-parameter"
 
 unless RUBY_PLATFORM =~ /darwin/
