@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 image_set /^test:(red|green|blue)$/ do |col|
   %w(red green blue).include?(col).should == true
