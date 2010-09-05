@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Ray::Image do
   before :each do
@@ -144,6 +144,39 @@ describe Ray::Image do
       col.r.should == 10
       col.g.should == 15
       col.b.should == 20
+    end
+  end
+
+  describe "#clip" do
+    context "without any arguments" do
+      it "should return the clipping rect" do
+        img = Ray::Image.new(:w => 10, :h => 10)
+        img.clip.should == Ray::Rect.new(0, 0, 10, 10)
+      end
+    end
+
+    context "without a rect" do
+      it "should change the clip rect" do
+        img = Ray::Image.new(:w => 10, :h => 10)
+        img.clip([5, 5, 3, 3])
+        img.clip.should == Ray::Rect.new(5, 5, 3, 3)
+      end
+
+      it "should return the new rect" do
+        img = Ray::Image.new(:w => 10, :h => 10)
+        img.clip([5, 5, 3, 3]).should == Ray::Rect.new(5, 5, 3, 3)
+      end
+    end
+
+    context "with a block" do
+      it "should change the clipping rect within the block" do
+        img = Ray::Image.new(:w => 10, :h => 10)
+        img.clip([5, 5, 3, 3]) do
+          img.clip.should == Ray::Rect.new(5, 5, 3, 3)
+        end
+
+        img.clip.should == Ray::Rect.new(0, 0, 10, 10)
+      end
     end
   end
 

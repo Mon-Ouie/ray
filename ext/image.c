@@ -477,6 +477,55 @@ VALUE ray_image_set_at(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_col) {
    return rb_col;
 }
 
+VALUE ray_image_ensure_unclip(VALUE ary) {
+   SDL_Surface *surface = ray_rb2surface(rb_ary_entry(ary, 0));
+   SDL_Rect rect = ray_rb2rect(rb_ary_entry(ary, 1));
+
+   SDL_SetClipRect(surface, &rect);
+
+   rb_gc_unregister_address(&ary);
+
+   return Qnil;
+}
+
+/*
+  @overload clip
+    @return [Ray::Rect] The current clipping rect
+
+  @overload clip(rect)
+    Changes the clipping rect (the rect which will be changed if something is
+    drawn on this image, the rest of the image being ignored.)
+  
+    If a block is given, it is executed, and the old clipping rect is reset.
+
+    @param [Ray::Rect, Array<Integer>] New clipping rect.
+*/
+VALUE ray_image_clip(int argc, VALUE *argv, VALUE self) {
+   VALUE rb_rect = Qnil;
+   rb_scan_args(argc, argv, "01", &rb_rect);
+
+   SDL_Rect old_rect;
+   SDL_GetClipRect(ray_rb2surface(self), &old_rect);
+
+   if (NIL_P(rb_rect))
+      return ray_rect2rb(old_rect);
+   
+   SDL_Rect rect = ray_convert_to_rect(rb_rect);
+   SDL_SetClipRect(ray_rb2surface(self), &rect);
+   
+   if (rb_block_given_p()) {
+      VALUE ary = rb_ary_new();
+      rb_ary_push(ary, self);
+      rb_ary_push(ary, ray_rect2rb(old_rect));
+      
+      rb_gc_register_address(&ary);
+
+      rb_ensure(rb_yield, Qnil, ray_image_ensure_unclip, ary);
+   }
+
+   return ray_rect2rb(rect);
+}
+
 #ifdef HAVE_SDL_GFX
 
 /*
@@ -798,6 +847,8 @@ void Init_ray_image() {
    rb_define_method(ray_cImage, "unlock", ray_image_unlock, 0);
    rb_define_method(ray_cImage, "[]", ray_image_at, 2);
    rb_define_method(ray_cImage, "[]=", ray_image_set_at, 3);
+
+   rb_define_method(ray_cImage, "clip", ray_image_clip, -1);
 
 #ifdef HAVE_SDL_GFX
    rb_define_method(ray_cImage, "rotozoom", ray_image_rotozoom, 2);
