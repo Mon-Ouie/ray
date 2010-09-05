@@ -31,6 +31,12 @@ module Ray
         (p_x < x + w) && (p_y < y + h)
     end
 
+    # @return [true, false] True if the two rects are equal
+    def ==(rect)
+      return false unless rect.is_a? Rect
+      x == rect.x && y == rect.y && w == rect.w && h == rect.h
+    end
+
     alias :w :width
     alias :h :height
 

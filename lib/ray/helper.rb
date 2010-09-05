@@ -12,7 +12,7 @@ module Ray
       self.raiser_runner   = value
     end
 
-    # @return [DSL::EventRunner] The event runner used to document
+    # @return [DSL::EventRunner] The event runner used to handle event.
     def event_runner
       listener_runner
     end
@@ -25,6 +25,11 @@ module Ray
     # @see Ray::ImageSet.[]
     def image(name)
       Ray::ImageSet[name]
+    end
+
+    # @see Ray::Sprite#initialize
+    def sprite(image, opts = {})
+      Ray::Sprite.new(image, opts)
     end
   end
 end
