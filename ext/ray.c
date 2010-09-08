@@ -14,11 +14,26 @@ VALUE ray_init(VALUE self) {
 #endif
 
    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+
+#ifdef HAVE_SDL_TTF
+   if (!TTF_WasInit())
+      TTF_Init();
+#endif
+
    return Qnil;
 }
 
 /* Stops ray */
 VALUE ray_stop(VALUE self) {
+#ifdef HAVE_SDL_TTF
+   /*
+     Freeing a font after TTF_Quit causes a segfault, but, Ruby being
+     garbage called, we can't be sure a font won't be freed later.
+   */
+
+   /* TTF_Quit(); */
+#endif
+
    SDL_Quit();
    /* The pool is never drained on OSX */
    return Qnil;
@@ -216,6 +231,7 @@ VALUE ray_has_image_support(VALUE self) {
    return Qfalse;
 #endif
 }
+
 /* @return [true, false] true if Ray supports graphical effect like rotations */
 VALUE ray_has_gfx_support(VALUE self) {
 #ifdef HAVE_SDL_GFX
@@ -224,6 +240,16 @@ VALUE ray_has_gfx_support(VALUE self) {
    return Qfalse;
 #endif
 }
+
+/* @return [true, false] true if Ray supports ttf fonts */
+VALUE ray_has_font_support(VALUE self) {
+#ifdef HAVE_SDL_TTF
+   return Qtrue;
+#else
+   return Qfalse;
+#endif
+}
+
 
 void Init_ray_ext() {
    ray_mRay = rb_define_module("Ray");
@@ -250,12 +276,18 @@ void Init_ray_ext() {
                              ray_has_image_support, 0);
    rb_define_module_function(ray_mRay, "has_gfx_support?",
                              ray_has_gfx_support, 0);
+   rb_define_module_function(ray_mRay, "has_font_support?",
+                             ray_has_font_support, 0);
 
    Init_ray_image();
    Init_ray_color();
    Init_ray_rect();
    Init_ray_event();
    Init_ray_joystick();
+
+#ifdef HAVE_SDL_TTF
+   Init_ray_font();
+#endif
 
 #ifdef PSP
    Init_ray_psp();

@@ -51,6 +51,20 @@
 # endif
 #endif
 
+#if defined(HAVE_SDL_TTF_H)
+# if !defined(HAVE_SDL_TTF)
+#  define HAVE_SDL_TTF
+# endif
+# include <SDL_ttf.h>
+#else
+# if defined(HAVE_SDL_SDL_TTF_H)
+#  if !defined(HAVE_SDL_TTF)
+#   define HAVE_SDL_TTF
+#  endif
+#  include <SDL/SDL_ttf.h>
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #if 0
@@ -65,6 +79,10 @@ extern VALUE ray_cImage;
 extern VALUE ray_cColor;
 extern VALUE ray_cRect;
 extern VALUE ray_cEvent;
+
+#ifdef HAVE_SDL_TTF
+extern VALUE ray_cFont;
+#endif
 
 #ifdef PSP
 extern VALUE ray_eTimeoutError;
@@ -105,6 +123,12 @@ typedef SDL_Rect ray_rect;
 typedef struct {
    SDL_Joystick *joystick;
 } ray_joystick;
+
+#ifdef HAVE_SDL_TTF
+typedef struct {
+   TTF_Font *font;
+} ray_font;
+#endif
 
 /* Convertion functions */
 
@@ -147,6 +171,11 @@ SDL_Event *ray_rb2event(VALUE object);
 /** Converts a ruby object into a joystick */
 SDL_Joystick *ray_rb2joystick(VALUE object);
 
+#ifdef HAVE_SDL_TTF
+/** Converts a ruby object into a font */
+TTF_Font *ray_rb2font(VALUE object);
+#endif
+
 /* Initializers */
 
 void Init_ray_ext();
@@ -155,6 +184,10 @@ void Init_ray_color();
 void Init_ray_rect();
 void Init_ray_event();
 void Init_ray_joystick();
+
+#ifdef HAVE_SDL_TTF
+void Init_ray_font();
+#endif
 
 #ifdef PSP
 void Init_ray_psp();

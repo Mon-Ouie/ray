@@ -5,6 +5,7 @@ require 'ray/rect'
 require 'ray/image'
 require 'ray/image_set'
 require 'ray/joystick'
+require 'ray/font' if Ray.has_font_support?
 
 require 'ray/config'
 
