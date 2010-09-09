@@ -143,6 +143,26 @@ VALUE ray_font_size_of(int argc, VALUE *argv, VALUE self) {
    return ray_rect2rb(rect);
 }
 
+/*
+  @oveload draw(string, opts = {})
+    @param [String] string The string which should be drawn.
+    
+    @option opts [Symbol] :mode Drawing mode. :solid (fastest),
+                                :shaded (requires a background set
+                                with :background)
+    @option opts [Symbol] :encoding :latin1, :utf8, or :unicode. Defaults
+                                    to :latin1.
+    @option opts [Ray::Color] :color Color to draw the text in. Defaults to
+                                     white.
+    @option opts [Ray::Color] :background The background color in :shaded mode.
+                                          defaults to black.
+    @option opts [Ray::Image] :on The image to draw on. In this case,
+                                  it will directly draw instead of returning
+                                  an image containing nothing but the string.
+    @opions opts [Ray::Rect, Array<Integer>] :to, :at where to draw on the image.
+
+    @return The surface it drew the string on.
+ */
 VALUE ray_font_draw(int argc, VALUE *argv, VALUE self) {
    VALUE string, hash;
    rb_scan_args(argc, argv, "11", &string, &hash);
