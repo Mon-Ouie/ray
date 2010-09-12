@@ -31,6 +31,7 @@ class String
   #                        if :on isn't specified. :w is required in that case.
   # @option opts [Symbol] The encoding. Can be guessed in Ruby 1.9.
   # @option opts [Ray::Color] :color The color to draw the text in.
+  # @option opts [Ray::Color] :background Background color in shaded mode.
   # @option opts [Symbol] :mode The drawing mode.
   # @option opts [Array<Symbol>] :style The different styles to apply.
   #                                     :italic, :bold, and :underlined.
