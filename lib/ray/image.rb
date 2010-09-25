@@ -43,6 +43,8 @@ module Ray
     # @yield [pixel]
     # @yieldparam [Ray::Color] pixel Color of a point
     def each
+      return Enumerator.new(self, :each) unless block_given?
+
       (0...w).each do |x|
         (0...h).each do |y|
           yield self[x, y]
@@ -55,6 +57,8 @@ module Ray
     # Same as each, but also yields the position of each point.
     # @yield [x, y, pixel]
     def each_with_pos
+      return Enumerator.new(self, :each_with_pos) unless block_given?
+
       (0...w).each do |x|
         (0...h).each do |y|
           yield x, y, self[x, y]
@@ -66,6 +70,8 @@ module Ray
 
     # @yield [pixel] Block returning the new color of this pixel.
     def map!
+      return Enumerator.new(self, :map!) unless block_given?
+
       lock do
         (0...w).each do |x|
           (0...h).each do |y|
@@ -79,6 +85,8 @@ module Ray
 
     # @yield [x, y, pixel] Block returning the new color of this pixel
     def map_with_pos!
+      return Enumerator.new(self, :map_with_pos!) unless block_given?
+
       lock do
         (0...w).each do |x|
           (0...h).each do |y|

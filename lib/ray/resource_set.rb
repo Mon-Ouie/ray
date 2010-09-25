@@ -51,6 +51,8 @@ module Ray
       # @yieldparam *arguments All the arguments used to access that object
       # @yieldparam object the actual resource
       def select!(&block)
+        return Enumerator.new(self, :select!) unless block_given?
+
         set_hash.each do |regexp, hash|
           hash.delete_if do |key, val|
             !block.call(*(key + [val]))
@@ -63,6 +65,7 @@ module Ray
       #
       # @yield *arguments, object (See #select!)
       def reject!(&block)
+        return Enumerator.new(self, :reject!) unless block_given?
         select! { |*args| !block.call(*args) }
       end
 

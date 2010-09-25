@@ -15,6 +15,8 @@ module Ray
       # @yield [joystick]
       # @yieldparam [Ray::Joystick] joystick
       def each
+        return Enumerator.new(self, :each) unless block_given?
+
         (0...count).each do |i|
           yield self[i]
         end

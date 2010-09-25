@@ -1,3 +1,5 @@
+require 'enumerator'
+
 require 'ray_ext'
 
 require 'ray/color'
