@@ -179,3 +179,8 @@ ruby_libs.map! { |i| "ruby_stdlib/lib/#{i}" }
 
 desc "Builds dependencies for running the specs on a PSP"
 task :psp_spec => (['debug:prx'] | ruby_libs)
+
+desc "Installs the gem without sudo"
+task :install => :build do
+  sh "gem install pkg/ray"
+end
