@@ -31,5 +31,10 @@ module Ray
     def sprite(image, opts = {})
       Ray::Sprite.new(image, opts)
     end
+
+    # @see Ray::Channel#initialize
+    def channel(id)
+      Ray::Channel.new(id)
+    end
   end
 end
