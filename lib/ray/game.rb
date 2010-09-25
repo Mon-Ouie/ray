@@ -53,9 +53,9 @@ module Ray
       last_mode = modes.select { |mode| Ray.can_use_mode? mode }.last
       raise ArgumentError, "No valid mode found" unless last_mode
 
-      if title = options[:title]
-        Ray.window_title = title
-        Ray.text_icon    = title
+      if @title = options[:title]
+        Ray.window_title = @title
+        Ray.text_icon    = @title
       end
 
       if icon = options[:icon]
@@ -138,6 +138,12 @@ module Ray
 
       @scenes.last.exit
       @scenes.clear
+    end
+
+    attr_reader :title
+
+    def inspect
+      "game(#{title.inspect})"
     end
   end
 end
