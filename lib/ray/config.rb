@@ -13,6 +13,7 @@ module Ray
   #   end
   class Config
     include Singleton
+    include Enumerable
 
     class << self
       # @return [Object] the value for key
@@ -49,6 +50,10 @@ module Ray
     # Sets the value for key
     def []=(key, value)
       @settings[key] = value
+    end
+
+    def each(&block)
+      @settings.each(&block)
     end
 
     # Clears all the settings
