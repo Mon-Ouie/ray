@@ -82,6 +82,10 @@ unless RUBY_PLATFORM =~ /darwin/
     have_header("SDL/SDL_ttf.h") or have_header("SDL_ttf.h")
   end
 
+  if have_library("SDL_mixer")
+    have_header("SDL/SDL_mixer.h") or have_header("SDL_mixer.h")
+  end
+
   create_makefile("ray_ext")
 
   data = File.read("Makefile").gsub("ray_osx.o", "")
@@ -101,6 +105,7 @@ else
   have_sdl_ext("SDL_image", "SDL_image.h")
   have_sdl_ext("SDL_gfx", "SDL_rotozoom.h")
   have_sdl_ext("SDL_ttf", "SDL_ttf.h")
+  have_sdl_ext("SDL_mixer", "SDL_mixer.h")
 
   create_makefile("ray_ext")
 end

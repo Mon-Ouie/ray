@@ -65,6 +65,20 @@
 # endif
 #endif
 
+#if defined(HAVE_SDL_MIXER_H)
+# if !defined(HAVE_SDL_MIXER)
+#  define HAVE_SDL_MIXER
+# endif
+# include <SDL_mixer.h>
+#else
+# if defined(HAVE_SDL_SDL_MIXER_H)
+#  if !defined(HAVE_SDL_MIXER)
+#   define HAVE_SDL_MIXER
+#  endif
+#  include <SDL/SDL_mixer.h>
+# endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #if 0
@@ -82,6 +96,12 @@ extern VALUE ray_cEvent;
 
 #ifdef HAVE_SDL_TTF
 extern VALUE ray_cFont;
+#endif
+
+#ifdef HAVE_SDL_MIXER
+extern VALUE ray_mAudio;
+extern VALUE ray_cSound;
+extern VALUE ray_cMusic;
 #endif
 
 #ifdef PSP
@@ -130,6 +150,16 @@ typedef struct {
 } ray_font;
 #endif
 
+#ifdef HAVE_SDL_MIXER
+typedef struct {
+   Mix_Chunk *sound;
+} ray_sound;
+
+typedef struct {
+   Mix_Music *music;
+} ray_music;
+#endif
+
 /* Convertion functions */
 
 /** Converts a surface into a ruby object (won't free it) */
@@ -176,6 +206,11 @@ SDL_Joystick *ray_rb2joystick(VALUE object);
 TTF_Font *ray_rb2font(VALUE object);
 #endif
 
+#ifdef HAVE_SDL_MIXER
+/** Converts a ruby object into a sound chunk */
+Mix_Chunk *ray_rb2chunk(VALUE object);
+#endif
+
 /* Initializers */
 
 void Init_ray_ext();
@@ -187,6 +222,10 @@ void Init_ray_joystick();
 
 #ifdef HAVE_SDL_TTF
 void Init_ray_font();
+#endif
+
+#ifdef HAVE_SDL_MIXER
+void Init_ray_audio();
 #endif
 
 #ifdef PSP

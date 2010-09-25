@@ -7,8 +7,20 @@ extern void ray_osx_close();
 
 VALUE ray_mRay = Qnil;
 
-/* Inits ray */
-VALUE ray_init(VALUE self) {
+/*
+  @overload init(opts = {})
+    Inits Ray.
+  
+    @option opts [Integer] :frequency Audio frequency (defaults to 22050)
+    @option opts [Integer] :format A constant declared in Ray::Audio
+    @option opts [true] :mono or :stereo Set :mono or :stereo to true to enable
+                                         one of them.
+    @option opts [Integer] :chunk_size Size of a chunk (defaults to 1024)
+*/
+VALUE ray_init(int argc, VALUE *argv, VALUE self) {
+   VALUE hash = Qnil;
+   rb_scan_args(argc, argv, "01", &hash);
+
 #ifdef HAVE_COCOA
    ray_osx_init();
 #endif
@@ -20,11 +32,41 @@ VALUE ray_init(VALUE self) {
       TTF_Init();
 #endif
 
+#ifdef HAVE_SDL_MIXER
+   int frequency   = MIX_DEFAULT_FREQUENCY;
+   uint16_t format = MIX_DEFAULT_FORMAT;
+   int channels    = MIX_DEFAULT_CHANNELS;
+   int chunk_size = 1024;
+
+   if (!NIL_P(hash)) {
+      VALUE rb_freq, rb_format, rb_chunk_size;
+      if (!NIL_P(rb_freq = rb_hash_aref(hash, RAY_SYM("frequency"))))
+         frequency = NUM2INT(rb_freq);
+
+      if (!NIL_P(rb_format = rb_hash_aref(hash, RAY_SYM("format"))))
+         format = NUM2INT(rb_format);
+      
+      if (RTEST(rb_hash_aref(hash, RAY_SYM("mono"))))
+         channels = 1;
+      else if (RTEST(rb_hash_aref(hash, RAY_SYM("stereo"))))
+         channels = 2;
+
+      if (!NIL_P(rb_chunk_size = rb_hash_aref(hash, RAY_SYM("chunk_size"))))
+         chunk_size = NUM2INT(rb_chunk_size);
+   }
+   
+   Mix_OpenAudio(frequency, format, channels, chunk_size);
+#endif
+
    return Qnil;
 }
 
 /* Stops ray */
 VALUE ray_stop(VALUE self) {
+#ifdef HAVE_SDL_MIXER
+   Mix_CloseAudio();
+#endif
+
 #ifdef HAVE_SDL_TTF
    /*
      Freeing a font after TTF_Quit causes a segfault, but, Ruby being
@@ -250,11 +292,19 @@ VALUE ray_has_font_support(VALUE self) {
 #endif
 }
 
+/* @return [true, false] true if Ray supports audio playback */
+VALUE ray_has_audio_support(VALUE self) {
+#ifdef HAVE_SDL_MIXER
+   return Qtrue;
+#else
+   return Qfalse;
+#endif
+}
 
 void Init_ray_ext() {
    ray_mRay = rb_define_module("Ray");
 
-   rb_define_module_function(ray_mRay, "init", ray_init, 0);
+   rb_define_module_function(ray_mRay, "init", ray_init, -1);
    rb_define_module_function(ray_mRay, "stop", ray_stop, 0);
 
    rb_define_module_function(ray_mRay, "create_window", ray_create_window, 1);
@@ -278,6 +328,8 @@ void Init_ray_ext() {
                              ray_has_gfx_support, 0);
    rb_define_module_function(ray_mRay, "has_font_support?",
                              ray_has_font_support, 0);
+  rb_define_module_function(ray_mRay, "has_audio_support?",
+                             ray_has_audio_support, 0); 
 
    Init_ray_image();
    Init_ray_color();
@@ -287,6 +339,10 @@ void Init_ray_ext() {
 
 #ifdef HAVE_SDL_TTF
    Init_ray_font();
+#endif
+
+#ifdef HAVE_SDL_MIXER
+   Init_ray_audio();
 #endif
 
 #ifdef PSP
