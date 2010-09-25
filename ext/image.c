@@ -334,7 +334,10 @@ VALUE ray_image_height(VALUE self) {
 
 /* @return [Integer] Bits per pixel */
 VALUE ray_image_bpp(VALUE self) {
-   return INT2FIX(ray_rb2surface(self)->format->BitsPerPixel);
+   SDL_Surface *surf = ray_rb2surface(self);
+   if (surf->format)
+      return INT2FIX(ray_rb2surface(self)->format->BitsPerPixel);
+   return Qnil;
 }
 
 /* @return [true, false] true if obj's manipulates the same surface as self */
