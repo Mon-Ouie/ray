@@ -32,7 +32,6 @@ describe Ray::ImageSet do
   it "should also use Ray::Image's cache" do
     img = Ray::ImageSet[path_of("aqua.bmp")]
     img.should == Ray::Image[path_of("aqua.bmp")]
-    img.should == Ray::ImageSet[path_of("aqua.bmp")]
   end
 
   it "should also handle Ray::Image's cache" do
@@ -40,7 +39,7 @@ describe Ray::ImageSet do
 
     Ray::ImageSet.delete_if { |name, img| name == path_of("aqua.bmp") }
     img.should_not == Ray::Image[path_of("aqua.bmp")]
-    img.object_id == Ray::ImageSet[path_of("aqua.bmp")]
+    img.should_not == Ray::ImageSet[path_of("aqua.bmp")]
   end
 
   after :all do
