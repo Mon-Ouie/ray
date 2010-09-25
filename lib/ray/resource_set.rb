@@ -71,9 +71,8 @@ module Ray
 
       alias :delete_if :reject!
 
-      # Sets the required argument count. If it is set to one, then
-      # ["a", "b"] is valid but not ["a"], since the first argument is always
-      # required.
+      # Sets the required argument count. The number of arguments passed to []
+      # must be equal to this + 1 (the first argument isn't counted and is required)
       #
       # Defaulted to 0.
       def need_argument_count(n)
