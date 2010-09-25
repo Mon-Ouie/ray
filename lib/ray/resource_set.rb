@@ -53,7 +53,7 @@ module Ray
       def select!(&block)
         set_hash.each do |regexp, hash|
           hash.delete_if do |key, val|
-            !block.call(*key, val)
+            !block.call(*(key + [val]))
           end
         end
       end
