@@ -6,6 +6,10 @@ image_set /^test:(red|green|blue)$/ do |col|
 end
 
 describe Ray::ImageSet do
+  before :all do
+    Ray.init
+  end
+
   describe ".[]" do
     it "should return a new image" do
       Ray::ImageSet["test:red"].should be_a(Ray::Image)
@@ -23,5 +27,23 @@ describe Ray::ImageSet do
     Ray::ImageSet.delete_if { |name, img| name == "test:red" }
     obj.object_id.should_not == Ray::ImageSet["test:red"].object_id
     other.object_id.should == Ray::ImageSet["test:blue"].object_id
+  end
+
+  it "should also use Ray::Image's cache" do
+    img = Ray::ImageSet[path_of("aqua.bmp")]
+    img.should == Ray::Image[path_of("aqua.bmp")]
+    img.should == Ray::ImageSet[path_of("aqua.bmp")]
+  end
+
+  it "should also handle Ray::Image's cache" do
+    img = Ray::ImageSet[path_of("aqua.bmp")]
+
+    Ray::ImageSet.delete_if { |name, img| name == path_of("aqua.bmp") }
+    img.should_not == Ray::Image[path_of("aqua.bmp")]
+    img.object_id == Ray::ImageSet[path_of("aqua.bmp")]
+  end
+
+  after :all do
+    Ray.stop
   end
 end

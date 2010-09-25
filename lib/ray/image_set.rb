@@ -1,43 +1,16 @@
 module Ray
   module ImageSet
-    @@sets = {}
+    include Ray::ResourceSet
 
     class << self
-      # @return [Ray::Image] image corresponding to the name.
-      def [](name)
-        @@sets.each do |regex, hash|
-          return hash[name] if name =~ regex
-        end
-
-        Ray::Image[name]
+      def missing_pattern(string)
+        Ray::Image[string]
       end
 
-      def add_set(regex, &block)
-        @@sets[regex] = Hash.new do |hash, key|
-          key =~ regex
-          hash[key] = block.call(*($~.captures))
-        end
-      end
-
-      # @see Ray::Image.select!
       def select!(&block)
-        @@sets.each do |regex, hash|
-          hash.delete_if { |k, v| !(block.call(k, v)) }
-        end
-
+        super(&block)
         Ray::Image.select!(&block)
       end
-
-      # @see Ray::Image.reject!
-      def reject!(&block)
-        @@sets.each do |regex, hash|
-          hash.delete_if { |k, v| (block.call(k, v)) }
-        end
-
-        Ray::Image.reject!(&block)
-      end
-
-      alias :delete_if :reject!
     end
   end
 
