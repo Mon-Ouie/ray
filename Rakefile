@@ -17,7 +17,8 @@ begin
   Jeweler::Tasks.new do |s|
     s.name = "ray"
 
-    s.summary = ""
+    s.summary = "A library to write games (or to play with) in Ruby"
+    s.description = "Written to play with Ruby"
     s.homepage = "http://github.com/Mon-Ouie/ray"
 
     s.email = "mon.ouie@gmail.com"
