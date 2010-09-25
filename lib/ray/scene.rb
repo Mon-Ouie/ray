@@ -3,47 +3,31 @@ module Ray
     include Ray::Helper
 
     class << self
-      # If you want to subclass Scene, this is the method you need to call.
-      # It will return a subclass, responding to bind, which allows you to
-      # register it.
-      #
-      # @example
-      #   Klass = Scene.create(:foo) do ... end
-      #   Klass.bind(game)
-      #   game.push_scene(:foo)
-      def create(scene_name, &block)
-        klass = Class.new(self)
-        klass.instance_variable_set("@block", block)
+      # Registers a scene to a game object, used for subclasses.
+      def bind(game)
+        game.scene(scene_name, self)
+      end
 
-        (class << klass; self; end).class_eval do
-          define_method(:bind) do |game|
-            game.scene(scene_name, self, &@block)
-          end
-
-          define_method(:inspect) { "Scene:#{scene_name}" }
-          define_method(:block) { @block }
-        end
-
-        klass.class_eval do
-          define_method(:initialize) do
-            super(&self.class.block)
-          end
-        end
-
-        return klass
+      # @overload scene_name
+      #   @return [Symbol] the name of the scene
+      # @overload scene_name(value)
+      #   Sets the name of the scene
+      def scene_name(val = nil)
+        @scene_name = val || @scene_name
       end
     end
+
+    scene_name :scene
 
     # Creates a new scene. block will be instance evaluated when
     # this scene becomes the current one.
     def initialize(&block)
-      @exit = false
       @block = block
-
-      @held_keys = []
     end
 
     def register_events
+      @held_keys = []
+
       on :key_press do |key, mod|
         @held_keys << key
       end
@@ -52,8 +36,17 @@ module Ray
         @held_keys.reject! { |i| i == key }
       end
 
-      instance_eval(&@block)
+      if @block
+        instance_eval(&@block)
+      else
+        register
+      end
+
       @exit = false
+    end
+
+    # Override this method in subclasses to register your own events
+    def register
     end
 
     # @param [Symbol, Integer] val A symbol to find the key (its name)
@@ -87,7 +80,12 @@ module Ray
         if @need_render
           @need_render = false
 
-          @render.call(@window)
+          if @render
+            @render.call(@window)
+          else
+            render(@window)
+          end
+
           @window.flip
         end
       end
@@ -120,10 +118,18 @@ module Ray
 
     # Registers the block to draw the scene.
     #
+    # Does nothing if no block is given, this method being called if you
+    # didn't register any render block. You can thus override it in subclasses
+    # instead of providing a block to it.
+    #
     # @yield [window] Block to render this scene.
     # @yieldparam [Ray::Image] window The window you should draw on
-    def render(&block)
-      @render = block
+    def render(win = nil, &block)
+      if block_given?
+        @render = block
+      else
+        # Do nothing
+      end
     end
 
     # Pushes a scene in the stack, and exits that one
