@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Ray::Sprite do
-  before :each do
+  before :all do
     Ray.init
     @win = Ray.create_window(:w => 100, :h => 100)
   end
@@ -120,7 +120,7 @@ describe Ray::Sprite do
     sprite.draw
   end
 
-  after :each do
+  after :all do
     Ray.stop
   end
 end

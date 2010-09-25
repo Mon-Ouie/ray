@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Ray::Image do
-  before :each do
+  before :all do
     Ray.init
     @win = Ray.create_window(:w => 100, :h => 100)
   end
@@ -180,7 +180,7 @@ describe Ray::Image do
     end
   end
 
-  after :each do
+  after :all do
     Ray.stop
   end
 end

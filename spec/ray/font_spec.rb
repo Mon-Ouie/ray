@@ -31,7 +31,7 @@ if Ray.has_font_support?
     end
 
     describe "#draw" do
-      before :each do
+      before :all do
         @win  = Ray.create_window(:w => 100, :h => 100)
         @font = Ray::Font.new(path_of("VeraMono.ttf"), 12)
       end

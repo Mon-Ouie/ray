@@ -84,4 +84,13 @@ describe Ray do
 
     after :all do Ray.stop end
   end
+
+  describe ".init" do
+    it "should allow to pass a hash to add options" do
+      lambda {
+        Ray.init({})
+        Ray.stop
+      }.should_not raise_exception
+    end
+  end
 end
