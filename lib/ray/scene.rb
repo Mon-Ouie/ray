@@ -22,7 +22,7 @@ module Ray
     # Creates a new scene. block will be instance evaluated when
     # this scene becomes the current one.
     def initialize(&block)
-      @block = block
+      @register_block = block
     end
 
     def register_events
@@ -36,8 +36,8 @@ module Ray
         @held_keys.reject! { |i| i == key }
       end
 
-      if @block
-        instance_eval(&@block)
+      if @register_block
+        instance_eval(&@register_block)
       else
         register
       end
@@ -73,15 +73,15 @@ module Ray
           raise_event(*args)
         end
 
-        @always.call if @always
+        @always_block.call if @always_block
 
         listener_runner.run
 
         if @need_render
           @need_render = false
 
-          if @render
-            @render.call(@window)
+          if @render_block
+            @render_block.call(@window)
           else
             render(@window)
           end
@@ -108,7 +108,7 @@ module Ray
 
     # Registers a block to be excuted as often as possible.
     def always(&block)
-      @always = block
+      @always_block = block
     end
 
     # Marks the scene should be redrawn.
@@ -126,7 +126,7 @@ module Ray
     # @yieldparam [Ray::Image] window The window you should draw on
     def render(win = nil, &block)
       if block_given?
-        @render = block
+        @render_block = block
       else
         # Do nothing
       end
