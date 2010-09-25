@@ -16,6 +16,16 @@ module Ray
         listener_runner.add_handler(event, args, block)
       end
 
+      # @overload add_hook(event, ..., callable)
+      #   Same as on, but the last argument is an object which responds to
+      #   to_proc.
+      #
+      #   @example
+      #     add_hook :quit, method(:exit!)
+      def add_hook(event, *args)
+        on(event, *args[0...-1], &args.last)
+      end
+
       def listener_runner
         @__listener_runner
       end
