@@ -46,14 +46,17 @@ module Ray
   end
 
   register_type(:image, Ray::Image)
-  register_type(:rect, Ray::Rect)
+  register_type(:font,  Ray::Font)
+  register_type(:music, Ray::Music)
+  register_type(:sound, Ray::Sound)
+  register_type(:rect,  Ray::Rect)
   register_type(:color, Ray::Color)
 
-  register_type(:string, String)
-  register_type(:array, Array)
-  register_type(:hash, Hash)
+  register_type(:string,  String)
+  register_type(:array,   Array)
+  register_type(:hash,    Hash)
   register_type(:integer, Integer)
-  register_type(:float, Float)
+  register_type(:float,   Float)
   register_type(:numeric, Numeric)
 
   register_type(:anything, Object)
