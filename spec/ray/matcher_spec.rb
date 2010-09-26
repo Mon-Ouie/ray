@@ -1,51 +1,41 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Ray::Matchers do
-  context "when a matcher is described" do
-    it "should add it as a public method" do
-      lambda {
-        Ray.describe_matcher(:awesome_matcher, :string) do |reg|
-          lambda { |str| str =~ reg }
-        end
-      }.should change {
-        Ray::Matchers.instance_methods.any? do |i|
-          i == :awesome_matcher or i == "awesome_matcher"
-        end
-      }.from(false).to(true)
+  it "should add matchers as publci methods" do
+    lambda {
+      Ray.describe_matcher(:awesome_matcher, :string) do |reg|
+        lambda { |str| str =~ reg }
+      end
+    }.should change {
+      Ray::Matchers.instance_methods.any? do |i|
+        i == :awesome_matcher or i == "awesome_matcher"
+      end
+    }.from(false).to(true)
+  end
+
+  it "should create matchers operating on anything if target isn't set" do
+    Ray.describe_matcher(:foo_matcher) do |something|
+      lambda { |x| x == something }
     end
 
-    context "without a defined target" do
-      it "should create one operate on anything" do
-        Ray.describe_matcher(:foo_matcher) do |something|
-          lambda { |x| x == something }
-        end
+    obj = Object.new
+    obj.extend Ray::Matchers
 
-        obj = Object.new
-        obj.extend Ray::Matchers
-
-        obj.instance_eval do
-          matcher = foo_matcher("")
-          matcher.can_match_on?(Object).should == true
-        end
-      end
+    obj.instance_eval do
+      matcher = foo_matcher("")
+      matcher.can_match_on?(Object).should == true
     end
   end
 
-  describe "'s private methods" do
-    before :all do
-      Ray.describe_matcher(:match, :string) do |reg|
-        lambda { |str| str =~ reg }
-      end
+  it "should return a Ray::DSL::Matchers for defined matchers" do
+    Ray.describe_matcher(:match, :string) do |reg|
+      lambda { |str| str =~ reg }
     end
 
-    before :each do
-      @obj = Object.new
-      @obj.extend Ray::Matchers
-    end
+    @obj = Object.new
+    @obj.extend Ray::Matchers
 
-    it "should return a matcher" do
-      @obj.instance_eval { match("foo") }.should be_a(Ray::DSL::Matcher)
-    end
+    @obj.instance_eval { match("foo") }.should be_a(Ray::DSL::Matcher)
   end
 
   describe "#where" do

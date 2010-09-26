@@ -3,50 +3,42 @@ require 'rbconfig'
 
 describe Ray do
   describe ".create_window" do
-    context "when given an unappropriate configuration" do
-      it "should raise runtime error" do
-        Ray.init
+    it "should raise runtime error for invalid configurations" do
+      Ray.init
 
-        lambda {
-          Ray.create_window(:w => 100, :h => 100, :bpp => 1)
-        }.should raise_exception(RuntimeError)
+      lambda {
+        Ray.create_window(:w => 100, :h => 100, :bpp => 1)
+      }.should raise_exception(RuntimeError)
 
-        Ray.stop
-      end
+      Ray.stop
     end
 
-    context "when given a correct configuration" do
-      it "should create a window of the expected size" do
-        Ray.init
+    it "should create a window of the expected size for valid configurations" do
+      Ray.init
 
-        win = Ray.create_window(:w => 100, :h => 50)
-        win.width.should == 100
-        win.height.should == 50
+      win = Ray.create_window(:w => 100, :h => 50)
+      win.width.should == 100
+      win.height.should == 50
 
-        win = Ray.create_window(:width => 50, :height => 100)
-        win.width.should == 50
-        win.height.should == 100
+      win = Ray.create_window(:width => 50, :height => 100)
+      win.width.should == 50
+      win.height.should == 100
 
-        Ray.stop
-      end
+      Ray.stop
     end
   end
 
   describe ".can_use_mode?" do
-    context "when given an unappropriate configuration" do
-      it "should return false" do
-        Ray.init
-        Ray.can_use_mode?(:w => 100, :h => 100, :bpp => 1).should be_false
-        Ray.stop
-      end
+    it "should return false for invalid configurations" do
+      Ray.init
+      Ray.can_use_mode?(:w => 100, :h => 100, :bpp => 1).should be_false
+      Ray.stop
     end
 
-    context "when given a correct configuration" do
-      it "should return true" do
-        Ray.init
-        Ray.can_use_mode?(:w => 480, :h => 272).should be_true
-        Ray.stop
-      end
+    it "should return true for valid configurations" do
+      Ray.init
+      Ray.can_use_mode?(:w => 480, :h => 272).should be_true
+      Ray.stop
     end
   end
 

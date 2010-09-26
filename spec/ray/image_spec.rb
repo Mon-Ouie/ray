@@ -6,53 +6,30 @@ describe Ray::Image do
     @win = Ray.create_window(:w => 100, :h => 100)
   end
 
-  describe "#blit" do
-    context "when trying to blit on a non-surface" do
-      it "should raise a type error" do
-        img = Ray::Image.new(:w => 50, :h => 50)
-        lambda {
-          img.blit(:on => Ray::Color.new(10, 20, 30))
-        }.should raise_exception(TypeError)
-      end
-    end
-
-    context "when trying to use a non-rect as a position" do
-      it "should raise a type error" do
-        img = Ray::Image.new(:w => 50, :h => 50)
-        lambda {
-          img.blit(:from => Ray::Color.new(10, 20, 30), :on => @win)
-        }.should raise_exception(TypeError)
-
-        lambda {
-          img.blit(:on => @win, :at => Ray::Color.new(10, 20, 30))
-        }.should raise_exception(TypeError)
-      end
-    end
+  it "should raise a type error when blitting on something that isn't an image" do
+    img = Ray::Image.new(:w => 50, :h => 50)
+    lambda {
+      img.blit(:on => Ray::Color.new(10, 20, 30))
+    }.should raise_exception(TypeError)
   end
 
   describe "#initialize" do
-    context "when the argument isn't a hash or a string" do
-      it "should raise a type error" do
-        lambda {
-          Ray::Image.new(3)
-        }.should raise_exception(TypeError)
-      end
+    it "should raise a type error if the argument isn't a hash or a string " do
+      lambda {
+        Ray::Image.new(3)
+      }.should raise_exception(TypeError)
     end
 
-    context "when loading an existing file" do
-      it "should not raise an error" do
-        lambda {
-          Ray::Image.new(path_of("aqua.bmp"))
-        }.should_not raise_exception
-      end
+    it "should not raise an error when loading an existing image" do
+      lambda {
+        Ray::Image.new(path_of("aqua.bmp"))
+      }.should_not raise_exception
     end
 
-    context "when loading an unexising file" do
-      it "should raise a runtime error" do
-        lambda {
-          Ray::Image.new("does_not_exist.bmp")
-        }.should raise_exception
-      end
+    it "should raise an error when loading an unexisting file " do
+      lambda {
+        Ray::Image.new("does_not_exist.bmp")
+      }.should raise_exception
     end
 
     it "should be able to load a file from an IO" do
@@ -78,12 +55,10 @@ describe Ray::Image do
         end
       end
 
-      context "if the extension does not match the file type" do
-        it "should still load it correctly" do
-          lambda {
-            Ray::Image.new(path_of("not_a_jpeg.jpeg"))
-          }.should_not raise_exception
-        end
+      it "should load images even if the extension is incorrect" do
+        lambda {
+          Ray::Image.new(path_of("not_a_jpeg.jpeg"))
+        }.should_not raise_exception
       end
     end
   end
@@ -126,7 +101,7 @@ describe Ray::Image do
   end
 
   describe "#[]" do
-    it "should return nil for pixel outsides the image" do
+    it "should return nil for pixels outside the image" do
       Ray::Image.new(:w => 10, :h => 10)[10, 10].should be_nil
     end
 
@@ -145,38 +120,39 @@ describe Ray::Image do
       col.g.should == 15
       col.b.should == 20
     end
+
+    it "should raise an error for pixels outside the image" do
+      img = Ray::Image.new(:w => 10, :h => 10)
+      lambda {
+        img.lock { img[11, 11] = Ray::Color.new(10, 15, 20) }
+      }.should raise_exception
+    end
   end
 
   describe "#clip" do
-    context "without any arguments" do
-      it "should return the clipping rect" do
-        img = Ray::Image.new(:w => 10, :h => 10)
-        img.clip.should == Ray::Rect.new(0, 0, 10, 10)
-      end
+    it "should return the clipping rect if there are no arguments" do
+      img = Ray::Image.new(:w => 10, :h => 10)
+      img.clip.should == Ray::Rect.new(0, 0, 10, 10)
     end
 
-    context "without a rect" do
-      it "should change the clip rect" do
-        img = Ray::Image.new(:w => 10, :h => 10)
-        img.clip([5, 5, 3, 3])
+    it "should change the clip rect when called with a rect" do
+      img = Ray::Image.new(:w => 10, :h => 10)
+      img.clip([5, 5, 3, 3])
+      img.clip.should == Ray::Rect.new(5, 5, 3, 3)
+    end
+
+    it "should return the new rect" do
+      img = Ray::Image.new(:w => 10, :h => 10)
+      img.clip([5, 5, 3, 3]).should == Ray::Rect.new(5, 5, 3, 3)
+    end
+
+    it "should change the clipping rect only within a block" do
+      img = Ray::Image.new(:w => 10, :h => 10)
+      img.clip([5, 5, 3, 3]) do
         img.clip.should == Ray::Rect.new(5, 5, 3, 3)
       end
 
-      it "should return the new rect" do
-        img = Ray::Image.new(:w => 10, :h => 10)
-        img.clip([5, 5, 3, 3]).should == Ray::Rect.new(5, 5, 3, 3)
-      end
-    end
-
-    context "with a block" do
-      it "should change the clipping rect within the block" do
-        img = Ray::Image.new(:w => 10, :h => 10)
-        img.clip([5, 5, 3, 3]) do
-          img.clip.should == Ray::Rect.new(5, 5, 3, 3)
-        end
-
-        img.clip.should == Ray::Rect.new(0, 0, 10, 10)
-      end
+      img.clip.should == Ray::Rect.new(0, 0, 10, 10)
     end
   end
 
