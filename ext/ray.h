@@ -209,6 +209,9 @@ TTF_Font *ray_rb2font(VALUE object);
 #ifdef HAVE_SDL_MIXER
 /** Converts a ruby object into a sound chunk */
 Mix_Chunk *ray_rb2chunk(VALUE object);
+
+/** Converts a ruby object into a music */
+Mix_Music *ray_rb2music(VALUE object);
 #endif
 
 /* Initializers */
