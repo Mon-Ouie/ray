@@ -149,7 +149,7 @@ VALUE ray_font_size_of(int argc, VALUE *argv, VALUE self) {
     
     @option opts [Symbol] :mode Drawing mode. :solid (fastest),
                                 :shaded (requires a background set
-                                with :background)
+                                with :background) or :blended
     @option opts [Symbol] :encoding :latin1, :utf8, or :unicode. Defaults
                                     to :latin1.
     @option opts [Ray::Color] :color Color to draw the text in. Defaults to
