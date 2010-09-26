@@ -6,7 +6,7 @@ module Ray
       # @return [Ray::Joystick] a joystick, opened if necesarry.
       def [](id)
         joy = @@joysticks[id]
-        joy.open if joy.closed
+        joy.open if joy.closed?
         joy
       end
 
