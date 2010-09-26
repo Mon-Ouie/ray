@@ -22,27 +22,27 @@ module Ray
     # Creates a new scene. block will be instance evaluated when
     # this scene becomes the current one.
     def initialize(&block)
-      @register_block = block
+      @scene_register_block = block
     end
 
     def register_events
-      @held_keys = []
+      @scene_held_keys = []
 
       on :key_press do |key, mod|
-        @held_keys << key
+        @scene_held_keys << key
       end
 
       on :key_release do |key, mod|
-        @held_keys.reject! { |i| i == key }
+        @scene_held_keys.reject! { |i| i == key }
       end
 
-      if @register_block
-        instance_eval(&@register_block)
+      if @scene_register_block
+        instance_eval(&@scene_register_block)
       else
         register
       end
 
-      @exit = false
+      @scene_exit = false
     end
 
     # Override this method in subclasses to register your own events
@@ -56,11 +56,11 @@ module Ray
     def holding?(val)
       if val.is_a? Symbol
         val = key(val)
-        @held_keys.any? { |o| val === o }
+        @scene_held_keys.any? { |o| val === o }
       elsif val.is_a? DSL::Matcher
-        @held_keys.any? { |o| val === o }
+        @scene_held_keys.any? { |o| val === o }
       else
-        @held_keys.include? val
+        @scene_held_keys.include? val
       end
     end
 
@@ -68,20 +68,20 @@ module Ray
     # This will also raise events if the mouse moves, ... allowing you
     # to directly listen to a such event.
     def run
-      until @exit
+      until @scene_exit
         DSL::EventTranslator.translate_event(Ray::Event.new).each do |args|
           raise_event(*args)
         end
 
-        @always_block.call if @always_block
+        @scene_always_block.call if @scene_always_block
 
         listener_runner.run
 
-        if @need_render
-          @need_render = false
+        if @scene_need_render
+          @scene_need_render = false
 
-          if @render_block
-            @render_block.call(@window)
+          if @scene_render_block
+            @scene_render_block.call(@window)
           else
             render(@window)
           end
@@ -96,7 +96,7 @@ module Ray
     # You may want to call this if you pushed a new scene, to switch to
     # the new scene.
     def exit
-      @exit = true
+      @scene_exit = true
     end
 
     # Exits the scene and pops it (may not work as expected if the current
@@ -108,12 +108,12 @@ module Ray
 
     # Registers a block to be excuted as often as possible.
     def always(&block)
-      @always_block = block
+      @scene_always_block = block
     end
 
     # Marks the scene should be redrawn.
     def need_render!
-      @need_render = true
+      @scene_need_render = true
     end
 
     # Registers the block to draw the scene.
@@ -126,7 +126,7 @@ module Ray
     # @yieldparam [Ray::Image] window The window you should draw on
     def render(win = nil, &block)
       if block_given?
-        @render_block = block
+        @scene_render_block = block
       else
         # Do nothing
       end
