@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-image_set /^test:(red|green|blue)$/ do |col|
+Ray.image_set(/^test:(red|green|blue)$/) do |col|
   %w(red green blue).include?(col).should == true
   Ray::Image.new(:w => 50, :h => 50).fill(Ray::Color.send(col))
 end

@@ -24,19 +24,10 @@ module Ray
   end
 end
 
-module Kernel
-  # @see Ray.image_set
-  def image_set(regex, &block)
-    Ray.image_set(regex, &block)
-  end
-
-  module_function :image_set
-end
-
 begin
   require 'open-uri'
 
-  image_set(/^(http|ftp):\/\/(\S+)$/) do |protocol, address|
+  Ray.image_set(/^(http|ftp):\/\/(\S+)$/) do |protocol, address|
     open("#{protocol}://#{address}") { |io| Ray::Image.new(io) }
   end
 rescue LoadError
