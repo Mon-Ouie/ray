@@ -101,7 +101,11 @@ module Ray
     def run
       until @scenes.empty?
         create_event_runner
-        @register.call if @register
+        if @register
+          @register.call
+        else
+          register
+        end
 
         @scenes.each do |scene|
           scene.game         = self
@@ -120,8 +124,13 @@ module Ray
     end
 
     # Registers a block to listen to events
+    # Subclasses can also overrid this method to register for events.
     def register(&block)
-      @register = block
+      if block_given?
+        @register = block
+      else
+        # Do nothing
+      end
     end
 
     # Removes the current scene of this game
