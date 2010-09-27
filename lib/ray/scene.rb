@@ -139,7 +139,7 @@ module Ray
     end
 
     def inspect
-      "scene(:#{self.class.scene_name} => #{game.title.inspect})"
+      "scene(:name => #{self.class.scene_name.inspect}, :game => #{game.inspect})"
     end
 
     alias :pop_scene :exit!
