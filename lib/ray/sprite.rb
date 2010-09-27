@@ -8,9 +8,9 @@ module Ray
     # @option opts [Ray::Rect, Array<Integer>] :rect Rect of the image which will
     #                                                be drawn (defaults to the
     #                                                whole image)
-    # @options opts [Float] :angle The angle which will be used to draw the image
+    # @option opts [Float] :angle The angle which will be used to draw the image
     #                              in degrees. Defaults to 0.
-    # @options opts [Float] :zoom The zoom level which will be used to draw the image.
+    # @option opts [Float] :zoom The zoom level which will be used to draw the image.
     #                              Defaults to 1.
     def initialize(image, opts = {})
       opts = {

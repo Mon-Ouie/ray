@@ -144,7 +144,7 @@ VALUE ray_font_size_of(int argc, VALUE *argv, VALUE self) {
 }
 
 /*
-  @oveload draw(string, opts = {})
+  @overload draw(string, opts = {})
     @param [String] string The string which should be drawn.
     
     @option opts [Symbol] :mode Drawing mode. :solid (fastest),
@@ -159,7 +159,7 @@ VALUE ray_font_size_of(int argc, VALUE *argv, VALUE self) {
     @option opts [Ray::Image] :on The image to draw on. In this case,
                                   it will directly draw instead of returning
                                   an image containing nothing but the string.
-    @opions opts [Ray::Rect, Array<Integer>] :to, :at where to draw on the image.
+    @option opts [Ray::Rect, Array<Integer>] :to, :at where to draw on the image.
 
     @return The surface it drew the string on.
  */
