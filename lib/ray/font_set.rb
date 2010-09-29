@@ -1,6 +1,6 @@
 module Ray
   module FontSet
-    include Ray::ResourceSet
+    extend Ray::ResourceSet
     need_argument_count 1
 
     class << self

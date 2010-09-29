@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 module TestSet
-  include Ray::ResourceSet
+  extend Ray::ResourceSet
 
   def self.missing_pattern(string)
     "unknown"
@@ -13,11 +13,11 @@ module TestSet
 end
 
 module DefaultMissingPattern
-  include Ray::ResourceSet
+  extend Ray::ResourceSet
 end
 
 module MultipleArgumentsSet
-  include Ray::ResourceSet
+  extend Ray::ResourceSet
 
   need_argument_count 1
 
@@ -31,7 +31,7 @@ module MultipleArgumentsSet
 end
 
 module CacheTestSet
-  include Ray::ResourceSet
+  extend Ray::ResourceSet
 
   add_set(/(.+)/) { |str| str }
 end

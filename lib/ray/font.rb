@@ -1,6 +1,6 @@
 module Ray
   class Font
-    include Ray::ResourceSet
+    extend Ray::ResourceSet
     need_argument_count 1
     add_set(/^(.*)$/) { |filename, size| new(filename, size) }
 

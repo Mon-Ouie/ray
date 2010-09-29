@@ -1,6 +1,6 @@
 module Ray
   module ImageSet
-    include Ray::ResourceSet
+    extend Ray::ResourceSet
 
     class << self
       def missing_pattern(string)

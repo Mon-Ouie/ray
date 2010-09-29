@@ -11,7 +11,7 @@ module Ray
     alias :draw :blit
     alias :update :flip
 
-    include Ray::ResourceSet
+    extend Ray::ResourceSet
     add_set(/^(.*)$/) { |filename| new(filename) }
 
     # @yield [pixel]
