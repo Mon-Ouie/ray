@@ -1,5 +1,9 @@
 module Ray
   class Font
+    include Ray::ResourceSet
+    need_argument_count 1
+    add_set(/^(.*)$/) { |filename, size| new(filename, size) }
+
     # @return [true, false] True if the font has no style
     def normal?
       style == STYLE_NORMAL

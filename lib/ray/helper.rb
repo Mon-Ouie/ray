@@ -36,5 +36,10 @@ module Ray
     def channel(id)
       Ray::Channel.new(id)
     end
+
+    # @see Ray::FontSet.[]
+    def font(name, size)
+      Ray::FontSet[name, size]
+    end
   end
 end
