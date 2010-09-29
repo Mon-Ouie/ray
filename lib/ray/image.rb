@@ -8,14 +8,11 @@ module Ray
     alias :w :width
     alias :h :height
 
+    alias :draw :blit
+    alias :update :flip
+
     include Ray::ResourceSet
     add_set(/^(.*)$/) { |filename| new(filename) }
-
-    # Instance evaluates a block for convenience, to draw something on
-    # the image.
-    def draw(&block)
-      instance_eval(&block)
-    end
 
     # @yield [pixel]
     # @yieldparam [Ray::Color] pixel Color of a point
