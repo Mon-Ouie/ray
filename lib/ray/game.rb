@@ -8,7 +8,7 @@ module Ray
     #
     # You can poss all the argument you would pass to create_window,
     # except width and height which should be given in :video_mode, like this :
-    #   Ray::Game.new(:video_modes = %w(480x272 640x480))
+    #   Ray::Game.new('hello', :video_modes = %w(480x272 640x480))
     #
     # It will try to get the biggest resolution available (so it will most
     # likely choose 640x480).
@@ -17,15 +17,16 @@ module Ray
     # directly run.
     #
     # This methods creates a new window and inits Ray.
-    def initialize(hash = {}, &block)
+    def initialize(title, hash = {}, &block)
       @game_registred_scenes = {}
       @game_scenes = []
 
       defaults = {
-        :double_buf => true,
-        :bpp        => 32,
-        :hw_surface => true,
-        :sw_surface => false
+        :double_buf  => true,
+        :bpp         => 32,
+        :hw_surface  => true,
+        :sw_surface  => false,
+        :video_modes => %w(480x272 640x480)
       }
 
       options = defaults.merge(hash)
@@ -101,8 +102,8 @@ module Ray
     def run
       until @game_scenes.empty?
         create_event_runner
-        if @game_register
-          @game_register.call
+        if @game_register_block
+          @game_register_block.call
         else
           register
         end
@@ -127,7 +128,7 @@ module Ray
     # Subclasses can also overrid this method to register for events.
     def register(&block)
       if block_given?
-        @game_register = block
+        @game_register_block = block
       else
         # Do nothing
       end
@@ -149,21 +150,17 @@ module Ray
       @game_scenes.clear
     end
 
-    attr_reader :title
+    def title
+      @game_title
+    end
 
     def inspect
       "game(#{title.inspect})"
     end
   end
-end
 
-module Kernel
-  # Creates a new game, with the given title.
-  # @see Ray::Game#initialize
-  def game(title, opts = {}, &block)
-    opts = {:title => title, :video_modes => %w(480x272 640x480)}.merge(opts)
-    Ray::Game.new(opts, &block)
+  # @see Ray::Game.new
+  def self.game(title, opts = {}, &block)
+    Ray::Game.new(title, opts, &block)
   end
-
-  module_function :game
 end

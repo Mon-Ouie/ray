@@ -81,12 +81,12 @@ module Ray
           @scene_need_render = false
 
           if @scene_render_block
-            @scene_render_block.call(@window)
+            @scene_render_block.call(@scene_window)
           else
-            render(@window)
+            render(@scene_window)
           end
 
-          @window.flip
+          @scene_window.flip
         end
       end
     end
@@ -139,12 +139,25 @@ module Ray
     end
 
     def inspect
-      "scene(:name => #{self.class.scene_name.inspect}, :game => #{game.inspect})"
+      "#<#{self.class} game=#{self.game.inspect}>"
     end
 
     alias :pop_scene :exit!
 
-    attr_accessor :game
-    attr_accessor :window
+    def game
+      @scene_game
+    end
+
+    def game=(val)
+      @scene_game = val
+    end
+
+    def window
+      @scene_window
+    end
+
+    def window=(val)
+      @scene_window = val
+    end
   end
 end
