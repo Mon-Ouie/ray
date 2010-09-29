@@ -24,6 +24,10 @@ module MultipleArgumentsSet
   add_set(/^string:(.+)$/) do |str, times|
     str * times
   end
+
+  def self.missing_pattern(*args)
+    args
+  end
 end
 
 module CacheTestSet
@@ -93,5 +97,9 @@ describe Ray::ResourceSet do
 
     first.object_id.should_not == CacheTestSet["first"].object_id
     sec.object_id.should == CacheTestSet["sec"].object_id
+  end
+
+  it "should pass all the arguments to missing_pattern" do
+    MultipleArgumentsSet["a", 3].should == ["a", 3]
   end
 end

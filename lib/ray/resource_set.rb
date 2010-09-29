@@ -42,7 +42,7 @@ module Ray
           return hash[([value] + params)] if regexp =~ value
         end
 
-        missing_pattern(value)
+        missing_pattern(value, *params)
       end
 
       # Selects objects matching a condition.
@@ -86,7 +86,7 @@ module Ray
 
       # Method called when a string isn't matched by any pattern.
       # Raises a NoPatternError excpetion by default.
-      def missing_pattern(string)
+      def missing_pattern(string, *args)
         raise NoPatternError, "#{string.inspect} not macthed by any pattern"
       end
     end
