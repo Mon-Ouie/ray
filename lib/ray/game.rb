@@ -18,8 +18,8 @@ module Ray
     #
     # This methods creates a new window and inits Ray.
     def initialize(hash = {}, &block)
-      @registred_scenes = {}
-      @scenes = []
+      @game_registred_scenes = {}
+      @game_scenes = []
 
       defaults = {
         :double_buf => true,
@@ -53,16 +53,16 @@ module Ray
       last_mode = modes.select { |mode| Ray.can_use_mode? mode }.last
       raise ArgumentError, "No valid mode found" unless last_mode
 
-      if @title = options[:title]
-        Ray.window_title = @title
-        Ray.text_icon    = @title
+      if @game_title = options[:title]
+        Ray.window_title = @game_title
+        Ray.text_icon    = @game_title
       end
 
       if icon = options[:icon]
         Ray.icon = Ray.convert(icon, :image)
       end
 
-      @window = Ray.create_window(last_mode)
+      @game_window = Ray.create_window(last_mode)
 
       if block
         instance_eval(&block)
@@ -77,15 +77,15 @@ module Ray
     #
     # @param [Symbol] scene_name The name of the scene which should be pushed
     def push_scene(scene_name)
-      scene = @registred_scenes[scene_name]
+      scene = @game_registred_scenes[scene_name]
       raise ArgumentError, "Unknown scene #{scene_name}" unless scene
 
-      @scenes << scene
+      @game_scenes << scene
     end
 
     # Pops the last scene.
     def pop_scene
-      @scenes.delete_at(-1)
+      @game_scenes.delete_at(-1)
     end
 
     # Registers a new scene with a given name. the block will be passed
@@ -94,26 +94,26 @@ module Ray
     # @param [Symobl] name the name of the new scene
     # @param [Class] klass the class of the scene.
     def scene(name, klass = Scene, &block)
-      @registred_scenes[name] = klass.new(&block)
+      @game_registred_scenes[name] = klass.new(&block)
     end
 
     # Runs the game until the last scene gets popped, and stop ray.
     def run
-      until @scenes.empty?
+      until @game_scenes.empty?
         create_event_runner
-        if @register
-          @register.call
+        if @game_register
+          @game_register.call
         else
           register
         end
 
-        @scenes.each do |scene|
+        @game_scenes.each do |scene|
           scene.game         = self
-          scene.window       = @window
+          scene.window       = @game_window
           scene.event_runner = event_runner
         end
 
-        scene = @scenes.last
+        scene = @game_scenes.last
 
         scene.register_events
         scene.need_render!
@@ -127,7 +127,7 @@ module Ray
     # Subclasses can also overrid this method to register for events.
     def register(&block)
       if block_given?
-        @register = block
+        @game_register = block
       else
         # Do nothing
       end
@@ -135,18 +135,18 @@ module Ray
 
     # Removes the current scene of this game
     def exit
-      return if @scenes.empty?
+      return if @game_scenes.empty?
 
-      @scenes.last.exit
+      @game_scenes.last.exit
       pop_scene
     end
 
     # Kills the game, removing all the scenes of this game
     def exit!
-      return if @scenes.empty?
+      return if @game_scenes.empty?
 
-      @scenes.last.exit
-      @scenes.clear
+      @game_scenes.last.exit
+      @game_scenes.clear
     end
 
     attr_reader :title
