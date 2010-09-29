@@ -5,9 +5,7 @@ module Ray
   module DSL; end
 end
 
-require 'ray/dsl/type'
 require 'ray/dsl/matcher'
-require 'ray/dsl/converter'
 
 require 'ray/dsl/event'
 require 'ray/dsl/handler'

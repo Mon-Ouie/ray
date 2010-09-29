@@ -22,6 +22,7 @@ describe Ray::Sprite do
 
   it "should blit its image when drawn" do
     image = mock("image")
+    image.stub!(:to_image).and_return(image)
     image.stub!(:is_a?).and_return(true)
     image.should_receive(:blit).and_return(@win)
 
@@ -31,6 +32,7 @@ describe Ray::Sprite do
 
   it "should draw on the screen by default" do
     image = mock("image")
+    image.stub!(:to_image).and_return(image)
     image.stub!(:is_a?).and_return(true)
     image.should_receive(:blit).with(hash_including(:on => @win)).and_return(@win)
 
@@ -55,6 +57,7 @@ describe Ray::Sprite do
 
   it "should draw the image at its position" do
     image = mock("image")
+    image.stub!(:to_image).and_return(image)
     image.stub!(:is_a?).and_return(true)
     image.should_receive(:blit).with(hash_including(:at => [10, 15])).
       and_return(@win)
@@ -65,6 +68,7 @@ describe Ray::Sprite do
 
   it "should allow to draw only a small rect of the image" do
     image = mock("image")
+    image.stub!(:to_image).and_return(image)
     image.stub!(:is_a?).and_return(true)
     rect = Ray::Rect.new(50, 30, 100, 120)
     image.should_receive(:blit).with(hash_including(:rect => rect)).
@@ -99,6 +103,7 @@ describe Ray::Sprite do
 
   it "should draw using its angle" do
     image = mock("image")
+    image.stub!(:to_image).and_return(image)
     image.stub!(:is_a?).and_return(true)
     image.should_receive(:blit).with(hash_including(:angle => 40))
 
@@ -113,6 +118,7 @@ describe Ray::Sprite do
 
   it "should draw using its zoom level" do
     image = mock("image")
+    image.stub!(:to_image).and_return(image)
     image.stub!(:is_a?).and_return(true)
     image.should_receive(:blit).with(hash_including(:zoom => 3))
 

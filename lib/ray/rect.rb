@@ -37,10 +37,28 @@ module Ray
       x == rect.x && y == rect.y && w == rect.w && h == rect.h
     end
 
+    def to_rect
+      self
+    end
+
     alias :w :width
     alias :h :height
 
     alias :w= :width=
     alias :h= :height=
+  end
+end
+
+class Array
+  # Converts an Array to a rect
+  def to_rect
+    Ray::Rect.new(*self)
+  end
+end
+
+class Hash
+  # Converts a Hash to a rect
+  def to_rect
+    Ray::Rect.new(self)
   end
 end

@@ -82,6 +82,17 @@ module Ray
       dup.map_with_pos!(&block)
     end
 
+    def to_image
+      self
+    end
+
     include Enumerable
+  end
+end
+
+class String
+  # Converts the string to an image using Ray::ImageSet.[]
+  def to_image
+    Ray::ImageSet[self]
   end
 end

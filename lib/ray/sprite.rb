@@ -20,15 +20,15 @@ module Ray
         :zoom  => 1
       }.merge(opts)
 
-      @from_rect = Ray.convert(opts[:rect], :rect)
+      @from_rect = opts[:rect].to_rect
 
-      rect = Ray.convert(opts[:at], :rect)
+      rect = opts[:at].to_rect
       @x, @y = rect.x, rect.y
 
       self.angle = opts[:angle]
       self.zoom  = opts[:zoom]
 
-      @image = Ray.convert(image, :image)
+      @image = image.to_image
     end
 
     # Draws the sprite on an image.

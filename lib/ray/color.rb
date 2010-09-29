@@ -22,6 +22,10 @@ module Ray
       r == obj.r && g == obj.g && b == obj.b && a == obj.a
     end
 
+    def to_color
+      self
+    end
+
     alias :red :r
     alias :green :g
     alias :blue :b
@@ -31,5 +35,12 @@ module Ray
     alias :green= :g=
     alias :blue= :b=
     alias :alpha= :a=
+  end
+end
+
+class Array
+  # Converts an Array to a color
+  def to_color
+    Ray::Color.new(*self)
   end
 end

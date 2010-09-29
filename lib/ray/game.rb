@@ -60,7 +60,7 @@ module Ray
       end
 
       if icon = options[:icon]
-        Ray.icon = Ray.convert(icon, :image)
+        Ray.icon = icon.is_a?(Ray::Image) ? icon : icon.to_image
       end
 
       @game_window = Ray.create_window(last_mode)
