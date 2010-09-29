@@ -4,7 +4,7 @@ begin
 
   YARD::Rake::YardocTask.new do |t|
     t.files = ['lib/**/*.rb', 'ext/**/*.c', 'psp/*.c']
-    t.options |= ["--private", "-p", "yard_template", "-e", "./yard_ext.rb"]
+    t.options |= ["--private", "-e", "./yard_ext.rb"]
   end
 rescue LoadError
   $stderr.puts("YARD is not installed. Please install it " +
