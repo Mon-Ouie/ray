@@ -451,7 +451,6 @@ VALUE ray_image_set_at(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_col) {
    ray_color col = ray_rb2col(rb_col);
 
    uint32_t val = SDL_MapRGBA(surface->format, col.r, col.g, col.b, col.a);
-   SDL_GetRGBA(val, surface->format, &(col.r), &(col.g), &(col.b), &(col.a));
 
    switch (bytes) {
       case 1:
