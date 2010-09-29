@@ -1,8 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-describe "the event DSL" do
-  context "when someone listens to an event" do
-    before :each do
+describe Ray::DSL do
+  before :each do
       @runner = Ray::DSL::EventRunner.new
 
       @obj = Object.new
@@ -14,108 +13,68 @@ describe "the event DSL" do
       @obj.raiser_runner = @runner
     end
 
-    context "without any arguments" do
-      it "should always send it" do
-        var = 0
-        @obj.on :foo do
-          var += 1
-        end
-
-        @obj.raise_event(:foo, "blabla")
-        @obj.raise_event(:foo)
-        @obj.raise_event(:foo, :error, 3, "read")
-
-        @runner.run
-        var.should == 3
-      end
+  it "should send events with the same arguments and name as in #on" do
+    count = 0
+    @obj.on :right_event, "danger", "bar" do |*args|
+      args.should == ["danger", "bar"]
+      count += 1
     end
 
-    context "with some arguments" do
-      it "should send the ones with the same arguments" do
-        var = 0
-        @obj.on :foo, "danger", "bar" do
-          var += 1
-        end
-
-        @obj.raise_event(:foo)
-        @obj.raise_event(:foo, "bar")
-        @obj.raise_event(:foo, "danger")
-        @obj.raise_event(:foo, "danger", "bar")
-        @obj.raise_event(:foo, "danger", "bar", "test")
-
-        @runner.run
-        var.should == 2
-      end
-
-      context "if a matcher is one of them" do
-        it "should send the events if it matches the argument" do
-          count = 0
-
-          @obj.instance_eval do
-            on :foo, more_than(10) do |x|
-              x.should > 10
-              count += 1
-            end
-
-            raise_event(:foo, 5)
-            raise_event(:foo, 15)
-          end
-
-          @runner.run
-          count.should == 1
-        end
-      end
-
-      context "if a regex is one of them" do
-        it "should send the event if a string match it" do
-          count = 0
-
-          @obj.instance_eval do
-            on :foo, /hello/ do |str|
-              str.should =~ /hello/
-              count += 1
-            end
-
-            raise_event(:foo, 0)
-            raise_event(:foo, "wat?")
-            raise_event(:foo, "Hey, hello you!")
-            raise_event(:foo, /hey hello you/)
-          end
-
-          @runner.run
-          count.should == 1
-        end
-
-        it "should send then event if the argument is the same regex" do
-          count = 0
-
-          @obj.instance_eval do
-            on :foo, /hello/ do |reg|
-              reg.should == /hello/
-              count += 1
-            end
-
-            raise_event(:foo, 0)
-            raise_event(:foo, 5.5)
-            raise_event(:foo, "Goodbye!")
-            raise_event(:foo, /hello/)
-          end
-
-          @runner.run
-          count.should == 1
-        end
-      end
+    [:right_event, :wrong_event].each do |name|
+      @obj.raise_event(name)
+      @obj.raise_event(name, "bar")
+      @obj.raise_event(name, "danger")
+      @obj.raise_event(name, "danger", "bar")
     end
 
-    context "when the proc takes arguments" do
-      it "should pass the arguments given to the event" do
-        @obj.on :foo do |*args|
-          args.should == ["a", "b", "c"]
-        end
+    @runner.run
+    count.should == 1
+  end
 
-        @obj.raise_event(:foo, "a", "b", "c")
-        @runner.run
-      end
+  it "should use === to see if an event can be raised" do
+    true_matcher = mock('true_matcher')
+    true_matcher.should_receive(:===).and_return(true)
+
+    false_matcher = mock('false_matcher')
+    false_matcher.should_receive(:===).and_return(false)
+
+    worked = nil
+
+    @obj.on :event, true_matcher do
+      worked.should_not == false
+      worked = true
     end
+
+    @obj.on :event, false_matcher do
+      worked = false
+    end
+
+    @obj.raise_event(:event, :argument)
+    @runner.run
+
+    worked.should be_true
+  end
+
+  it "should pass the arguments of the event to the block" do
+    @obj.on :foo do |*args|
+      args.should == ["a", "b", "c"]
+    end
+
+    @obj.raise_event(:foo, "a", "b", "c")
+    @runner.run
+  end
+
+  it "should send events with more arguments than #on if they match" do
+    count = 0
+    @obj.on :foo do
+      count += 1
+    end
+
+    @obj.raise_event(:foo, "blabla")
+    @obj.raise_event(:foo)
+    @obj.raise_event(:foo, :error, 3, "read")
+
+    @runner.run
+    count.should == 3
   end
 end
