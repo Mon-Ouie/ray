@@ -75,104 +75,80 @@ describe Ray::Rect do
   end
 
   describe "#inside?" do
-    context "when given the receiver as an argument" do
-      it "should return true" do
-        rect = Ray::Rect.new(10, 15, 20, 30)
-        rect.should be_inside(rect)
-      end
+    it "should return true if the rect is the receiver itself" do
+      rect = Ray::Rect.new(10, 15, 20, 30)
+      rect.should be_inside(rect)
     end
 
-    context "when given a rect inside the receiver" do
-      it "should return true" do
-        rect = Ray::Rect.new(10, 15, 30, 40)
-        Ray::Rect.new(13, 17, 10, 20).should be_inside(rect)
-      end
+    it "should return true if the rect inside the receiver" do
+      rect = Ray::Rect.new(10, 15, 30, 40)
+      Ray::Rect.new(13, 17, 10, 20).should be_inside(rect)
     end
 
-    context "when given a rect colliding with the receiver" do
-      it "should return false" do
-        rect = Ray::Rect.new(10, 15, 30, 40)
+    it "should return false if the rect only collides with the receiver" do
+      rect = Ray::Rect.new(10, 15, 30, 40)
 
-        Ray::Rect.new(5, 10, 20, 20).should_not be_inside(rect)
-        Ray::Rect.new(11, 16, 40, 50).should_not be_inside(rect)
-      end
+      Ray::Rect.new(5, 10, 20, 20).should_not be_inside(rect)
+      Ray::Rect.new(11, 16, 40, 50).should_not be_inside(rect)
     end
 
-    context "when given a rect outside the receiver" do
-      it "should return false" do
-                rect = Ray::Rect.new(10, 15, 20, 30)
+    it "should return false if the rect is outside the receiver" do
+      rect = Ray::Rect.new(10, 15, 20, 30)
 
-        Ray::Rect.new(1, 2, 3, 5).should_not be_inside(rect)
-        Ray::Rect.new(100, 150, 350, 450).should_not be_inside(rect)
-      end
+      Ray::Rect.new(1, 2, 3, 5).should_not be_inside(rect)
+      Ray::Rect.new(100, 150, 350, 450).should_not be_inside(rect)
     end
   end
 
   describe "#outside?" do
-    context "when given the receiver as an argument" do
-      it "should return false" do
-        rect = Ray::Rect.new(10, 15, 20, 30)
-        rect.should_not be_outside(rect)
-      end
+    it "should return false if the rect is the receiver itself" do
+      rect = Ray::Rect.new(10, 15, 20, 30)
+      rect.should_not be_outside(rect)
     end
 
-    context "when given a rect outside the receiver" do
-      it "should return true" do
-        rect = Ray::Rect.new(10, 15, 20, 30)
+    it "should return true if the rect is outside the receiver" do
+      rect = Ray::Rect.new(10, 15, 20, 30)
 
-        Ray::Rect.new(1, 2, 3, 5).should be_outside(rect)
-        Ray::Rect.new(100, 150, 350, 450).should be_outside(rect)
-      end
+      Ray::Rect.new(1, 2, 3, 5).should be_outside(rect)
+      Ray::Rect.new(100, 150, 350, 450).should be_outside(rect)
     end
 
-    context "when given a rect inside the receiver" do
-      it "should return false" do
-        rect = Ray::Rect.new(10, 15, 30, 40)
-        Ray::Rect.new(13, 17, 10, 20).should_not be_outside(rect)
-      end
+    it "should return false if the rect is inside the receiver" do
+      rect = Ray::Rect.new(10, 15, 30, 40)
+      Ray::Rect.new(13, 17, 10, 20).should_not be_outside(rect)
     end
 
-    context "when given a rect colliding with the receiver" do
-      it "should return false" do
-        rect = Ray::Rect.new(10, 15, 30, 40)
+    it "should return false if the rect collides with the receiver" do
+      rect = Ray::Rect.new(10, 15, 30, 40)
 
-        Ray::Rect.new(5, 10, 20, 20).should_not be_outside(rect)
-        Ray::Rect.new(11, 16, 40, 50).should_not be_outside(rect)
-      end
+      Ray::Rect.new(5, 10, 20, 20).should_not be_outside(rect)
+      Ray::Rect.new(11, 16, 40, 50).should_not be_outside(rect)
     end
   end
 
   describe "#colllide?" do
-    context "when given the receiver as an argument" do
-      it "should return true" do
-        rect = Ray::Rect.new(10, 15, 20, 30)
-        rect.collide?(rect).should be_true
-      end
+    it "should return true if the rect is the receiver itself" do
+      rect = Ray::Rect.new(10, 15, 20, 30)
+      rect.collide?(rect).should be_true
     end
 
-    context "when given a rect outside the receiver" do
-      it "should return false" do
-        rect = Ray::Rect.new(10, 15, 20, 30)
+    it "should return false if the rect is outside the receiver" do
+      rect = Ray::Rect.new(10, 15, 20, 30)
 
-        Ray::Rect.new(1, 2, 3, 5).collide?(rect).should_not be_true
-        Ray::Rect.new(100, 150, 350, 450).collide?(rect).should_not be_true
-      end
+      Ray::Rect.new(1, 2, 3, 5).collide?(rect).should_not be_true
+      Ray::Rect.new(100, 150, 350, 450).collide?(rect).should_not be_true
     end
 
-    context "when given a rect inside the receiver" do
-      it "should return true" do
-        rect = Ray::Rect.new(10, 15, 30, 40)
-        Ray::Rect.new(13, 17, 10, 20).collide?(rect).should be_true
-      end
+    it "should return true if the rect is inside the receiver" do
+      rect = Ray::Rect.new(10, 15, 30, 40)
+      Ray::Rect.new(13, 17, 10, 20).collide?(rect).should be_true
     end
 
-    context "when given a rect colliding with the receiver" do
-      it "should return true" do
-        rect = Ray::Rect.new(10, 15, 30, 40)
+    it "should return true if the rect collides with the receiver" do
+      rect = Ray::Rect.new(10, 15, 30, 40)
 
-        Ray::Rect.new(5, 10, 20, 20).collide?(rect).should be_true
-        Ray::Rect.new(11, 16, 40, 50).collide?(rect).should be_true
-      end
+      Ray::Rect.new(5, 10, 20, 20).collide?(rect).should be_true
+      Ray::Rect.new(11, 16, 40, 50).collide?(rect).should be_true
     end
   end
 end
