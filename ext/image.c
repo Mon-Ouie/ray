@@ -285,7 +285,11 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
          from_rect.h = res->h;
       }
 
-      SDL_BlitSurface(res, &from_rect,  ray_rb2surface(surf), &to_rect);
+      if (SDL_BlitSurface(res, &from_rect,  ray_rb2surface(surf),
+                          &to_rect) == -1) {
+         rb_raise(rb_eRuntimeError, "Couldn't blit the image (%s)",
+                  SDL_GetError());
+      }
 
       SDL_FreeSurface(res);
       
@@ -298,7 +302,11 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
       from_rect.h = origin->h;
    }
 
-   SDL_BlitSurface(origin, &from_rect,  ray_rb2surface(surf), &to_rect);
+   if (SDL_BlitSurface(origin, &from_rect,  ray_rb2surface(surf),
+                       &to_rect) == -1) {
+      rb_raise(rb_eRuntimeError, "Couldn't blit the image (%s)",
+                  SDL_GetError());
+   }
 
    return surf;
 }

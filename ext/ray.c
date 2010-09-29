@@ -25,11 +25,18 @@ VALUE ray_init(int argc, VALUE *argv, VALUE self) {
    ray_osx_init();
 #endif
 
-   SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) == -1) {
+      rb_raise(rb_eRuntimeError, "Couldn't init the SDL (%s)",
+               SDL_GetError());
+   }
 
 #ifdef HAVE_SDL_TTF
-   if (!TTF_WasInit())
-      TTF_Init();
+   if (!TTF_WasInit()) {
+      if (TTF_Init() == -1) {
+         rb_raise(rb_eRuntimeError, "Couldn't init SDL_TTF (%s)",
+                  TTF_GetError());
+      }
+   }
 #endif
 
 #ifdef HAVE_SDL_MIXER
@@ -55,7 +62,10 @@ VALUE ray_init(int argc, VALUE *argv, VALUE self) {
          chunk_size = NUM2INT(rb_chunk_size);
    }
    
-   Mix_OpenAudio(frequency, format, channels, chunk_size);
+   if (Mix_OpenAudio(frequency, format, channels, chunk_size) == -1) {
+      rb_raise(rb_eRuntimeError, "Couldn't open audio (%s)",
+               Mix_GetError());
+   }
 #endif
 
    return Qnil;
