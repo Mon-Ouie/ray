@@ -1,4 +1,38 @@
 module Ray
+  # Scenes contain the main logic of a game.
+  #
+  # You can define a new scene using a block, which will be called every time
+  # your scene is about to be used. However, you may also want to subclass
+  # Ray::Scene. When doing this, you'll probably want to override the register
+  # method:
+  #   def register
+  #     on :some_event do some_stuff end
+  #   end
+  #
+  # You can indicate how your scene should be rendered there:
+  #    render do |win|
+  #      # Do drawing here
+  #    end
+  #
+  # Or you can override render:
+  #   def render(win)
+  #     # Do drawing here
+  #   end
+  #
+  # Notice win is not filled with an empty color when render is called, i.e.
+  # it still contains the frame which appears to the user.
+  #
+  # Also, scenes are rendered lazily: only once when the scene is created,
+  # and then every time need_render! is called.
+  #
+  # == Managing the stack of scenes
+  # exit is called when you want to stop running the scene, but not to remove
+  # the last scene from the stack. It is useful if you want to push a new
+  # scene. Hence Ray::Scene#push_scene will call exit.
+  #
+  # exit! (or pop_scene), on the other hand, is used to go back to the previous
+  # scene in the hierarchy
+  #
   class Scene
     include Ray::Helper
 

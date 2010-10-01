@@ -1,6 +1,67 @@
 module Ray
-  # A game is represented as a stack of scenes, running until there are no more
-  # scenes.
+  # Games are used to manage different scenes. They also init Ray and create a
+  # window.
+  #
+  # == Creating a Game
+  # There are several ways of doing this.
+  # Using a block:
+  #   Ray::Game.new("my game") do
+  #     ...
+  #   end
+  #
+  # Using the instance directly:
+  #   game = Ray::Game.new("my game")
+  #   ...
+  #   game.run
+  #
+  # Subclassing:
+  #   class Game < Ray::Game
+  #     def initialize
+  #       super("my game")
+  #       ...
+  #     end
+  #   end
+  #
+  #   Game.new.run
+  #
+  # == Registring scenes to a Game
+  # Games need the scenes they use to be registred. The most obvious way to
+  # do it is to use scene with a block:
+  #   scene :game do
+  #     # See Ray::Scene
+  #   end
+  #
+  # You may also call it to register a subclass of Ray::Scene
+  #   scene(:game, GameScene)
+  # Which is the same as:
+  #   GameScene.bind(self) # Assuming GameScene's scene_name is set to :game
+  #
+  # == Managing the scene stack
+  # You can push a scene to the game:
+  #   push_scene :game
+  # When #run will be called, it will show the scene :game. Notice that, if you
+  # push more than one scene, only the last one will be seen directly. However,
+  # if you remove it later, the previous scene will be shown.
+  #
+  # You can thus also remove a scene from your stack:
+  #   pop_scene # Removes the last scene
+  #
+  # exit is not exactly the same: it will ask the scene to quit before doing this.
+  # exit! will do something totally different: completely kill the game.
+  #
+  # == Handling events
+  # Games can listen to events just like scenes. Since the event runner will change
+  # often, it needs to register every time it changes it. You can pass a block to
+  # the register method:
+  #   register do
+  #     on :some_event do some_stuff end
+  #   end
+  #
+  # You may also want to override register in suclasses:
+  #   def register
+  #     on :some_event do some_stuff end
+  #   end
+  #
   class Game
     include Ray::Helper
 
