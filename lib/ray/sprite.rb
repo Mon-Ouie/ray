@@ -59,19 +59,23 @@ module Ray
     # @param [Ray::Rect, #rect] An object with which the receiver may collide
     # @return [true, false]
     def collide?(obj)
-      rect.colide?(obj.is_a?(Ray::Rect) || obj.is_a?(Array) ? obj : obj.rect)
+      rect.colide?(obj.to_rect)
     end
 
     # @param [Ray::Rect, #rect] (See #collide?)
     # @return [true, false]
     def inside?(obj)
-      rect.inside?(obj.is_a?(Ray::Rect) || obj.is_a?(Array) ? obj : obj.rect)
+      rect.inside?(obj.to_rect)
     end
 
     # @param [Ray::Rect, #rect] (See #collide?)
     # @return [true, false]
     def outside?(obj)
-      rect.outside?(obj.is_a?(Ray::Rect) || obj.is_a?(Array) ? obj : obj.rect)
+      rect.outside?(obj.to_rect)
+    end
+
+    def to_rect
+      rect
     end
 
     # @return [Ray::Image]
