@@ -177,6 +177,7 @@ module Ray
 
         scene = @game_scenes.last
 
+        scene.setup
         scene.register_events
         scene.need_render!
         scene.run

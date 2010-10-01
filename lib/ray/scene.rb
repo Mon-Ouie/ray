@@ -9,6 +9,13 @@ module Ray
   #     on :some_event do some_stuff end
   #   end
   #
+  # Another method is called before register: setup. Putting code in register or
+  # in setup doesn't matter, but setting the scene up inside register method
+  # seems (and, indeed, is) inappropriate. You can override it:
+  #   def setup
+  #     @sprite = sprite("image.png")
+  #   end
+  #
   # You can indicate how your scene should be rendered there:
   #    render do |win|
   #      # Do drawing here
@@ -24,6 +31,18 @@ module Ray
   #
   # Also, scenes are rendered lazily: only once when the scene is created,
   # and then every time need_render! is called.
+  #
+  # Once your scene is loaded, you'll probably want to clean it up (set some
+  # instance variables to nil so they can be garbaged collected for instance).
+  # You can do that by passing a block to clean_up:
+  #   clean_up do
+  #     @some_big_resource = nil
+  #   end
+  #
+  # Or by overriding it:
+  #   def clean_up
+  #     @some_big_resource = nil
+  #   end
   #
   # == Managing the stack of scenes
   # exit is called when you want to stop running the scene, but not to remove
@@ -79,6 +98,11 @@ module Ray
       @scene_exit = false
     end
 
+    # Override this method in subclasses to setup the initial state
+    # of your scene.
+    def setup
+    end
+
     # Override this method in subclasses to register your own events
     def register
     end
@@ -122,6 +146,12 @@ module Ray
 
           @scene_window.flip
         end
+      end
+
+      if @scene_clean_block
+        @scene_clean_block.call
+      else
+        clean_up
       end
     end
 
@@ -170,6 +200,15 @@ module Ray
     def push_scene(scene)
       game.push_scene(scene)
       exit
+    end
+
+    # Cleans the scene or registers a block to clean it.
+    def clean_up(&block)
+      if block_given?
+        @scene_clean_block = block
+      else
+        # Do nothing
+      end
     end
 
     def inspect
