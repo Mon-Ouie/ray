@@ -82,7 +82,7 @@ module Ray
   #
   # @return [DSL::Matcher] A matching matching any rect inside the argument.
   describe_matcher(:inside) do |*args|
-    rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args.first, :rect)
+    rect = args.size > 1 ? Ray::Rect.new(*args) : args.first.to_rect
     lambda { |o| o.inside? rect }
   end
 
@@ -92,7 +92,7 @@ module Ray
   #
   # @return [DSL::Matcher] A matching matching any rect outside the argument.
   describe_matcher(:outside) do |*args|
-    rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args.first, :rect)
+    rect = args.size > 1 ? Ray::Rect.new(*args) : args.first.to_rect
     lambda { |o| o.outside? rect }
   end
 
@@ -103,7 +103,7 @@ module Ray
   # @return [DSL::Matcher] A matching matching any rect colliding with the
   #                        argument.
   describe_matcher(:colliding_with) do |*args|
-    rect = args.size > 1 ? Ray::Rect.new(*args) : Ray.convert(args.first, :rect)
+    rect = args.size > 1 ? Ray::Rect.new(*args) : args.first.to_rect
     lambda { |o| o.collide? rect }
   end
 
