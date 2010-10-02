@@ -138,11 +138,13 @@ module Ray
     # then call bind to register it.
     #
     # @param [Symbol] scene_name The name of the scene which should be pushed
-    def push_scene(scene_name)
+    # @param *args Arguments passed to the scene
+    def push_scene(scene_name, *args)
       scene = @game_registred_scenes[scene_name]
       raise ArgumentError, "Unknown scene #{scene_name}" unless scene
 
       @game_scenes << scene
+      @game_scene_arguments = args
     end
 
     # Pops the last scene.
@@ -170,14 +172,15 @@ module Ray
         end
 
         @game_scenes.each do |scene|
-          scene.game         = self
-          scene.window       = @game_window
-          scene.event_runner = event_runner
+          scene.game            = self
+          scene.window          = @game_window
+          scene.event_runner    = event_runner
+          scene.scene_arguments = @game_scene_arguments
         end
 
         scene = @game_scenes.last
 
-        scene.setup
+        scene.setup(*@game_scene_arguments)
         scene.register_events
         scene.need_render!
         scene.run

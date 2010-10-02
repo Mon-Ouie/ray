@@ -52,6 +52,19 @@ module Ray
   # exit! (or pop_scene), on the other hand, is used to go back to the previous
   # scene in the hierarchy
   #
+  # == Sending informations to a scene
+  # Scenes may need some arguments to work. You can pass those in push_scene:
+  #   push_scene(:polygon, 6, Ray::Color.red)
+  # Then you can use them with scene_arguments:
+  #   scene :polygon do
+  #     sides, color = scene_arguments
+  #     # ...
+  #   end
+  #
+  # They are also passed to #setup:
+  #   def setup(sides, color)
+  #     # ...
+  #   end
   class Scene
     include Ray::Helper
 
@@ -100,7 +113,7 @@ module Ray
 
     # Override this method in subclasses to setup the initial state
     # of your scene.
-    def setup
+    def setup(*args)
     end
 
     # Override this method in subclasses to register your own events
@@ -197,8 +210,8 @@ module Ray
     end
 
     # Pushes a scene in the stack, and exits that one
-    def push_scene(scene)
-      game.push_scene(scene)
+    def push_scene(scene, *args)
+      game.push_scene(scene, *args)
       exit
     end
 
@@ -232,5 +245,8 @@ module Ray
     def window=(val)
       @scene_window = val
     end
+
+    # The arguments passed to the scene with push_scene
+    attr_accessor :scene_arguments
   end
 end
