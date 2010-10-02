@@ -51,11 +51,6 @@ class String
 
     target = opts[:on]
 
-    target ||= Ray::Image.new(:height => opts[:height] || opts[:h] ||
-                              line_skip * lines.size,
-                              :width  => opts[:width] || opts[:w])
-
-
     string_encoding = opts[:encoding]
     string_encoding ||= if respond_to? :encoding # Ruby 1.9
                           case encoding.to_s
@@ -69,6 +64,13 @@ class String
                         else
                           nil
                         end
+
+    target ||= Ray::Image.new(:height => opts[:height] || opts[:h] ||
+                              line_skip * lines.size,
+                              :width  => opts[:width] || opts[:w] ||
+                              lines.map { |i|
+                                font.size_of(self, string_encoding).width
+                              }.max)
 
     color      = opts[:color]
     background = opts[:background]

@@ -58,15 +58,9 @@ if Ray.has_font_support?
       @font = Ray::Font.new(path_of("VeraMono.ttf"), 12)
     end
 
-    it "should ask for the width unless :on is specified" do
+    it "should be able to guess the size" do
       lambda {
         "Hello world!".draw(:font => @font)
-      }.should raise_exception
-    end
-
-    it "should not ask for the width if :on is specified" do
-      lambda {
-        "Hello world!".draw(:font => @font, :on => @win)
       }.should_not raise_exception
     end
 
