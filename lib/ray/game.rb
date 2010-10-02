@@ -115,7 +115,7 @@ module Ray
       last_mode = modes.select { |mode| Ray.can_use_mode? mode }.last
       raise ArgumentError, "No valid mode found" unless last_mode
 
-      if @game_title = options[:title]
+      if @game_title = title
         Ray.window_title = @game_title
         Ray.text_icon    = @game_title
       end
