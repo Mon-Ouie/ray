@@ -38,7 +38,6 @@ class CustomCParser < YARD::Parser::CParser
       # see if we can find the whole body
 
       re = Regexp.escape(body_text.strip) + '[^(]*\{.*?^\}'
-      puts re
       if /#{re}/m =~ content
         body_text = $&
       end
