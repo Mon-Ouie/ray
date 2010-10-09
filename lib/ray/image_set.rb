@@ -17,7 +17,7 @@ module Ray
   # Creates a new image set.
   #
   # @param [Regexp] regex Regular expression used to match file
-  # @yield [*args] Block returning the image matching the captures
+  # @yield [*args] Block returning the image
   # @yieldparam args Regex captures
   def self.image_set(regex, &block)
     Ray::ImageSet.add_set(regex, &block)

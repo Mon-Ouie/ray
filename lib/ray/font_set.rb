@@ -15,10 +15,10 @@ module Ray
     end
   end
 
-  # Creates a new image set.
+  # Creates a new font set.
   #
   # @param [Regexp] regex Regular expression used to match file
-  # @yield [*args, size] Block returning the image matching the captures
+  # @yield [*args, size] Block returning the font
   #
   # @yieldparam args Regex captures
   # @yieldparam size Size of the font
@@ -31,7 +31,7 @@ begin
   require 'open-uri'
 
   Ray.font_set(/^(http|ftp):\/\/(\S+)$/) do |protocol, address, size|
-    open("#{protocol}://#{address}") { |io, size| Ray::Font.new(io, size) }
+    open("#{protocol}://#{address}") { |io| Ray::Font.new(io, size) }
   end
 rescue LoadError
 end
