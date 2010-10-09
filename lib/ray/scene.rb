@@ -65,6 +65,10 @@ module Ray
   #   def setup(sides, color)
   #     # ...
   #   end
+  #
+  # == Limiting the loop rate
+  # You can prevent a scene from always running by using #loops_per_second=:
+  #   self.loops_per_second = 30 # will sleep some time after each loop
   class Scene
     include Ray::Helper
 
@@ -140,6 +144,8 @@ module Ray
     # to directly listen to a such event.
     def run
       until @scene_exit
+        loop_start = Time.now
+
         DSL::EventTranslator.translate_event(Ray::Event.new).each do |args|
           raise_event(*args)
         end
@@ -158,6 +164,13 @@ module Ray
           end
 
           @scene_window.flip
+        end
+
+        if @scene_loops_per_second
+          ellapsed_time = Time.now - loop_start
+          time_per_loop = 1.0 / @scene_loops_per_second
+
+          sleep(time_per_loop - ellapsed_time) if ellapsed_time < time_per_loop
         end
       end
 
@@ -244,6 +257,14 @@ module Ray
 
     def window=(val)
       @scene_window = val
+    end
+
+    def loops_per_second
+      @scene_loops_per_second
+    end
+
+    def loops_per_second=(val)
+      @scene_loops_per_second = val
     end
 
     # The arguments passed to the scene with push_scene
