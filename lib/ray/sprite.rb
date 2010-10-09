@@ -59,7 +59,7 @@ module Ray
     # @param [Ray::Rect, #rect] An object with which the receiver may collide
     # @return [true, false]
     def collide?(obj)
-      rect.colide?(obj.to_rect)
+      rect.collide?(obj.to_rect)
     end
 
     # @param [Ray::Rect, #rect] (See #collide?)
