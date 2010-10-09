@@ -27,7 +27,7 @@ module Ray
 
     # @return [true, false] True if the receiver contians this point
     def contain?(p_x, p_y)
-      (p_x >= x) && (p_y >= x) &&
+      (p_x >= x) && (p_y >= y) &&
         (p_x < x + w) && (p_y < y + h)
     end
 
