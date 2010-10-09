@@ -87,6 +87,19 @@ module Ray
     # @return [Ray::Rect] the part of the image which will be drawn. An empty
     #                     rect means the whole image.
     attr_accessor :from_rect
+    
+    # @return [Ray::Rect] the position of the sprite
+    def pos
+      [x, y]
+    end
+    
+    # Sets the position of the sprite
+    def pos=(ary)
+      rect = ary.to_rect
+      
+      self.x = rect.x
+      self.y = rect.y
+    end
 
     # @return [Float] The angle used when the image is drawn.
     def angle

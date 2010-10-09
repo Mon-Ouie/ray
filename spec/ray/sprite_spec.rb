@@ -125,6 +125,12 @@ describe Ray::Sprite do
     sprite = Ray::Sprite.new(image, :zoom => 3)
     sprite.draw
   end
+  
+  it "should allow to set its position using an array" do
+    sprite = Ray::Sprite.new(@win)
+    sprite.pos = [10, 15]
+    sprite.pos.to_rect.should == Ray::Rect.new(10, 15)
+  end
 
   after :all do
     Ray.stop
