@@ -124,6 +124,7 @@ module Ray
         Ray.icon = icon.is_a?(Ray::Image) ? icon : icon.to_image
       end
 
+      @game_last_mode = last_mode
       @game_window = Ray.create_window(last_mode)
 
       if block
@@ -213,6 +214,19 @@ module Ray
 
       @game_scenes.last.exit
       @game_scenes.clear
+    end
+    
+    # Resizes the window and raise a window_resize event
+    def resize_window(w, h)
+      @game_window = Ray.create_window(@game_last_mode.merge!(:w => w,
+                                                              :h => h))
+      @game_scenes.each do |scene|
+        scene.window = @game_window
+      end
+      
+      @game_scenes.last.need_render!
+      
+      raise_event(:window_resize, Ray::Rect.new(0, 0, w, h))
     end
 
     def title
