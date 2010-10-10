@@ -132,6 +132,15 @@ VALUE ray_audio_paused(int argc, VALUE *argv, VALUE self) {
    return Mix_PausedMusic() ? Qtrue : Qfalse;
 }
 
+/*
+  Sets the position in the current music. May not be implemented for some
+  formats.  
+*/
+VALUE ray_audio_set_music_pos(VALUE self, VALUE val) {
+	Mix_SetMusicPosition(NUM2DBL(val));
+	return val;
+}
+
 Mix_Chunk *ray_rb2chunk(VALUE object) {
    if (!RAY_IS_A(object, ray_cSound)) {
       rb_raise(rb_eTypeError, "Can't convert %s into Ray::Sound",
@@ -420,6 +429,8 @@ void Init_ray_audio() {
    rb_define_module_function(ray_mAudio, "resume", ray_audio_resume, -1);
    rb_define_module_function(ray_mAudio, "paused?", ray_audio_paused, -1);
    rb_define_module_function(ray_mAudio, "playing?", ray_audio_playing, -1);
+
+	rb_define_module_function(ray_mAudio, "music_pos=", ray_audio_set_music_pos, 1);
 
    ray_cSound = rb_define_class_under(ray_mRay, "Sound", rb_cObject);
    rb_define_alloc_func(ray_cSound, ray_alloc_sound);
