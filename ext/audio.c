@@ -442,8 +442,10 @@ void Init_ray_audio() {
    rb_define_const(ray_cMusic, "TYPE_MID", INT2FIX(MUS_MID));
    rb_define_const(ray_cMusic, "TYPE_OGG", INT2FIX(MUS_OGG));
    rb_define_const(ray_cMusic, "TYPE_MP3", INT2FIX(MUS_MP3));
+#ifndef PSP
    rb_define_const(ray_cMusic, "TYPE_MP3_MAD", INT2FIX(MUS_MP3_MAD));
    rb_define_const(ray_cMusic, "TYPE_FLAC", INT2FIX(MUS_FLAC));
+#endif
 }
 
 #endif
