@@ -125,6 +125,37 @@ describe Ray::Sprite do
     sprite = Ray::Sprite.new(image, :zoom => 3)
     sprite.draw
   end
+  
+  it "should allow to set its position using an array" do
+    sprite = Ray::Sprite.new(@win)
+    sprite.pos = [10, 15]
+    sprite.pos.to_rect.should == Ray::Rect.new(10, 15)
+  end
+  
+  it "should allow to use a sprite sheet" do
+    sprite = Ray::Sprite.new(@win)
+    sprite.sheet_size = [10, 10]
+    
+    sprite.rect.w.should == (@win.w / 10)
+    sprite.rect.h.should == (@win.h / 10)
+  end
+  
+  it "should allow to change the cell which will be drawn" do
+    sprite = Ray::Sprite.new(@win)
+    sprite.sheet_size = [10, 10]
+    sprite.sheet_pos = [3, 6]
+    
+    sprite.from_rect.should == Ray::Rect.new((@win.w / 10) * 3,
+                                             (@win.h / 10) * 6,
+                                             @win.w / 10, @win.h / 10)
+  end
+  
+  it "should allow to disable the use of a sprite sheet" do
+    sprite = Ray::Sprite.new(@win)
+    sprite.sheet_size = [10, 10]
+    sprite.disable_sprite_sheet
+    sprite.from_rect.should == Ray::Rect.new(0, 0, @win.w, @win.h)
+  end
 
   after :all do
     Ray.stop

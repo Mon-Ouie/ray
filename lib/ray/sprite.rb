@@ -30,6 +30,66 @@ module Ray
 
       @image = image.to_image
     end
+    
+    # Sets the size of the sprite sheet. For instance,
+    #   sprite.sheet_size = [3, 4]
+    # would mean there are 4 rows and 3 columns in the sprite (and each cell
+    # has the same size).
+    def sheet_size=(ary)
+      w, h = ary
+      
+      @uses_sprite_sheet = true
+      
+      @sprite_sheet_w = w
+      @sprite_sheet_h = h
+      
+      self.sheet_pos = [0, 0]
+    end
+    
+    # Sets which cell of the sprite sheet should be displayed.
+    #   sprite.sheet_pos = [0, 1] # Uses the first cell of the second line.
+    def sheet_pos=(ary)
+      x, y = ary
+      
+      self.from_rect = Ray::Rect.new(x * sprite_width, y * sprite_height,
+                                     sprite_width, sprite_height)
+      
+      @sheet_pos_x = x
+      @sheet_pos_y = y
+    end
+    
+    # Returns the position of the cell which is being used.
+    def sheet_pos
+      [@sheet_pos_x, @sheet_pos_y]
+    end
+    
+    # @return [Integer, nil] The width of each cell in the sprite sheet
+    def sprite_width
+      if uses_sprite_sheet?
+        @image.w / @sprite_sheet_w
+      end
+    end
+    
+    # @return [Integer, nil] The height of each cell in the sprite sheet
+    def sprite_height
+      if uses_sprite_sheet?
+        @image.h / @sprite_sheet_h
+      end
+    end
+    
+    # Disables the sprite sheet
+    def disable_sprite_sheet
+      self.from_rect = Ray::Rect.new(0, 0, @image.w, @image.h)
+      
+      @sprite_sheet_w = nil
+      @sprite_sheet_h = nil
+      
+      @uses_sprite_sheet = false
+    end
+    
+    def uses_sprite_sheet?
+      @uses_sprite_sheet
+    end
 
     # Draws the sprite on an image.
     # @param [Ray::Image] screen The image on which the sprite will be drawn
@@ -59,7 +119,7 @@ module Ray
     # @param [Ray::Rect, #rect] An object with which the receiver may collide
     # @return [true, false]
     def collide?(obj)
-      rect.colide?(obj.to_rect)
+      rect.collide?(obj.to_rect)
     end
 
     # @param [Ray::Rect, #rect] (See #collide?)
@@ -87,6 +147,19 @@ module Ray
     # @return [Ray::Rect] the part of the image which will be drawn. An empty
     #                     rect means the whole image.
     attr_accessor :from_rect
+    
+    # @return [Ray::Rect] the position of the sprite
+    def pos
+      [x, y]
+    end
+    
+    # Sets the position of the sprite
+    def pos=(ary)
+      rect = ary.to_rect
+      
+      self.x = rect.x
+      self.y = rect.y
+    end
 
     # @return [Float] The angle used when the image is drawn.
     def angle

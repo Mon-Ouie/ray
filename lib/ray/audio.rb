@@ -39,4 +39,14 @@ module Ray
       Ray::Audio.playing?(@id)
     end
   end
+
+  class Sound
+    extend Ray::ResourceSet
+    add_set(/^(.*)$/) { |filename| new(filename) }
+  end
+
+  class Music
+    extend Ray::ResourceSet
+    add_set(/^(.*)$/) { |filename| new(filename) }
+  end
 end
