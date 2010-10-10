@@ -157,12 +157,7 @@ module Ray
         if @scene_need_render
           @scene_need_render = false
 
-          if @scene_render_block
-            @scene_render_block.call(@scene_window)
-          else
-            render(@scene_window)
-          end
-
+          render(@scene_window)
           @scene_window.flip
         end
 
@@ -174,11 +169,7 @@ module Ray
         end
       end
 
-      if @scene_clean_block
-        @scene_clean_block.call
-      else
-        clean_up
-      end
+      clean_up
     end
 
     # Exits the scene, but does not pop the scene.
@@ -218,7 +209,7 @@ module Ray
       if block_given?
         @scene_render_block = block
       else
-        # Do nothing
+        @scene_render_block.call(win) if @scene_render_block
       end
     end
 
@@ -238,7 +229,7 @@ module Ray
       if block_given?
         @scene_clean_block = block
       else
-        # Do nothing
+        @scene_clean_block.call if @scene_clean_block
       end
     end
 

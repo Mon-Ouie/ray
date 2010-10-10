@@ -166,11 +166,7 @@ module Ray
     def run
       until @game_scenes.empty?
         create_event_runner
-        if @game_register_block
-          @game_register_block.call
-        else
-          register
-        end
+        register
 
         @game_scenes.each do |scene|
           scene.game            = self
@@ -196,7 +192,7 @@ module Ray
       if block_given?
         @game_register_block = block
       else
-        # Do nothing
+        @game_register_block.call if @game_register_block
       end
     end
 
