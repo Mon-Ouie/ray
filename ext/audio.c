@@ -8,32 +8,36 @@ VALUE ray_cMusic = Qnil;
 
 /* @return [Integer] The audio frequency */
 VALUE ray_audio_frequency() {
-   int freq = 0, format = 0, channels = 0;
-   Mix_QuerySpec(&freq, (uint16_t*)&format, &channels);
+   int freq = 0, channels = 0;
+   uint16_t format = 0;
+   Mix_QuerySpec(&freq, &format, &channels);
 
    return INT2FIX(freq);
 }
 
 /* @return [Integer] The audio format */
 VALUE ray_audio_format() {
-   int freq = 0, format = 0, channels = 0;
-   Mix_QuerySpec(&freq, (uint16_t*)&format, &channels);
+   int freq = 0, channels = 0;
+   uint16_t format = 0;
+   Mix_QuerySpec(&freq, &format, &channels);
 
    return INT2FIX(format);
 }
 
 /* @return [true, false] true if mono is used */
 VALUE ray_audio_mono() {
-   int freq = 0, format = 0, channels = 0;
-   Mix_QuerySpec(&freq, (uint16_t*)&format, &channels);
+   int freq = 0, channels = 0;
+   uint16_t format = 0;
+   Mix_QuerySpec(&freq, &format, &channels);
 
    return channels == 1 ? Qtrue : Qfalse;
 }
 
 /* @return [true, false] true if stereo is used */
 VALUE ray_audio_stereo() {
-   int freq = 0, format = 0, channels = 0;
-   Mix_QuerySpec(&freq, (uint16_t*)&format, &channels);
+   int freq = 0, channels = 0;
+   uint16_t format = 0;
+   Mix_QuerySpec(&freq, &format, &channels);
 
    return channels == 1 ? Qfalse : Qtrue;
 }
