@@ -1,6 +1,8 @@
 require 'enumerator'
 
-require 'ray_ext'
+# 'ray_ext' doesn't exist on the PSP.
+# We assume that Ray isn't defined in other cases.
+require 'ray_ext' unless defined? Ray
 
 require 'ray/resource_set'
 
