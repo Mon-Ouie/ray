@@ -29,7 +29,12 @@ begin
 
     s.has_rdoc = "yard"
 
-    s.extensions << "ext/extconf.rb"
+    s.extensions = ["ext/extconf.rb"]
+    
+    s.add_development_dependency "jeweler"
+    s.add_development_dependency "yard"
+    s.add_development_dependency "rspec"
+    s.add_development_dependency "psp_task"
   end
 rescue LoadError
   $stderr.puts("Jeweler is not installed. Please install it " +
@@ -37,11 +42,20 @@ rescue LoadError
 end
 
 begin
-  require 'spec/rake/spectask'
-
-  Spec::Rake::SpecTask.new('spec') do |t|
-    t.spec_files = FileList['spec/**/*_spec\.rb']
-    t.fail_on_error = false
+  begin
+    require 'spec/rake/spectask'
+    
+    Spec::Rake::SpecTask.new(:spec) do |t|
+      t.spec_files = FileList['spec/**/*_spec\.rb']
+      t.fail_on_error = false
+    end
+  rescue LoadError
+    require 'rspec/core/rake_task'
+  
+    RSpec::Core::RakeTask.new(:spec) do |t|
+      t.spec_files = FileList['spec/**/*_spec\.rb']
+      t.fail_on_error = false
+    end
   end
 rescue LoadError
   $stderr.puts("RSpec is not installed. Please install it " +
