@@ -36,6 +36,16 @@ module Ray
     def channel(id)
       Ray::Channel.new(id)
     end
+    
+    # @see Ray::MusicSet.[]
+    def sound(file)
+      Ray::SoundSet[file]
+    end
+    
+    # @see Ray::MusicSet.[]
+    def music(file)
+      Ray::MusicSet[file]
+    end
 
     # @see Ray::FontSet.[]
     def font(name, size)
