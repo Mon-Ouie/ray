@@ -1,7 +1,7 @@
 module Ray
   module DSL
     # The module that allows you to do something when something else happened.
-    module Listener
+    module EventListener
       # Registers a block to listen to an event.
       #
       # Arguments are compared with the ones of the regex using === and,

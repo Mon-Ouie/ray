@@ -2,7 +2,7 @@ module Ray
   # Module including many helpful modules and methods.
   module Helper
     include Ray::DSL::EventRaiser
-    include Ray::DSL::Listener
+    include Ray::DSL::EventListener
 
     include Ray::Matchers
 

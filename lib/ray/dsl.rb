@@ -11,7 +11,7 @@ require 'ray/dsl/event'
 require 'ray/dsl/handler'
 require 'ray/dsl/event_runner'
 
-require 'ray/dsl/listener'
+require 'ray/dsl/event_listener'
 require 'ray/dsl/event_raiser'
 
 require 'ray/dsl/event_translator'

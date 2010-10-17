@@ -5,7 +5,7 @@ describe Ray::DSL do
       @runner = Ray::DSL::EventRunner.new
 
       @obj = Object.new
-      @obj.extend Ray::DSL::Listener
+      @obj.extend Ray::DSL::EventListener
       @obj.extend Ray::DSL::EventRaiser
       @obj.extend Ray::Matchers
 

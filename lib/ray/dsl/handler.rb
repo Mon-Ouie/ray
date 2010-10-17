@@ -1,6 +1,6 @@
 module Ray
   module DSL
-    # Used internally to call blocks registred with Ray::DSL::Listener#on.
+    # Used internally to call blocks registred with Ray::DSL::EventListener#on.
     class Handler
       def initialize(type, args, block)
         @type, @args, @block = type, args, block
