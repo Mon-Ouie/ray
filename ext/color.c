@@ -55,7 +55,7 @@ VALUE ray_init_color(int argc, VALUE *argv, VALUE self) {
    return Qnil;
 }
 
-/* @return [Integer] red level */
+/* @return [Integer] red intensity */
 VALUE ray_color_r(VALUE self) {
    ray_color *ret;
    Data_Get_Struct(self, ray_color, ret);
@@ -63,7 +63,7 @@ VALUE ray_color_r(VALUE self) {
    return INT2FIX(ret->r);
 }
 
-/* @return [Integer] green level */
+/* @return [Integer] green intensity */
 VALUE ray_color_g(VALUE self) {
    ray_color *ret;
    Data_Get_Struct(self, ray_color, ret);
@@ -71,7 +71,7 @@ VALUE ray_color_g(VALUE self) {
    return INT2FIX(ret->g);
 }
 
-/* @return [Integer] blue level */
+/* @return [Integer] blue intensity */
 VALUE ray_color_b(VALUE self) {
    ray_color *ret;
    Data_Get_Struct(self, ray_color, ret);
@@ -79,7 +79,7 @@ VALUE ray_color_b(VALUE self) {
    return INT2FIX(ret->b);
 }
 
-/* @return [Integer] alpha level */
+/* @return [Integer] alpha intensity */
 VALUE ray_color_a(VALUE self) {
    ray_color *ret;
    Data_Get_Struct(self, ray_color, ret);

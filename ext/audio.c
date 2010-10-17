@@ -42,7 +42,10 @@ VALUE ray_audio_stereo() {
    return channels == 1 ? Qfalse : Qtrue;
 }
 
-/* @return [Float] The volume for the song which is currently being played */ 
+/*
+  @return [Float] The volume for the song which is currently being played.
+                   0 is the minimum volume, whereas 100 is the maximum.
+ */ 
 VALUE ray_audio_volume(VALUE self) {
    int volume = Mix_VolumeMusic(-1);
    return rb_float_new((volume / 128.0f) * 100.0f);
@@ -124,9 +127,10 @@ VALUE ray_audio_resume(int argc, VALUE *argv, VALUE self) {
 }
 
 /*
-  @return [true, false] True if the channel is paused. If channel isn't set,
-    returns true if the current music isn't paused.
- */
+  @overload paused?(channel = nil)
+    @return [true, false] True if the channel is paused. If channel isn't set,
+      returns true if the current music isn't paused.
+*/
 VALUE ray_audio_paused(int argc, VALUE *argv, VALUE self) {
    VALUE channel;
    rb_scan_args(argc, argv, "01", &channel);
@@ -137,8 +141,9 @@ VALUE ray_audio_paused(int argc, VALUE *argv, VALUE self) {
 }
 
 /*
-  Sets the position in the current music. May not be implemented for some
-  formats.  
+  @overload music_pos=(val)
+    Sets the position in the current music. May not be implemented for some
+    formats.  
 */
 VALUE ray_audio_set_music_pos(VALUE self, VALUE val) {
 	Mix_SetMusicPosition(NUM2DBL(val));
@@ -222,7 +227,7 @@ VALUE ray_init_sound(VALUE self, VALUE arg) {
 /*
   @overload play(channel = 0, times = 1)
     Plays a sound on the given channel a given number of times.
-    @param [Integer, :forever] tiems How many times the song should be played.
+    @param [Integer, :forever] times How many times the sound should be played.
       Can also be :forever or 0 to play it forever.
  */
 VALUE ray_sound_play(int argc, VALUE *argv, VALUE self) {
@@ -373,7 +378,9 @@ VALUE ray_music_type(VALUE self) {
 
 /*
   @overload play(times = 1)
-    
+    Plays the music a given number of times.
+    @param [Integer, :forever] times How many times the music should be played.
+       Can also be :forever or 0 to play it forever.
  */
 VALUE ray_music_play(int argc, VALUE *argv, VALUE self) {
    VALUE times;

@@ -143,35 +143,36 @@ ray_video_mode ray_parse_video_mode(VALUE hash) {
 }
 
 /*
-  Creates a new window.
+  @overload create_window(hash)
+    Creates a new window.
 
-  @note If both hw_surface and sws_urface are false, hw_surface
-        will be considered as true. :sw_surface should be true
-        if you want to acess
+    If both hw_surface and sws_urface are false, hw_surface
+    will be considered as true. :sw_surface should be true
+    if you want to acess
 
-  @return [Ray::Image] An image representing the window
+    @return [Ray::Image] An image representing the window
 
-  @option hash [Integer] :width Width of the window
-  @option hash [Integer] :height Height of the window
+    @option hash [Integer] :width Width of the window
+    @option hash [Integer] :height Height of the window
 
-  @option hash [Integer] :w Alias for width
-  @option hash [Integer] :h Alias for height
+    @option hash [Integer] :w Alias for width
+    @option hash [Integer] :h Alias for height
 
-  @option hash [Integer] :bits_per_pixel Bits per pixel. Valid values are
-                                         8, 15, 16, 24, and 32.
-  @option hash [Integer] :bpp Alias for bits_per_pixel
+    @option hash [Integer] :bits_per_pixel Bits per pixel. Valid values are
+                                           8, 15, 16, 24, and 32.
+    @option hash [Integer] :bpp Alias for bits_per_pixel
 
-  @option hash [true, false] :hw_surface Creates the surface in video memory
+    @option hash [true, false] :hw_surface Creates the surface in video memory
                                         (default)
-  @option hash [true, false] :sw_surface Creates the surface in system memory
-  @option hash [true, false] :async_blit Enables asynchronous updates of the
-                                         the surface
-  @option hash [true, false] :double_buf Enables double buffering. Ignored
-                                         if sw_surface is set.
-  @option hash [true, false] :fullscreen Creates a full screen window.
-  @option hash [true, false] :resizable  Creates a resizable window.
-  @option hash [true, false] :no_frame   Disables window decoration if
-                                         possible.
+    @option hash [true, false] :sw_surface Creates the surface in system memory
+    @option hash [true, false] :async_blit Enables asynchronous updates of the
+                                           the surface
+    @option hash [true, false] :double_buf Enables double buffering. Ignored
+                                           if sw_surface is set.
+    @option hash [true, false] :fullscreen Creates a full screen window.
+    @option hash [true, false] :resizable  Creates a resizable window.
+    @option hash [true, false] :no_frame   Disables window decoration if
+                                           possible.
  */
 VALUE ray_create_window(VALUE self, VALUE hash) {
    ray_video_mode mode = ray_parse_video_mode(hash);
@@ -187,8 +188,10 @@ VALUE ray_create_window(VALUE self, VALUE hash) {
 }
 
 /*
-  @return [true, false] True if the video mode described by hash
-                        can be used.
+  @overload can_use_mode?(hash)
+    @param [Hash] hash Same options as in create_window
+    @return [true, false] True if the video mode described by hash
+                          can be used.
 */
 VALUE ray_can_use_mode(VALUE self, VALUE hash) {
    ray_video_mode mode = ray_parse_video_mode(hash);
@@ -198,8 +201,9 @@ VALUE ray_can_use_mode(VALUE self, VALUE hash) {
 }
 
 /*
-  Sets the window icon
-  @param [Ray::Image] icon The icon to display
+  @overload icon=(icon)
+    Sets the window icon
+    @param [Ray::Image] icon The icon to display
 */
 VALUE ray_set_icon(VALUE self, VALUE icon) {
    SDL_WM_SetIcon(ray_rb2surface(icon), NULL);
@@ -216,7 +220,10 @@ VALUE ray_window_title(VALUE self) {
    return rb_str_new2(title);
 }
 
-/* Sets the window title */
+/*
+  @overload window_title=(title)
+    Sets the window title
+*/
 VALUE ray_set_window_title(VALUE self, VALUE title) {
    char *icon = NULL;
 
@@ -238,7 +245,10 @@ VALUE ray_text_icon(VALUE self) {
    return rb_str_new2(icon);   
 }
 
-/* Sets the window title */
+/*
+  @overload text_icon=(val)
+    Sets the window text icon
+*/
 VALUE ray_set_text_icon(VALUE self, VALUE icon) {
    char *title;
    
@@ -260,7 +270,10 @@ VALUE ray_grab_input(VALUE self) {
    return (mode == SDL_GRAB_ON) ? Qtrue : Qfalse;
 }
 
-/* Sets the grab input to true or false */
+/*
+  @overload grab_input=(grab)
+    Sets the grab input to true or false
+*/
 VALUE ray_set_grab_input(VALUE self, VALUE grab) {
    SDL_WM_GrabInput(RTEST(grab) ? SDL_GRAB_ON : SDL_GRAB_OFF);
    return grab;

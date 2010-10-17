@@ -67,14 +67,14 @@ module Ray
 
     # Creates a new game.
     #
-    # You can poss all the argument you would pass to create_window,
-    # except width and height which should be given in :video_mode, like this :
-    #   Ray::Game.new('hello', :video_modes = %w(480x272 640x480))
+    # You can pass all the arguments you would pass to create_window,
+    # except width and height which should be given in :video_mode:
+    #   Ray::Game.new('hello', :video_modes => %w(480x272 640x480))
     #
     # It will try to get the biggest resolution available (so it will most
-    # likely choose 640x480).
+    # likely choose 640x480 in this case).
     #
-    # If a block is passes, it is instance evaluated, and then the game is
+    # If a block is passed, it is instance evaluated, then the game is
     # directly run.
     #
     # This methods creates a new window and inits Ray.
@@ -133,10 +133,12 @@ module Ray
       end
     end
 
-    # Adds a scene to the stack by its name.
+    # Adds a scene to the stack using its name.
     #
     # You must call Game#scene before this. If you subclassed scene,
-    # then call bind to register it.
+    # then call bind to register it:
+    #   scene :something, SomeClass
+    #   SomeClass.bind(self)
     #
     # @param [Symbol] scene_name The name of the scene which should be pushed
     # @param *args Arguments passed to the scene
@@ -162,7 +164,8 @@ module Ray
       @game_registred_scenes[name] = klass.new(&block)
     end
 
-    # Runs the game until the last scene gets popped, and stop ray.
+    # Runs the game until the last scene gets popped.
+    # Will call Ray.stop.
     def run
       until @game_scenes.empty?
         create_event_runner
@@ -204,7 +207,7 @@ module Ray
       pop_scene
     end
 
-    # Kills the game, removing all the scenes of this game
+    # Kills the game, removing all the scenes it contains.
     def exit!
       return if @game_scenes.empty?
 
@@ -212,7 +215,7 @@ module Ray
       @game_scenes.clear
     end
     
-    # Resizes the window and raise a window_resize event
+    # Resizes the window and raises a window_resize event
     def resize_window(w, h)
       @game_window = Ray.create_window(@game_last_mode.merge!(:w => w,
                                                               :h => h))
@@ -234,7 +237,7 @@ module Ray
     end
   end
 
-  # @see Ray::Game.new
+  # @see Ray::Game#initialize
   def self.game(title, opts = {}, &block)
     Ray::Game.new(title, opts, &block)
   end

@@ -26,7 +26,7 @@ VALUE ray_alloc_event(VALUE self) {
 }
 
 /*
-  Creates the event according to what's happening now.
+  Creates the event according to the next event of the stack.
 */
 VALUE ray_init_event(VALUE self) {
    SDL_Event *event = ray_rb2event(self);
@@ -105,10 +105,11 @@ VALUE ray_event_mod_keys(VALUE self) {
 }
 
 /*
-  @return [Integer, nil] A mask of the focus states, for active event. 
+  @return [Integer, nil] A mask of the focus states, for active events
+                         (when type is TYPE_ACTIVEEVENT) 
 */
 VALUE ray_event_focus_state(VALUE self) {
-      SDL_Event *ev = ray_rb2event(self);
+   SDL_Event *ev = ray_rb2event(self);
    if (ev->type != SDL_ACTIVEEVENT)
       return Qnil;
    return INT2FIX(ev->active.state);

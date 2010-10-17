@@ -153,7 +153,10 @@ VALUE ray_rect_h(VALUE self) {
    return INT2FIX(rect->h);
 }
 
-/* Sets the position of the rect */
+/*
+  @overload x=(val)
+    Sets the position of the rect
+*/
 VALUE ray_rect_set_x(VALUE self, VALUE val) {
    ray_rect *rect;
    Data_Get_Struct(self, ray_rect, rect);
@@ -163,7 +166,10 @@ VALUE ray_rect_set_x(VALUE self, VALUE val) {
    return val;
 }
 
-/* Sets the position of the rect */
+/*
+  @overload y=(val)
+    Sets the position of the rect
+*/
 VALUE ray_rect_set_y(VALUE self, VALUE val) {
    ray_rect *rect;
    Data_Get_Struct(self, ray_rect, rect);
@@ -173,7 +179,10 @@ VALUE ray_rect_set_y(VALUE self, VALUE val) {
    return val;
 }
 
-/* Sets the size of the rect */
+/*
+  @overload w=(val)
+    Sets the size of the rect
+*/
 VALUE ray_rect_set_w(VALUE self, VALUE val) {
    ray_rect *rect;
    Data_Get_Struct(self, ray_rect, rect);
@@ -183,7 +192,10 @@ VALUE ray_rect_set_w(VALUE self, VALUE val) {
    return val;
 }
 
-/* Sets the size of the rect */
+/*
+  @overload h=(val)
+    Sets the size of the rect
+*/
 VALUE ray_rect_set_h(VALUE self, VALUE val) {
    ray_rect *rect;
    Data_Get_Struct(self, ray_rect, rect);

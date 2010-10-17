@@ -208,6 +208,8 @@ VALUE Wlan_ip(VALUE self) {
   Inits a builtin module. You should never call it by yourself.
   This avoids to load unneeded module from the stdlib (Ray's are all loaded
   anyway). For instance, the zlib library needs to be enabled by this function.
+  
+  @note This method is only available on the PSP.
 */
 VALUE ray_init_internal(VALUE self, VALUE module_name) {
    VALUE rb_str = rb_obj_as_string(module_name);
@@ -265,6 +267,8 @@ VALUE ray_init_internal(VALUE self, VALUE module_name) {
 
   Once you're connected, everything is transparent: you can use sockets as
   usual.
+  
+  @note This module is only available on the PSP.
 */
 void Init_ray_psp() {
    rb_define_module_function(ray_mRay, "init_internal", ray_init_internal, 1);

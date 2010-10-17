@@ -110,7 +110,7 @@ void ray_init_image_with_io(VALUE self, VALUE io) {
     @option hash [Integer] :h Alias for height
 
     @option hash [Integer] :bits_per_pixel See Ray.create_window
-    @option hash [Integer] :pp Alias for bits_per_pixel
+    @option hash [Integer] :bpp Alias for bits_per_pixel
 
     @option hash [true, false] :hw_surface See Ray.create_window
     @option hash [true, false] :sw_surface See Ray.create_window
@@ -209,26 +209,27 @@ VALUE ray_image_flip(VALUE self) {
 }
 
 /*
-  Blits the receiver on another image.
+  @overload blit(hash)
+    Blits the receiver on another image.
   
-  @option hash [Ray::Rect, Array] :at Rects in which the image will be
-                                      drawn. If an array is given, it
-                                      passed to Ray::Rect.new. Only the
-                                      position is read.
-  @option hash [Ray::Rect, Array] :rect Rects that will be copied.
-                                        If an array is given, it
-                                        passed to Ray::Rect.new.
-                                        If the size is (0, 0), it will
-                                        be reset to the image's size.
-  @option hash [Ray::Rect, Array] :from Alias for rect
+    @option hash [Ray::Rect, Array] :at Rects in which the image will be
+                                        drawn. If an array is given, it
+                                        passed to Ray::Rect.new. Only the
+                                        position is read.
+    @option hash [Ray::Rect, Array] :rect Rects that will be copied.
+                                          If an array is given, it
+                                          passed to Ray::Rect.new.
+                                          If the size is (0, 0), it will
+                                          be reset to the image's size.
+    @option hash [Ray::Rect, Array] :from Alias for rect
 
-  @option hash [Ray::Image, required] :on The image on which the receiver should
-                                          be drawn.
+    @option hash [Ray::Image, required] :on The image on which the receiver should
+                                            be drawn.
 
-  @option hash [Ray::Image, required] :to Alias for on.
+    @option hash [Ray::Image, required] :to Alias for on.
 
-  @option hash [Float] :angle Rotation in degrees.
-  @option hash [Float] :zoom 1.0 for the current size
+    @option hash [Float] :angle Rotation in degrees.
+    @option hash [Float] :zoom Zoom level. 1.0 for the current size.
 */
 VALUE ray_image_blit(VALUE self, VALUE hash) {
    SDL_Surface *origin = ray_rb2surface(self);
@@ -263,6 +264,9 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
    VALUE surf = rb_hash_aref(hash, RAY_SYM("on"));
    if (surf == Qnil) surf = rb_hash_aref(hash, RAY_SYM("to"));
 
+   /* avoid raising an exception, which would prevent us from  freeing  the surface */
+   SDL_Surface *target = ray_rb2surface(surf);
+
 #ifdef HAVE_SDL_GFX
    VALUE rb_angle = Qnil, rb_zoom = Qnil;
    double angle = 0.0, zoom = 1.0; 
@@ -285,8 +289,8 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
          from_rect.h = res->h;
       }
 
-      if (SDL_BlitSurface(res, &from_rect,  ray_rb2surface(surf),
-                          &to_rect) == -1) {
+      if (SDL_BlitSurface(res, &from_rect,  target, &to_rect) == -1) {
+         SDL_FreeSurface(res); /* Don't leak when an error occurs */
          rb_raise(rb_eRuntimeError, "Couldn't blit the image (%s)",
                   SDL_GetError());
       }
@@ -302,7 +306,7 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
       from_rect.h = origin->h;
    }
 
-   if (SDL_BlitSurface(origin, &from_rect,  ray_rb2surface(surf),
+   if (SDL_BlitSurface(origin, &from_rect, target,
                        &to_rect) == -1) {
       rb_raise(rb_eRuntimeError, "Couldn't blit the image (%s)",
                   SDL_GetError());
@@ -312,8 +316,9 @@ VALUE ray_image_blit(VALUE self, VALUE hash) {
 }
 
 /*
-  Sets the alpha transparency.
-  @param [Integer, 0..255] alpha the new transparency
+  @overload alpha=(alpha)
+    Sets the alpha transparency.
+    @param [Integer, 0..255] alpha the new transparency
 */
 VALUE ray_image_set_alpha(VALUE self, VALUE alpha) {
    SDL_SetAlpha(ray_rb2surface(self), SDL_SRCALPHA | SDL_RLEACCEL,
@@ -348,7 +353,11 @@ VALUE ray_image_bpp(VALUE self) {
    return Qnil;
 }
 
-/* @return [true, false] true if obj's manipulates the same surface as self */
+/*
+  @overload ==(obj)
+    @return [true, false] true if obj manipulates the same surface as the
+                          receiver.
+*/
 VALUE ray_image_is_equal(VALUE self, VALUE obj) {
    if (!RAY_IS_A(obj, ray_cImage))
       return Qfalse;
@@ -391,9 +400,10 @@ VALUE ray_image_unlock(VALUE self) {
 }
 
 /*
-  @return [Ray::Color, nil] Pixel at (x, y). Nil if the point is outside the
-                            image.
- */
+  @overload [](x, y)
+    @return [Ray::Color, nil] Pixel at (x, y). Nil if the point is outside the
+                              image.
+*/
 VALUE ray_image_at(VALUE self, VALUE rb_x, VALUE rb_y) {
    SDL_Surface *surface = ray_rb2surface(self);
 
@@ -437,8 +447,9 @@ VALUE ray_image_at(VALUE self, VALUE rb_x, VALUE rb_y) {
 }
 
 /*
-  Sets the color of the point at (x, y)
-  @raise ArgumentError If (x, y) is outside the image.
+  @overload [](x, y, color)
+    Sets the color of the point at (x, y)
+    @raise ArgumentError If (x, y) is outside the image.
 */
 VALUE ray_image_set_at(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_col) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -506,9 +517,10 @@ VALUE ray_image_ensure_unclip(VALUE ary) {
     Changes the clipping rect (the rect which will be changed if something is
     drawn on this image, the rest of the image being ignored.)
   
-    If a block is given, it is executed, and the old clipping rect is reset.
+    If a block is given, it is executed, and the old clipping rect is reset
+    afterwards.
 
-    @param [Ray::Rect, Array<Integer>] New clipping rect.
+    @param [Ray::Rect, Array<Integer>] rect New clipping rect.
 */
 VALUE ray_image_clip(int argc, VALUE *argv, VALUE self) {
    VALUE rb_rect = Qnil;
@@ -539,10 +551,13 @@ VALUE ray_image_clip(int argc, VALUE *argv, VALUE self) {
 #ifdef HAVE_SDL_GFX
 
 /*
-  Rotates and zoomes on the image.
-  @param [Float] angle Angle in degrees
-  @param [Float] zoom
-  @return [SDL::Image] the modified image.
+  @overload rotozoom(angle, zoom)
+    Rotates and zoomes on the image.
+    @param [Float] angle Angle in degrees
+    @param [Float] zoom
+    @return [SDL::Image] the modified image.
+    
+    @see #rotozoom!
 */
 VALUE ray_image_rotozoom(VALUE self, VALUE angle, VALUE zoom) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -558,8 +573,14 @@ VALUE ray_image_rotozoom(VALUE self, VALUE angle, VALUE zoom) {
 }
 
 /*
-  Rotates and zoomes on the image, but does not create a new instance
-  of Ray::Image, which may be better for memory management.
+  @overload rotozoom!(angle, zoom)
+    Rotates and zoomes on the image, but does not create a new instance
+    of Ray::Image, which may be better for memory management.
+    
+    Notice Ray.create_window(...).rotozoom!(...) will not modify
+    the image used as the screen.
+    
+    @see #rotozoom
 */
 VALUE ray_image_rotozoom_bang(VALUE self, VALUE angle, VALUE zoom) {
    ray_image *img = ray_rb2image(self);
@@ -581,10 +602,11 @@ VALUE ray_image_rotozoom_bang(VALUE self, VALUE angle, VALUE zoom) {
 }
 
 /*
-  Draws a point.
+  @overload draw_pixel(point, color)
+    Draws a point.
 
-  @param [Ray::Rect, Array<Integer>] rb_point The point which should be changed.
-  @param [Ray::Color] rb_color Its new color.
+    @param [Ray::Rect, Array<Integer>] point The point which should be changed.
+    @param [Ray::Color] color Its new color.
 */
 VALUE ray_image_draw_pixel(VALUE self, VALUE rb_point, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -598,11 +620,12 @@ VALUE ray_image_draw_pixel(VALUE self, VALUE rb_point, VALUE rb_color) {
 }
 
 /*
-  Draws a line.
+  @overload draw_line(p1, p2, color)
+    Draws a line.
   
-  @param [Ray::Rect, Array<Integer>] p1 First point of the line.
-  @param [Ray::Rect, Array<Integer>] p2 Second point of the line.
-  @param [Ray::Color] rb_color color of the line
+    @param [Ray::Rect, Array<Integer>] p1 First point of the line.
+    @param [Ray::Rect, Array<Integer>] p2 Second point of the line.
+    @param [Ray::Color] color Color of the line.
 */
 VALUE ray_image_draw_line(VALUE self, VALUE p1, VALUE p2, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -618,10 +641,11 @@ VALUE ray_image_draw_line(VALUE self, VALUE p1, VALUE p2, VALUE rb_color) {
 }
 
 /*
-  Draws a rect.
+  @overload draw_rect(rect, color)
+    Draws a rect.
 
-  @param [Ray::Rect, Array<Integer>] rb_rect Rect to draw
-  @param [Ray::Color] rb_color color of the rect
+    @param [Ray::Rect, Array<Integer>] rect Rect to draw
+    @param [Ray::Color] color color of the rect
 */
 VALUE ray_image_draw_rect(VALUE self, VALUE rb_rect, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -635,10 +659,11 @@ VALUE ray_image_draw_rect(VALUE self, VALUE rb_rect, VALUE rb_color) {
 }
 
 /*
-  Draws a filled rect.
+  @overload draw_filled_rect(rect, color)
+    Draws a filled rect.
 
-  @param [Ray::Rect, Array<Integer>] rb_rect Rect to draw
-  @param [Ray::Color] rb_color color of the rect
+    @param [Ray::Rect, Array<Integer>] rb_rect Rect to draw.
+    @param [Ray::Color] rb_color Color of the rect.
 */
 VALUE ray_image_draw_filled_rect(VALUE self, VALUE rb_rect, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -652,11 +677,12 @@ VALUE ray_image_draw_filled_rect(VALUE self, VALUE rb_rect, VALUE rb_color) {
 }
 
 /*
-  Draws a circle
+  @overload draw_circle(center, radius, color)
+    Draws a circle
 
-  @param [Ray::Rect, Array<Integer>] center Center of the circle
-  @param [Integer] radius Radius of the circle
-  @param [Ray::Color] rb_color Color of the circle
+    @param [Ray::Rect, Array<Integer>] center Center of the circle.
+    @param [Integer] radius Radius of the circle.
+    @param [Ray::Color] color Color of the circle.
 */
 VALUE ray_image_draw_circle(VALUE self, VALUE center, VALUE radius,
                             VALUE rb_color) {
@@ -671,11 +697,12 @@ VALUE ray_image_draw_circle(VALUE self, VALUE center, VALUE radius,
 }
 
 /*
-  Draws a filled circle
+  @overload draw_filled_circle(center, radius, color)
+    Draws a filled circle
 
-  @param [Ray::Rect, Array<Integer>] center Center of the circle
-  @param [Integer] radius Radius of the circle
-  @param [Ray::Color] rb_color Color of the circle
+    @param [Ray::Rect, Array<Integer>] center Center of the circle.
+    @param [Integer] radius Radius of the circle.
+    @param [Ray::Color] color Color of the circle.
 */
 VALUE ray_image_draw_filled_circle(VALUE self, VALUE center, VALUE radius,
                             VALUE rb_color) {
@@ -690,10 +717,11 @@ VALUE ray_image_draw_filled_circle(VALUE self, VALUE center, VALUE radius,
 }
 
 /*
-  Draws an ellipse.
+  @overload draw_ellipse(rect, color)
+    Draws an ellipse.
   
-  @param [Ray::Rect, Array<Integer>] rect Rect in which the ellipse should be drawn.
-  @param [Ray::Color] color Color in which the ellipse should be drawn.
+    @param [Ray::Rect, Array<Integer>] rect Rect in which the ellipse should be drawn.
+    @param [Ray::Color] color Color in which the ellipse should be drawn.
 */
 VALUE ray_image_draw_ellipse(VALUE self, VALUE rb_rect, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -707,10 +735,11 @@ VALUE ray_image_draw_ellipse(VALUE self, VALUE rb_rect, VALUE rb_color) {
 }
 
 /*
-  Draws a filled ellipse.
+  @overload draw_flled_ellipse(rect, color)
+    Draws a filled ellipse.
   
-  @param [Ray::Rect, Array<Integer>] rect Rect in which the ellipse should be drawn.
-  @param [Ray::Color] color Color in which the ellipse should be drawn.
+    @param [Ray::Rect, Array<Integer>] rect Rect in which the ellipse should be drawn.
+    @param [Ray::Color] color Color in which the ellipse should be drawn.
 */
 VALUE ray_image_draw_filled_ellipse(VALUE self, VALUE rb_rect, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -724,7 +753,8 @@ VALUE ray_image_draw_filled_ellipse(VALUE self, VALUE rb_rect, VALUE rb_color) {
 }
 
 /*
-  Draws a triangle.
+  @overload draw_triangle(p1, p2, p3, color)
+    Draws a triangle.
 */
 VALUE ray_image_draw_triangle(VALUE self, VALUE p1, VALUE p2, VALUE p3,
                               VALUE rb_color) {
@@ -745,7 +775,8 @@ VALUE ray_image_draw_triangle(VALUE self, VALUE p1, VALUE p2, VALUE p3,
 }
 
 /*
-  Draws a filled triangle.
+  @overload draw_filled_triangle(p1, p2, p3, color)
+    Draws a filled triangle.
 */
 VALUE ray_image_draw_filled_triangle(VALUE self, VALUE p1, VALUE p2, VALUE p3,
                                      VALUE rb_color) {
@@ -766,11 +797,12 @@ VALUE ray_image_draw_filled_triangle(VALUE self, VALUE p1, VALUE p2, VALUE p3,
 }
 
 /*
-  Draws a polygon.
+  @overload draw_polygon(points, color)
+    Draws a polygon.
 
-  @param [Array<Array<Integer>, Ray::Rect>] points Points which should be joined
-                                                   to draw the polygon.
-  @param [Ray::Color] color The color in which the polygon should be drawn.
+    @param [Array<Array<Integer>, Ray::Rect>] points Points which should be joined
+                                                     to draw the polygon.
+    @param [Ray::Color] color The color in which the polygon should be drawn.
 */
 VALUE ray_image_draw_polygon(VALUE self, VALUE points, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);
@@ -798,11 +830,12 @@ VALUE ray_image_draw_polygon(VALUE self, VALUE points, VALUE rb_color) {
 }
 
 /*
-  Draws a filled polygon.
+  @overload draw_filled_polygon(points, color)
+    Draws a filled polygon.
 
-  @param [Array<Array<Integer>, Ray::Rect>] points Points which should be joined
-                                                   to draw the polygon.
-  @param [Ray::Color] color The color in which the polygon should be drawn.
+    @param [Array<Array<Integer>, Ray::Rect>] points Points which should be joined
+                                                     to draw the polygon.
+    @param [Ray::Color] color The color in which the polygon should be drawn.
 */
 VALUE ray_image_draw_filled_polygon(VALUE self, VALUE points, VALUE rb_color) {
    SDL_Surface *surface = ray_rb2surface(self);

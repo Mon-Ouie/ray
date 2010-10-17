@@ -31,8 +31,8 @@ class String
   #
   # @option opts [Ray::Font] :font The font used to render the string.
   # @option opts [Ray::Image] :on The image to draw on.
-  # @option opts [Integer] :w (:width) and :h (:height) Size of the image
-  #                        if :on isn't specified. :w is required in that case.
+  # @option opts [Integer] :w Witdh of the image. Also called :width.
+  # @option opts [Integer] ;h height of the image. Also called :height.
   # @option opts [Symbol] The encoding. Can be guessed in Ruby 1.9.
   # @option opts [Ray::Color] :color The color to draw the text in.
   # @option opts [Ray::Color] :background Background color in shaded mode.
@@ -42,6 +42,7 @@ class String
   #
   # @option opts [Array<Integer>] :at Where the image should be drawn.
   #                                   Defaults to (0, 0)
+  #
   # @see Ray::Font#draw
   def draw(opts = {})
     font = opts[:font]

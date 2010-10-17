@@ -3,7 +3,7 @@ module Ray
     @@joysticks = Hash.new { |h, k| h[k] = new(k) }
 
     class << self
-      # @return [Ray::Joystick] a joystick, opened if necesarry.
+      # @return [Ray::Joystick] an opened joystick
       def [](id)
         joy = @@joysticks[id]
         joy.open if joy.closed?

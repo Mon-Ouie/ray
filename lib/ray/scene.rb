@@ -69,6 +69,8 @@ module Ray
   # == Limiting the loop rate
   # You can prevent a scene from always running by using #loops_per_second=:
   #   self.loops_per_second = 30 # will sleep some time after each loop
+  #
+  # @see Ray::DSL::EventTranslator
   class Scene
     include Ray::Helper
 

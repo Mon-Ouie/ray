@@ -9,7 +9,7 @@ module Ray
 
     # Plays a sound on the channel.
     # @param [Ray::Sound] sound The sound to be played
-    # @param [Integer, :forever] How many times the sound should be played.
+    # @param [Integer, :forever] times How many times the sound should be played.
     def play(sound, times = 1)
       sound.play(@id, times)
     end

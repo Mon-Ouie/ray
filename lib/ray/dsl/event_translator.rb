@@ -1,7 +1,20 @@
 module Ray
   module DSL
     # Module charged to translate an instance of Ray::Event into the arguments
-    # you pass to raise_event.
+    # you pass to raise_event. It is for instance used in Ray::Scene.
+    #
+    # == Raised events
+    # 1. quit
+    # 2. focus_gain(focus_type)
+    # 3. mouse_motion(rect), where [rect.x, rect.y] is where the user clicked.
+    # 4. mouse_press(button, rect)
+    # 5. mouse_release(button, rect)
+    # 6. key_press(key, mod_keys)
+    # 7. key_release(key, mod_keys)
+    # 8. window_resize(rect), where [rect.w, rect.h] is the size of the window.
+    # 9. joy_motion(joystick_id, axis_id, axis_value)
+    # 10. joy_press(joystick_id, button_id)
+    # 11. joy_release(joystick_id, button_id)
     module EventTranslator
       FOCUS_TYPES = {
         Ray::Event::APPMOUSEFOCUS => :mouse_focus,
@@ -18,10 +31,10 @@ module Ray
       }
 
       class << self
-        # @return [Array, nil] The arguments you should pass to raise_event.
+        # @return [Array] The arguments you should pass to raise_event.
         def translate_event(ev)
           case ev.type
-          when 0 then []
+          when Ray::Event::TYPE_NOEVENT then []
           when Ray::Event::TYPE_QUIT then quit(ev)
           when Ray::Event::TYPE_ACTIVEEVENT then active_event(ev)
           when Ray::Event::TYPE_MOUSEMOTION then mouse_motion(ev)

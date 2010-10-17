@@ -79,9 +79,17 @@ VALUE ray_joystick_open(VALUE self) {
    return self;
 }
 
+/* @return [true, false] true if the joystick is closed */ 
+VALUE ray_joystick_closed(VALUE self) {
+   ray_joystick *joy = NULL;
+   Data_Get_Struct(self, ray_joystick, joy);
+   
+   return joy->joystick == NULL ? Qtrue : Qfalse;
+}
+
 /* Closes the joystick. Can be called even if closed? is true. */
 VALUE ray_joystick_close(VALUE self) {
-   if (ray_joystick_close(self) == Qtrue)
+   if (ray_joystick_closed(self) == Qtrue)
       return Qnil;
 
    SDL_JoystickClose(ray_rb2joystick(self));
@@ -92,14 +100,6 @@ VALUE ray_joystick_close(VALUE self) {
    joy->joystick = NULL;
    
    return Qnil;
-}
-
-/* @return [true, false] true if the joystick is closed */ 
-VALUE ray_joystick_closed(VALUE self) {
-   ray_joystick *joy = NULL;
-   Data_Get_Struct(self, ray_joystick, joy);
-   
-   return joy->joystick == NULL ? Qtrue : Qfalse;
 }
 
 /* @return [Integer] The number of buttons on this joystick */
