@@ -20,3 +20,4 @@ ext/ray
 /ext/mkmf.log
 ruby-1.8.*/
 ruby_stdlib/
+autotest/
