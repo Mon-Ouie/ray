@@ -53,7 +53,6 @@ begin
     require 'rspec/core/rake_task'
   
     RSpec::Core::RakeTask.new(:spec) do |t|
-      t.spec_files = FileList['spec/**/*_spec\.rb']
       t.fail_on_error = false
     end
   end
