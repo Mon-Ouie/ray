@@ -14,7 +14,7 @@ require 'ray/font' if Ray.has_font_support?
 require 'ray/audio' if Ray.has_audio_support?
 
 require 'ray/image_set'
-require 'ray/font_set'
+require 'ray/font_set'  if Ray.has_font_support?
 require 'ray/sound_set' if Ray.has_audio_support?
 require 'ray/music_set' if Ray.has_audio_support?
 
