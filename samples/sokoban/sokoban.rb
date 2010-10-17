@@ -358,7 +358,7 @@ module Sokoban
       super("Sokoban")
 
       LevelScene.bind(self)
-      push_scene(:sokoban_level, "level_1")
+      push_scene(:sokoban_level, File.expand_path(File.join(File.dirname(__FILE__), "level_1")))
     end
 
     def register
