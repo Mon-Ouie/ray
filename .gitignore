@@ -1,0 +1,11 @@
+.yardoc/
+doc/
+pkg/
+*.rbc
+*.gem
+*.o
+*.gemspec
+*.log
+*.so
+*.bundle
+Makefile

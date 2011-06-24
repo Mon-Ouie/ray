@@ -1,0 +1,2 @@
+--private
+-e ./yard_ext.rb
