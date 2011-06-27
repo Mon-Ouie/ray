@@ -18,6 +18,7 @@ require 'ray/rect'
 require 'ray/matrix'
 require 'ray/view'
 require 'ray/color'
+require 'ray/vertex'
 require 'ray/shader'
 
 require 'ray/image'

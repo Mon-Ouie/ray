@@ -9,6 +9,7 @@ void Init_ray_ext() {
   Init_ray_rect();
   Init_ray_matrix();
   Init_ray_color();
+  Init_ray_vertex();
   Init_ray_image();
   Init_ray_font();
   Init_ray_shader();
