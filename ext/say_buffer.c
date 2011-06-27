@@ -50,37 +50,58 @@ static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
   free(pair);
 }
 
-static char *say_buffer_offset(size_t id) {
-  return ((char*)NULL + id);
-}
-
-static char *say_buffer_pos_offset() {
-  return say_buffer_offset(0);
-}
-
-static char *say_buffer_color_offset() {
-  return say_buffer_offset(sizeof(float) * 2);
-}
-
-static char *say_buffer_tex_pos_offset() {
-  return say_buffer_offset(sizeof(float) * 2 + sizeof(uint8_t) * 4);
-}
-
 static void say_buffer_build_vao(say_buffer *buf, GLuint vao) {
   say_vao_make_current(vao);
   say_buffer_make_current(buf->vbo);
 
-  glVertexAttribPointerARB(SAY_POS_ID, 2, GL_FLOAT, GL_FALSE,
-                           sizeof(say_vertex), say_buffer_pos_offset());
+  say_vertex_type *type = say_get_vertex_type(buf->vtype);
 
-  glVertexAttribPointerARB(SAY_COLOR_ID, 4, GL_UNSIGNED_BYTE, GL_TRUE,
-                           sizeof(say_vertex), say_buffer_color_offset());
+  size_t count  = say_vertex_type_get_elem_count(type);
+  size_t stride = say_vertex_type_get_size(type);
 
-  glVertexAttribPointerARB(SAY_TEX_COORD_ID, 2, GL_FLOAT, GL_FALSE,
-                           sizeof(say_vertex), say_buffer_tex_pos_offset());
+  size_t offset = 0;
 
-  for (int i = 0; i < SAY_ATTR_COUNT; i++)
+  for (size_t i = 0; i < count; i++) {
+    say_vertex_elem_type t = say_vertex_type_get_type(type, i);
+
+    switch (t) {
+    case SAY_FLOAT:
+      glVertexAttribPointerARB(i, 1, GL_FLOAT, GL_FALSE, stride, (void*)offset);
+      offset += sizeof(GLfloat);
+      break;
+    case SAY_INT:
+      glVertexAttribPointerARB(i, 1, GL_INT, GL_FALSE, stride, (void*)offset);
+      offset += sizeof(GLint);
+      break;
+    case SAY_UBYTE:
+      glVertexAttribPointerARB(i, 1, GL_UNSIGNED_BYTE, GL_FALSE, stride,
+                               (void*)offset);
+      offset += sizeof(GLubyte);
+      break;
+    case SAY_BOOL:
+      glVertexAttribPointerARB(i, 1, GL_INT, GL_FALSE, stride, (void*)offset);
+      offset += sizeof(GLint);
+      break;
+
+    case SAY_COLOR:
+      glVertexAttribPointerARB(i, 4, GL_UNSIGNED_BYTE, GL_TRUE, stride,
+                               (void*)offset);
+      offset += sizeof(GLubyte) * 4;
+      break;
+    case SAY_VECTOR2:
+      glVertexAttribPointerARB(i, 2, GL_FLOAT, GL_FALSE, stride,
+                               (void*)offset);
+      offset += sizeof(GLfloat) * 2;
+      break;
+    case SAY_VECTOR3:
+      glVertexAttribPointerARB(i, 3, GL_FLOAT, GL_FALSE, stride,
+                               (void*)offset);
+      offset += sizeof(GLfloat) * 3;
+      break;
+    }
+
     glEnableVertexAttribArrayARB(i);
+  }
 }
 
 static GLuint say_buffer_get_vao(say_buffer *buf) {
@@ -105,22 +126,24 @@ static GLuint say_buffer_get_vao(say_buffer *buf) {
   }
 }
 
-say_buffer *say_buffer_create(GLenum type, size_t size) {
+say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size) {
   say_context_ensure();
 
   say_buffer *buf = (say_buffer*)malloc(sizeof(say_buffer));
   buf->vaos = say_table_create((say_destructor)say_buffer_delete_vao_pair);
+
+  buf->vtype = vtype;
 
   glGenBuffersARB(1, &buf->vbo);
   say_buffer_make_current(buf->vbo);
 
   buf->type = type;
 
-  buf->size = size;
-  buf->buffer = (say_vertex*)malloc(sizeof(say_vertex) * size);
+  size_t byte_size = say_vertex_type_get_size(say_get_vertex_type(vtype));
+  buf->buffer = say_array_create(byte_size, NULL, NULL);
+  say_array_resize(buf->buffer, size);
 
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, buf->size * sizeof(say_vertex), NULL,
-                  type);
+  glBufferDataARB(GL_ARRAY_BUFFER_ARB, size * byte_size, NULL, type);
 
   return buf;
 }
@@ -133,12 +156,12 @@ void say_buffer_free(say_buffer *buf) {
   say_buffer_will_delete(buf->vbo);
   glDeleteBuffersARB(1, &(buf->vbo));
 
-  free(buf->buffer);
+  say_array_free(buf->buffer);
   free(buf);
 }
 
-say_vertex *say_buffer_get_vertex(say_buffer *buf, size_t id) {
-  return &(buf->buffer[id]);
+void *say_buffer_get_vertex(say_buffer *buf, size_t id) {
+  return say_array_get(buf->buffer, id);
 }
 
 void say_buffer_bind(say_buffer *buf) {
@@ -157,23 +180,28 @@ void say_buffer_update_part(say_buffer *buf, size_t id, size_t size) {
   if (size == 0) return;
 
   say_buffer_make_current(buf->vbo);
-  glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, sizeof(say_vertex) * id,
-                     sizeof(say_vertex) * size, &(buf->buffer[id]));
+
+  size_t byte_size = say_array_get_elem_size(buf->buffer);
+  glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
+                     byte_size * id,
+                     byte_size * size,
+                     say_buffer_get_vertex(buf, id));
 }
 
 void say_buffer_update(say_buffer *buf) {
-  say_buffer_update_part(buf, 0, buf->size);
+  say_buffer_update_part(buf, 0, say_array_get_size(buf->buffer));
 }
 
 size_t say_buffer_get_size(say_buffer *buf) {
-  return buf->size;
+  return say_array_get_size(buf->buffer);
 }
 
 void say_buffer_resize(say_buffer *buf, size_t size) {
-  buf->size = size;
-  buf->buffer = realloc(buf->buffer, sizeof(say_vertex) * size);
+  say_array_resize(buf->buffer, size);
 
   say_buffer_make_current(buf->vbo);
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, buf->size * sizeof(say_vertex),
-                  buf->buffer, buf->type);
+  glBufferDataARB(GL_ARRAY_BUFFER_ARB,
+                  size * say_array_get_elem_size(buf->buffer),
+                  say_buffer_get_vertex(buf, 0),
+                  buf->type);
 }

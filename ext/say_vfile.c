@@ -11,7 +11,7 @@ sf_count_t say_vfile_seek(sf_count_t offset, int whence, say_vfile *file) {
   case SEEK_CUR: start = file->pos;
   case SEEK_SET: start = 0;
   case SEEK_END: start = file->size;
-  default: return;
+  default: return file->pos;
   }
 
   sf_count_t new_pos = start + offset;

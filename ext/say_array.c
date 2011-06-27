@@ -71,13 +71,13 @@ void say_array_resize(say_array *ary, size_t size) {
     ary->capa = size;
   }
 
+  ary->size = size;
+
   if (ary->create) {
     for (void *i = say_array_get(ary, old_size); i; say_array_next(ary, &i)) {
       ary->create(i);
     }
   }
-
-  ary->size = size;
 }
 
 void say_array_insert(say_array *ary, size_t n, void *elem) {

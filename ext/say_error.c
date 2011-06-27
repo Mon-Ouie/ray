@@ -9,14 +9,6 @@ const char *say_error_get_last() {
   return say_thread_variable_get(say_last_error);
 }
 
-static char *say_strdup(const char *str) {
-  size_t size = sizeof(char) * (strlen(str) + 1);
-  char *cpy = malloc(size);
-  memcpy(cpy, str, size);
-
-  return cpy;
-}
-
 void say_error_set(const char *message) {
   if (!say_last_error)
     say_last_error = say_thread_variable_create(free);

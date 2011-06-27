@@ -17,11 +17,12 @@ static void say_drawable_update_matrix(say_drawable *drawable) {
   drawable->matrix_updated = 1;
 }
 
-say_drawable *say_drawable_create() {
+say_drawable *say_drawable_create(size_t vtype) {
   say_drawable *drawable = (say_drawable*)malloc(sizeof(say_drawable));
 
   drawable->vertex_count = 0;
-  drawable->space = NULL;
+  drawable->vtype        = vtype;
+  drawable->slice        = NULL;
 
   drawable->data = NULL;
 
@@ -46,6 +47,7 @@ say_drawable *say_drawable_create() {
 
 void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
   drawable->vertex_count = other->vertex_count;
+  drawable->vtype        = other->vtype;
 
   drawable->data = other->data;
 
@@ -67,8 +69,8 @@ void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
 }
 
 void say_drawable_free(say_drawable *drawable) {
-  if (drawable->space)
-    say_buffer_space_free(drawable->space);
+  if (drawable->slice)
+    say_buffer_slice_free(drawable->slice);
   say_matrix_free(drawable->matrix);
   free(drawable);
 }
@@ -87,6 +89,10 @@ size_t say_drawable_get_vertex_count(say_drawable *drawable) {
   return drawable->vertex_count;
 }
 
+size_t say_drawable_get_vertex_type(say_drawable *drawable) {
+  return drawable->vtype;
+}
+
 void say_drawable_set_fill_proc(say_drawable *drawable, say_fill_proc proc) {
   drawable->fill_proc   = proc;
   drawable->has_changed = 1;
@@ -97,27 +103,27 @@ void say_drawable_set_render_proc(say_drawable *drawable, say_render_proc proc) 
   drawable->has_changed = 1;
 }
 
-void say_drawable_fill_buffer(say_drawable *drawable, say_vertex *vertices) {
+void say_drawable_fill_buffer(say_drawable *drawable, void *vertices) {
   if (drawable->fill_proc)
     drawable->fill_proc(drawable->data, vertices);
 }
 
 void say_drawable_fill_own_buffer(say_drawable *drawable) {
   if (drawable->has_changed) {
-    if (!drawable->space)
-      drawable->space = say_buffer_space_create(drawable->vertex_count);
+    if (!drawable->slice)
+      drawable->slice = say_buffer_slice_create(0, drawable->vertex_count);
 
-    if (say_buffer_space_get_size(drawable->space) != drawable->vertex_count) {
-      say_buffer_space_recreate(drawable->space, drawable->vertex_count);
+    if (say_buffer_slice_get_size(drawable->slice) != drawable->vertex_count) {
+      say_buffer_slice_recreate(drawable->slice, drawable->vertex_count);
     }
 
     if (drawable->fill_proc) {
       drawable->fill_proc(drawable->data,
-                          say_buffer_space_get_vertex(drawable->space, 0));
+                          say_buffer_slice_get_vertex(drawable->slice, 0));
     }
 
     drawable->has_changed = 0;
-    say_buffer_space_update(drawable->space);
+    say_buffer_slice_update(drawable->slice);
   }
 }
 
@@ -149,9 +155,9 @@ void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
                             drawable->use_texture);
     }
 
-    say_buffer_space_bind(drawable->space);
+    say_buffer_slice_bind(drawable->slice);
     drawable->render_proc(drawable->data,
-                          say_buffer_space_get_loc(drawable->space),
+                          say_buffer_slice_get_loc(drawable->slice),
                           used_shader);
 
     if (drawable->shader)

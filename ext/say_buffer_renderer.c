@@ -17,7 +17,7 @@ say_buffer_renderer *say_buffer_renderer_create(GLenum type,
                                                 size_t size) {
   say_buffer_renderer *renderer = malloc(sizeof(say_buffer_renderer));
 
-  renderer->buffer = say_buffer_create(type, vertex_count);
+  renderer->buffer = say_buffer_create(0, type, vertex_count);
 
   renderer->drawables = malloc(sizeof(say_drawable*) * size);
   renderer->size = size;

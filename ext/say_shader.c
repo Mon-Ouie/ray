@@ -159,9 +159,7 @@ say_shader *say_shader_create() {
   glAttachObjectARB(shader->program, shader->frag_shader);
   glAttachObjectARB(shader->program, shader->vertex_shader);
 
-  glBindAttribLocationARB(shader->program, SAY_POS_ID, SAY_POS_ATTR);
-  glBindAttribLocationARB(shader->program, SAY_COLOR_ID, SAY_COLOR_ATTR);
-  glBindAttribLocationARB(shader->program, SAY_TEX_COORD_ID, SAY_TEX_COORD_ATTR);
+  say_shader_apply_vertex_type(shader, 0);
 
   if (say_shader_use_new) {
     glBindFragDataLocationEXT(shader->program, 0, SAY_FRAG_COLOR);
@@ -200,6 +198,17 @@ int say_shader_compile_frag(say_shader *shader, const char *src) {
 int say_shader_compile_vertex(say_shader *shader, const char *src) {
   say_context_ensure();
   return say_shader_create_shader(shader->vertex_shader, src);
+}
+
+void say_shader_apply_vertex_type(say_shader *shader, size_t vtype) {
+  say_context_ensure();
+
+  say_vertex_type *type = say_get_vertex_type(vtype);
+
+  for (size_t i = 0; i < say_vertex_type_get_elem_count(type); i++) {
+    glBindAttribLocationARB(shader->program, i,
+                            say_vertex_type_get_name(type, i));
+  }
 }
 
 int say_shader_link(say_shader *shader) {

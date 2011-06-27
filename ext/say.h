@@ -155,37 +155,40 @@ typedef enum {
 } say_vertex_elem_type;
 
 typedef struct {
-  say_vertex_elem_type type;
-  size_t count;
+  say_vertex_elem_type  type;
+  char                 *name;
 } say_vertex_elem;
 
 typedef struct {
   say_array *elements;
 } say_vertex_type;
 
+/* We don't want compiler to align this structure because we're going to
+ * allocate vertices without using sizeof(say_vertex). */
 typedef struct {
   say_vector2 pos;
-  say_color col;
+  say_color   col;
   say_vector2 tex;
-} say_vertex;
+} __attribute__((packed)) say_vertex;
 
 typedef struct {
+  size_t vtype;
+
   GLuint vbo;
-  GLuint vao;
-  size_t size;
+  GLenum type;
 
   say_table *vaos;
 
-  GLenum type;
-
-  say_vertex *buffer;
+  say_array *buffer;
 } say_buffer;
 
 typedef struct {
   size_t buf_id;
   size_t loc;
+
+  size_t vtype;
   size_t size;
-} say_buffer_space;
+} say_buffer_slice;
 
 typedef struct {
   GLuint program;
@@ -196,16 +199,17 @@ typedef struct {
   GLint locations[SAY_LOC_ID_COUNT];
 } say_shader;
 
-typedef void (*say_fill_proc)(void *data, say_vertex *vertices);
+typedef void (*say_fill_proc)(void *data, void *vertices);
 typedef void (*say_render_proc)(void *data, size_t first, say_shader *shader);
 
 typedef struct {
-  size_t vertex_count;
-  say_buffer_space *space;
+  size_t            vertex_count;
+  size_t            vtype;
+  say_buffer_slice *slice;
 
   void *data;
 
-  say_fill_proc fill_proc;
+  say_fill_proc   fill_proc;
   say_render_proc render_proc;
 
   say_shader *shader;
@@ -214,8 +218,8 @@ typedef struct {
   say_vector2 origin;
   say_vector2 scale;
   say_vector2 pos;
-  float z_order;
-  float angle;
+  float       z_order;
+  float       angle;
 
   uint8_t use_texture;
   uint8_t matrix_updated;
@@ -620,7 +624,7 @@ typedef struct {
   say_sound_buffer *buf;
 } say_sound;
 
-typedef void (*say_thread_func)(void *data);
+typedef void *(*say_thread_func)(void *data);
 
 typedef struct {
   pthread_t th;
@@ -677,6 +681,7 @@ typedef struct {
 
 /* String manipulations */
 uint32_t say_utf8_to_utf32(const uint8_t *string);
+char *say_strdup(const char *str);
 
 /* Thread variables */
 
@@ -710,8 +715,9 @@ size_t say_vertex_type_make_new();
 say_vertex_type *say_get_vertex_type(size_t i);
 
 void say_vertex_type_push(say_vertex_type *type, say_vertex_elem elem);
+
 say_vertex_elem_type say_vertex_type_get_type(say_vertex_type *type, size_t i);
-size_t say_vertex_type_get_count(say_vertex_type *type, size_t i);
+const char *say_vertex_type_get_name(say_vertex_type *type, size_t i);
 size_t say_vertex_type_get_elem_count(say_vertex_type *type);
 size_t say_vertex_type_get_size(say_vertex_type *type);
 
@@ -849,10 +855,10 @@ void say_matrix_look_at(say_matrix *matrix,
 
 /* VBOs */
 
-say_buffer *say_buffer_create(GLenum type, size_t size);
+say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size);
 void say_buffer_free(say_buffer *buf);
 
-say_vertex *say_buffer_get_vertex(say_buffer *buf, size_t id);
+void *say_buffer_get_vertex(say_buffer *buf, size_t id);
 
 void say_buffer_bind(say_buffer *buf);
 void say_buffer_unbind();
@@ -863,20 +869,20 @@ void say_buffer_update(say_buffer *buf);
 size_t say_buffer_get_size(say_buffer *buf);
 void say_buffer_resize(say_buffer *buf, size_t size);
 
-/* Buffer spaces */
+/* Buffer slices */
 
-say_buffer_space *say_buffer_space_create(size_t size);
-void say_buffer_space_free(say_buffer_space *space);
+say_buffer_slice *say_buffer_slice_create(size_t vtype, size_t size);
+void say_buffer_slice_free(say_buffer_slice *slice);
 
-void say_buffer_space_recreate(say_buffer_space *space, size_t size);
+void say_buffer_slice_recreate(say_buffer_slice *slice, size_t size);
 
-size_t say_buffer_space_get_loc(say_buffer_space *space);
-size_t say_buffer_space_get_size(say_buffer_space *space);
+size_t say_buffer_slice_get_loc(say_buffer_slice *slice);
+size_t say_buffer_slice_get_size(say_buffer_slice *slice);
 
-say_vertex *say_buffer_space_get_vertex(say_buffer_space *space, size_t id);
+void *say_buffer_slice_get_vertex(say_buffer_slice *slice, size_t id);
 
-void say_buffer_space_update(say_buffer_space *space);
-void say_buffer_space_bind(say_buffer_space *space);
+void say_buffer_slice_update(say_buffer_slice *slice);
+void say_buffer_slice_bind(say_buffer_slice *slice);
 
 /* Shaders */
 
@@ -888,6 +894,8 @@ void say_shader_force_old();
 
 int say_shader_compile_frag(say_shader *shader, const char *src);
 int say_shader_compile_vertex(say_shader *shader, const char *src);
+
+void say_shader_apply_vertex_type(say_shader *shader, size_t vtype);
 
 int say_shader_link(say_shader *shader);
 
@@ -916,7 +924,7 @@ void say_shader_bind(say_shader *shader);
 
 /* Drawables */
 
-say_drawable *say_drawable_create();
+say_drawable *say_drawable_create(size_t vtype);
 void say_drawable_free(say_drawable *drawable);
 
 void say_drawable_copy(say_drawable *drawable, say_drawable *other);
@@ -926,10 +934,12 @@ void say_drawable_set_custom_data(say_drawable *drawable, void *data);
 void say_drawable_set_vertex_count(say_drawable *drawable, size_t size);
 size_t say_drawable_get_vertex_count(say_drawable *drawable);
 
+size_t say_drawable_get_vertex_type(say_drawable *drawable);
+
 void say_drawable_set_fill_proc(say_drawable *drawable, say_fill_proc proc);
 void say_drawable_set_render_proc(say_drawable *drawable, say_render_proc proc);
 
-void say_drawable_fill_buffer(say_drawable *drawable, say_vertex *vertices);
+void say_drawable_fill_buffer(say_drawable *drawable, void *vertices);
 void say_drawable_fill_own_buffer(say_drawable *drawable);
 void say_drawable_draw_at(say_drawable *drawable, size_t id, say_shader *shader);
 void say_drawable_draw(say_drawable *drawable, say_shader *shader);

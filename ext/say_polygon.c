@@ -160,7 +160,7 @@ say_polygon *say_polygon_create(size_t size) {
   polygon->outlined = 0;
   polygon->filled   = 1;
 
-  polygon->drawable = say_drawable_create();
+  polygon->drawable = say_drawable_create(0);
   say_drawable_set_custom_data(polygon->drawable, polygon);
   say_drawable_set_fill_proc(polygon->drawable,
                              (say_fill_proc)say_polygon_fill_vertices);

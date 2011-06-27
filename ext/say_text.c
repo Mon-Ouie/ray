@@ -285,7 +285,7 @@ static void say_text_draw(say_text *text, size_t first, say_shader *shader) {
 say_text *say_text_create() {
   say_text *text = malloc(sizeof(say_text));
 
-  text->drawable = say_drawable_create();
+  text->drawable = say_drawable_create(0);
   say_drawable_set_custom_data(text->drawable, text);
   say_drawable_set_textured(text->drawable, 1);
   say_drawable_set_fill_proc(text->drawable, (say_fill_proc)say_text_fill_vertices);

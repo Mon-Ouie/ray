@@ -79,7 +79,7 @@ static void say_sprite_draw(say_sprite *sprite, size_t first, say_shader *shader
 say_sprite *say_sprite_create() {
   say_sprite *sprite = malloc(sizeof(say_sprite));
 
-  sprite->drawable = say_drawable_create();
+  sprite->drawable = say_drawable_create(0);
   say_drawable_set_custom_data(sprite->drawable, sprite);
   say_drawable_set_vertex_count(sprite->drawable, 4);
   say_drawable_set_textured(sprite->drawable, 1);

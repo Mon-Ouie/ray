@@ -90,7 +90,7 @@ VALUE ray_shader_link(VALUE self) {
 */
 static
 VALUE ray_shader_locate(VALUE self, VALUE attr) {
-  char *str = rb_id2name(rb_to_id(attr));
+  const char *str = rb_id2name(rb_to_id(attr));
   int loc = say_shader_locate(ray_rb2shader(self), str);
 
   if (loc >= 0)

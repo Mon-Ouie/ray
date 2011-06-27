@@ -320,13 +320,13 @@ module Sokoban
 
     def color_for(obj)
       case obj
-      when :man then Ray::Color.white
-      when :crate then Ray::Color.gray
-      when :wall then Ray::Color.new(91, 59, 17)
-      when :storage then Ray::Color.yellow
+      when :man              then Ray::Color.white
+      when :crate            then Ray::Color.gray
+      when :wall             then Ray::Color.new(91, 59, 17)
+      when :storage          then Ray::Color.yellow
       when :crate_on_storage then Ray::Color.green
-      when :man_on_storage then Ray::Color.red
-      when :empty then Ray::Color.black
+      when :man_on_storage   then Ray::Color.red
+      when :empty            then Ray::Color.black
       end
     end
   end
