@@ -11,6 +11,11 @@ extern "C" {
 # endif
 #endif
 
+typedef struct {
+  say_drawable *drawable;
+  VALUE         obj;
+} ray_drawable;
+
 /* Classes and modules */
 extern VALUE ray_mRay;
 
@@ -20,6 +25,7 @@ extern VALUE ray_cRect;
 extern VALUE ray_cMatrix;
 extern VALUE ray_cColor;
 extern VALUE ray_cVertex;
+extern VALUE ray_mGL;
 extern VALUE ray_cImage;
 extern VALUE ray_cFont;
 extern VALUE ray_cShader;
@@ -48,7 +54,7 @@ extern VALUE ray_cMusic;
 #define RAY_SYM(string) (ID2SYM(rb_intern(string)))
 #define RAY_METH(string) (rb_intern(string))
 
-#define RAY_ARRAY_AT(ary, i) rb_funcall(ary, RAY_METH("[]"), 1, INT2FIX(i))
+#define RAY_ARRAY_AT(ary, i) (rb_funcall(ary, RAY_METH("[]"), 1, INT2FIX(i)))
 
 void Init_ray_ext();
 void Init_ray_vector();
@@ -56,6 +62,7 @@ void Init_ray_rect();
 void Init_ray_matrix();
 void Init_ray_color();
 void Init_ray_vertex();
+void Init_ray_gl();
 void Init_ray_image();
 void Init_ray_font();
 void Init_ray_shader();
@@ -100,6 +107,8 @@ say_view *ray_rb2view(VALUE self);
 
 say_color ray_rb2col(VALUE object);
 VALUE ray_col2rb(say_color color);
+
+say_vertex *ray_rb2vertex(VALUE obj);
 
 say_image *ray_rb2image(VALUE obj);
 say_font *ray_rb2font(VALUE obj);

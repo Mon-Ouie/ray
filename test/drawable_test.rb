@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__)) + '/helpers.rb'
 
 context "a drawable" do
-  setup { Ray::Polygon.line [0, 0], [1, 1], 1, Ray::Color.blue }
+  setup { Ray::Drawable.new }
 
   asserts(:origin).equals Ray::Vector2[0, 0]
   asserts(:scale).equals Ray::Vector2[1, 1]
@@ -46,7 +46,7 @@ context "a drawable" do
     asserts(:origin).equals Ray::Vector2[0, 0]
     asserts(:scale).equals Ray::Vector2[1, 1]
     asserts(:pos).equals Ray::Vector2[0, 0]
-    asserts(:z).equals -0.5
+    asserts(:z).equals(-0.5)
     asserts(:angle).equals 0
   end
 
@@ -80,6 +80,34 @@ context "a drawable" do
     asserts("matrix.transform (10, 30)") {
       topic.matrix.transform [10, 30]
     }.almost_equals(Ray::Vector3[45, 20, 9], 1e-6)
+
+    context "created from a copy" do
+      setup { topic.dup }
+
+      asserts(:origin).equals Ray::Vector2[30, 40]
+      asserts(:pos).equals Ray::Vector2[10, 20]
+      asserts(:angle).equals 90
+      asserts(:scale).equals Ray::Vector2[2, 0.5]
+      asserts(:z).equals 9
+    end
+
+    context "and a custom matrix" do
+      hookup do
+        topic.matrix = Ray::Matrix.new
+      end
+
+      asserts(:matrix).equals Ray::Matrix.new
+      asserts(:transform, [10, 30]).equals Ray::Vector3[10, 30, 0]
+
+      context "that has been disabled" do
+        hookup do
+          topic.matrix = nil
+        end
+
+        asserts(:transform, [10, 30]).almost_equals(Ray::Vector3[45, 20, 9],
+                                                    1e-6)
+      end
+    end
   end
 
   context "after changing shader" do
@@ -90,5 +118,78 @@ context "a drawable" do
     asserts(:shader).equals { @shader }
   end
 end
+
+class CustomDrawable < Ray::Drawable
+  include Ray::GL
+
+  def initialize
+    super
+    self.vertex_count = 3
+  end
+
+  def fill_vertices
+     [Ray::Vertex.new([0,  0]),
+      Ray::Vertex.new([50, 0]),
+      Ray::Vertex.new([50, 50])]
+  end
+
+  def render(vertex)
+    draw_arrays :triangles, vertex, 3
+  end
+end
+
+context "a custom drawable" do
+  setup { CustomDrawable.new }
+
+  asserts(:vertex_count).equals 3
+  asserts :changed?
+  denies  :textured?
+
+  target = Ray::Window.new
+  target.open "test", [100, 100]
+
+  context "drawn" do
+    hookup do
+      proxy(topic).fill_vertices
+      proxy(topic).render
+      target.draw topic
+    end
+
+    asserts_topic.received :fill_vertices
+    asserts_topic.received :render, anything
+
+    denies :changed?
+
+    context "twice" do
+      hookup do
+        target.draw topic
+      end
+
+      denies_topic.received :fill_vertices => 2
+      asserts_topic.received({:render => 2}, anything)
+
+      denies :changed?
+    end
+
+    context "and changed" do
+      hookup { topic.changed! }
+      asserts :changed?
+
+      context "and drawn again" do
+        hookup { target.draw topic }
+        denies :changed?
+
+        asserts_topic.received :fill_vertices => 2
+        asserts_topic.received({:render => 2}, anything)
+      end
+    end
+  end
+
+  context "after enabling texturing" do
+    hookup { topic.textured = true }
+    asserts :textured?
+  end
+end
+
 
 run_tests if __FILE__ == $0

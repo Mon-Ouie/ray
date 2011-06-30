@@ -1,6 +1,9 @@
 #include "say.h"
 
 static void say_drawable_update_matrix(say_drawable *drawable) {
+  if (drawable->custom_matrix)
+    return;
+
   say_matrix_reset(drawable->matrix);
 
   say_matrix_translate_by(drawable->matrix,
@@ -32,9 +35,10 @@ say_drawable *say_drawable_create(size_t vtype) {
   drawable->shader = NULL;
   drawable->matrix = say_matrix_identity();
 
-  drawable->matrix_updated = 0;
-  drawable->use_texture    = 0;
-  drawable->has_changed    = 1;
+  drawable->matrix_updated = false;
+  drawable->custom_matrix  = false;
+  drawable->use_texture    = false;
+  drawable->has_changed    = true;
 
   drawable->origin  = say_make_vector2(0, 0);
   drawable->scale   = say_make_vector2(1, 1);
@@ -239,6 +243,17 @@ say_matrix *say_drawable_get_matrix(say_drawable *drawable) {
     say_drawable_update_matrix(drawable);
 
   return drawable->matrix;
+}
+
+void say_drawable_set_matrix(say_drawable *drawable, say_matrix *matrix) {
+  if (matrix) {
+    drawable->custom_matrix = true;
+    memcpy(drawable->matrix->content, matrix->content, sizeof(float) * 16);
+  }
+  else {
+    drawable->custom_matrix  = false;
+    drawable->matrix_updated = false;
+  }
 }
 
 say_vector3 say_drawable_transform(say_drawable *drawable, say_vector3 point) {

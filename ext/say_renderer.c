@@ -21,8 +21,8 @@ say_shader *say_renderer_get_shader(say_renderer *renderer) {
 void say_renderer_reset_states(say_renderer *renderer) {
   renderer->using_texture = 0;
   say_shader_set_int_id(renderer->shader, SAY_TEXTURE_ENABLED_LOC_ID, 0);
-}
 
+}
 void say_renderer_push(say_renderer *renderer, say_drawable *drawable) {
   if (!drawable->shader &&
       renderer->using_texture != say_drawable_is_textured(drawable)) {

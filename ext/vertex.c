@@ -33,9 +33,9 @@ VALUE ray_vertex_init(int argc, VALUE *argv, VALUE self) {
   VALUE pos, col, tex;
   rb_scan_args(argc, argv, "03", &pos, &col, &tex);
 
-  vertex->pos = NIL_P(tex) ? say_make_vector2(0, 0) : ray_convert_to_vector2(pos);
-  vertex->tex = NIL_P(tex) ? say_make_vector2(0, 0) : ray_convert_to_vector2(tex);
+  vertex->pos = NIL_P(pos) ? say_make_vector2(0, 0) : ray_convert_to_vector2(pos);
   vertex->col = NIL_P(col) ? say_make_color(255, 255, 255, 255) : ray_rb2col(col);
+  vertex->tex = NIL_P(tex) ? say_make_vector2(0, 0) : ray_convert_to_vector2(tex);
 
   return self;
 }

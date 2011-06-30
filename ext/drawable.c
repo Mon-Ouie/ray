@@ -2,6 +2,41 @@
 
 VALUE ray_cDrawable = Qnil;
 
+static
+void ray_drawable_fill_proc(ray_drawable *drawable, say_vertex *vertices) {
+  VALUE ary = rb_funcall(drawable->obj, RAY_METH("fill_vertices"), 0);
+
+  size_t size = say_drawable_get_vertex_count(drawable->drawable);
+  for (size_t i = 0; i < size; i++) {
+    VALUE vertex = RAY_ARRAY_AT(ary, i);
+    memcpy(&vertices[i], ray_rb2vertex(vertex), sizeof(say_vertex));
+  }
+}
+
+static
+void ray_drawable_render_proc(ray_drawable *drawable, size_t first,
+                              say_shader *shader) {
+  rb_funcall(drawable->obj, RAY_METH("render"), 1, INT2FIX(first));
+}
+
+ray_drawable *ray_rb2full_drawable(VALUE obj) {
+  if (rb_obj_is_kind_of(obj, rb_path2class("Ray::Text"))   ||
+      rb_obj_is_kind_of(obj, rb_path2class("Ray::Sprite")) ||
+      rb_obj_is_kind_of(obj, rb_path2class("Ray::Polygon"))) {
+    rb_raise(rb_eTypeError, "can't get drawable pointer from %s",
+             RAY_OBJ_CLASSNAME(obj));
+  }
+
+  ray_drawable *ptr = NULL;
+  Data_Get_Struct(obj, ray_drawable, ptr);
+
+  if (!ptr->drawable) {
+    rb_raise(rb_eRuntimeError, "trying to use an uninitialized drawable");
+  }
+
+  return ptr;
+}
+
 say_drawable *ray_rb2drawable(VALUE obj) {
   if (RAY_IS_A(obj, rb_path2class("Ray::Polygon")))
     return ray_rb2polygon(obj)->drawable;
@@ -10,9 +45,74 @@ say_drawable *ray_rb2drawable(VALUE obj) {
   else if (RAY_IS_A(obj, rb_path2class("Ray::Text")))
     return ray_rb2text(obj)->drawable;
   else {
-    rb_raise(rb_eTypeError, "can't get a drawable pointer from a %s",
-             RAY_OBJ_CLASSNAME(obj));
+    return ray_rb2full_drawable(obj)->drawable;
   }
+}
+
+static
+void ray_drawable_free(ray_drawable *drawable) {
+  if (drawable->drawable)
+    say_drawable_free(drawable->drawable);
+  free(drawable);
+}
+
+static
+VALUE ray_drawable_alloc(VALUE self) {
+  ray_drawable *obj = malloc(sizeof(ray_drawable));
+  obj->drawable = NULL;
+
+  VALUE rb = Data_Wrap_Struct(self, NULL, ray_drawable_free, obj);
+  obj->obj = rb;
+
+  return rb;
+}
+
+static
+VALUE ray_drawable_init(VALUE self) {
+  if (rb_obj_is_kind_of(self, rb_path2class("Ray::Text"))   ||
+      rb_obj_is_kind_of(self, rb_path2class("Ray::Sprite")) ||
+      rb_obj_is_kind_of(self, rb_path2class("Ray::Polygon"))) {
+    rb_raise(rb_eTypeError, "can't get drawable pointer from %s",
+             RAY_OBJ_CLASSNAME(self));
+  }
+
+  ray_drawable *obj = NULL;
+  Data_Get_Struct(self, ray_drawable, obj);
+
+  obj->drawable = say_drawable_create(0);
+  say_drawable_set_custom_data(obj->drawable, obj);
+  say_drawable_set_fill_proc(obj->drawable,
+                             (say_fill_proc)ray_drawable_fill_proc);
+  say_drawable_set_render_proc(obj->drawable,
+                               (say_render_proc)ray_drawable_render_proc);
+  say_drawable_set_changed(obj->drawable);
+
+  return self;
+}
+
+static
+VALUE ray_drawable_init_copy(VALUE self, VALUE orig) {
+  if (rb_obj_is_kind_of(self, rb_path2class("Ray::Text"))   ||
+      rb_obj_is_kind_of(self, rb_path2class("Ray::Sprite")) ||
+      rb_obj_is_kind_of(self, rb_path2class("Ray::Polygon"))) {
+    rb_raise(rb_eTypeError, "can't get drawable pointer from %s",
+             RAY_OBJ_CLASSNAME(self));
+  }
+
+  ray_drawable *obj = NULL;
+  Data_Get_Struct(self, ray_drawable, obj);
+
+  obj->drawable = say_drawable_create(0);
+  say_drawable_set_custom_data(obj->drawable, obj);
+  say_drawable_set_fill_proc(obj->drawable,
+                             (say_fill_proc)ray_drawable_fill_proc);
+  say_drawable_set_render_proc(obj->drawable,
+                               (say_render_proc)ray_drawable_render_proc);
+  say_drawable_set_changed(obj->drawable);
+
+  say_drawable_copy(obj->drawable, ray_rb2drawable(orig));
+
+  return self;
 }
 
 /*
@@ -146,6 +246,28 @@ VALUE ray_drawable_matrix(VALUE self) {
 }
 
 /*
+  @overload matrix=(val)
+    Sets the current matrix to a custom one, making Ray ignore attributes
+    setting that change the transformation matrix.
+
+    Setting this to nil will cause Ray to start using the actual transformation
+    matrix.
+
+    @param [Ray::Matrix, nil] val
+*/
+static
+VALUE ray_drawable_set_matrix(VALUE self, VALUE val) {
+  say_drawable *drawable = ray_rb2drawable(self);
+
+  if (NIL_P(val))
+    say_drawable_set_matrix(drawable, NULL);
+  else
+    say_drawable_set_matrix(drawable, ray_rb2matrix(val));
+
+  return val;
+}
+
+/*
   @overload transform(point)
     Applies the transformations to a point.
 
@@ -176,8 +298,53 @@ VALUE ray_drawable_set_shader(VALUE self, VALUE val) {
   return val;
 }
 
+static
+VALUE ray_drawable_set_vertex_count(VALUE self, VALUE val) {
+  ray_drawable *drawable = ray_rb2full_drawable(self);
+  say_drawable_set_vertex_count(drawable->drawable, NUM2ULONG(val));
+  return val;
+}
+
+/* @return [Integer] Amount of vertices used by this drawable */
+static
+VALUE ray_drawable_vertex_count(VALUE self) {
+  say_drawable *drawable = ray_rb2drawable(self);
+  size_t count = say_drawable_get_vertex_count(drawable);
+  return INT2FIX(count);
+}
+
+/* @return [true, flase] true if the drawable has changed, and vertices must be
+ *   updated. */
+static
+VALUE ray_drawable_has_changed(VALUE self) {
+  return say_drawable_has_changed(ray_rb2drawable(self)) ? Qtrue : Qfalse;
+}
+
+/* Marks the object as changed, meaning vertices must be updated. */
+static
+VALUE ray_drawable_set_changed(VALUE self) {
+  say_drawable_set_changed(ray_rb2drawable(self));
+  return self;
+}
+
+/* @return [true, flase] true if the drawable is textured */
+static
+VALUE ray_drawable_is_textured(VALUE self) {
+  return say_drawable_is_textured(ray_rb2drawable(self)) ? Qtrue : Qfalse;
+}
+
+/* Marks the object as changed, meaning vertices must be updated. */
+static
+VALUE ray_drawable_set_textured(VALUE self, VALUE val) {
+  say_drawable_set_textured(ray_rb2drawable(self), RTEST(val));
+  return self;
+}
+
 void Init_ray_drawable() {
   ray_cDrawable = rb_define_class_under(ray_mRay, "Drawable", rb_cObject);
+  rb_define_alloc_func(ray_cDrawable, ray_drawable_alloc);
+  rb_define_method(ray_cDrawable, "initialize", ray_drawable_init, 0);
+  rb_define_method(ray_cDrawable, "initialize_copy", ray_drawable_init_copy, 1);
 
   rb_define_method(ray_cDrawable, "origin", ray_drawable_origin, 0);
   rb_define_method(ray_cDrawable, "origin=", ray_drawable_set_origin, 1);
@@ -195,8 +362,19 @@ void Init_ray_drawable() {
   rb_define_method(ray_cDrawable, "angle=", ray_drawable_set_angle, 1);
 
   rb_define_method(ray_cDrawable, "matrix", ray_drawable_matrix, 0);
+  rb_define_method(ray_cDrawable, "matrix=", ray_drawable_set_matrix, 1);
   rb_define_method(ray_cDrawable, "transform", ray_drawable_transform, 1);
 
   rb_define_method(ray_cDrawable, "shader", ray_drawable_shader, 0);
   rb_define_method(ray_cDrawable, "shader=", ray_drawable_set_shader, 1);
+
+  rb_define_method(ray_cDrawable, "vertex_count=",
+                   ray_drawable_set_vertex_count, 1);
+  rb_define_method(ray_cDrawable, "vertex_count", ray_drawable_vertex_count, 0);
+
+  rb_define_method(ray_cDrawable, "changed!", ray_drawable_set_changed, 0);
+  rb_define_method(ray_cDrawable, "changed?", ray_drawable_has_changed, 0);
+
+  rb_define_method(ray_cDrawable, "textured=", ray_drawable_set_textured, 1);
+  rb_define_method(ray_cDrawable, "textured?", ray_drawable_is_textured, 0);
 }
