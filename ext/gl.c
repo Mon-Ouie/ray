@@ -12,7 +12,7 @@ static VALUE ray_gl_primitives = Qnil;
 
     @param [Integer] first Identifier of the first vertex to draw.
     @param [Integer] count Amount of vertices to draw.
- */
+*/
 static
 VALUE ray_gl_draw_arrays(VALUE self, VALUE primitive, VALUE first,
                          VALUE count) {
@@ -21,6 +21,31 @@ VALUE ray_gl_draw_arrays(VALUE self, VALUE primitive, VALUE first,
                NUM2ULONG(first), NUM2ULONG(count));
   return Qnil;
 }
+
+/*
+  @overload multi_draw_arrays(primitive, first, count)
+    @param primitive (see #draw_arrays)
+    @param [Ray::GL::IntArray] first Indices of the first vertex
+    @param [Ray::GL::IntArray] count Ammount of vertices to draw
+*/
+static
+VALUE ray_gl_multi_draw_arrays(VALUE self, VALUE primitive, VALUE rb_first,
+                               VALUE rb_count) {
+  say_array *first = ray_rb2int_array(rb_first);
+  say_array *count = ray_rb2int_array(rb_count);
+
+  size_t size = say_array_get_size(first);
+
+  if (size != say_array_get_size(count))
+    rb_raise(rb_eArgError, "first and count arrays should have the same size");
+
+  glMultiDrawArrays(NUM2INT(rb_hash_aref(ray_gl_primitives, primitive)),
+                    say_array_get(first, 0), say_array_get(count, 0),
+                    size);
+
+  return Qnil;
+}
+
 
 void Init_ray_gl() {
   ray_mGL = rb_define_module_under(ray_mRay, "GL");
@@ -41,4 +66,6 @@ void Init_ray_gl() {
   rb_define_const(ray_mGL, "Primitives", ray_gl_primitives);
 
   rb_define_module_function(ray_mGL, "draw_arrays", ray_gl_draw_arrays, 3);
+  rb_define_module_function(ray_mGL, "multi_draw_arrays",
+                            ray_gl_multi_draw_arrays, 3);
 }

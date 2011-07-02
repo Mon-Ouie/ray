@@ -19,6 +19,8 @@ require 'ray/matrix'
 require 'ray/view'
 require 'ray/color'
 require 'ray/vertex'
+require 'ray/gl/vertex'
+require 'ray/gl/int_array'
 require 'ray/shader'
 
 require 'ray/image'

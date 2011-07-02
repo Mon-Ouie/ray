@@ -3,13 +3,27 @@
 VALUE ray_cDrawable = Qnil;
 
 static
-void ray_drawable_fill_proc(ray_drawable *drawable, say_vertex *vertices) {
+void ray_drawable_fill_proc(void *drawable_ptr, void *vertex_ptr) {
+  ray_drawable *drawable = drawable_ptr;
+  uint8_t      *vertices = vertex_ptr;
+
   VALUE ary = rb_funcall(drawable->obj, RAY_METH("fill_vertices"), 0);
+  VALUE klass = rb_iv_get(drawable->obj, "@vertex_type_class");
 
   size_t size = say_drawable_get_vertex_count(drawable->drawable);
   for (size_t i = 0; i < size; i++) {
     VALUE vertex = RAY_ARRAY_AT(ary, i);
-    memcpy(&vertices[i], ray_rb2vertex(vertex), sizeof(say_vertex));
+
+    if (!RAY_IS_A(vertex, klass)) {
+      rb_raise(rb_eTypeError, "Can't convert %s into %s",
+               RAY_OBJ_CLASSNAME(vertex), rb_class2name(klass));
+    }
+
+    uint8_t *data = NULL;
+    Data_Get_Struct(vertex, uint8_t, data);
+
+    memcpy(vertices, data, drawable->vsize);
+    vertices += drawable->vsize;
   }
 }
 
@@ -59,16 +73,21 @@ void ray_drawable_free(ray_drawable *drawable) {
 static
 VALUE ray_drawable_alloc(VALUE self) {
   ray_drawable *obj = malloc(sizeof(ray_drawable));
-  obj->drawable = NULL;
 
   VALUE rb = Data_Wrap_Struct(self, NULL, ray_drawable_free, obj);
-  obj->obj = rb;
+
+  obj->drawable = NULL;
+  obj->obj      = rb;
 
   return rb;
 }
 
+/*
+  @overload initialize(vertex_class = Ray::Vertex)
+    @param [Class] vertex_class Class of the vertices.
+*/
 static
-VALUE ray_drawable_init(VALUE self) {
+VALUE ray_drawable_init(int argc, VALUE *argv, VALUE self) {
   if (rb_obj_is_kind_of(self, rb_path2class("Ray::Text"))   ||
       rb_obj_is_kind_of(self, rb_path2class("Ray::Sprite")) ||
       rb_obj_is_kind_of(self, rb_path2class("Ray::Polygon"))) {
@@ -79,13 +98,23 @@ VALUE ray_drawable_init(VALUE self) {
   ray_drawable *obj = NULL;
   Data_Get_Struct(self, ray_drawable, obj);
 
-  obj->drawable = say_drawable_create(0);
+  VALUE arg = Qnil;
+  rb_scan_args(argc, argv, "01", &arg);
+
+  size_t id = NIL_P(arg) ? 0 : ray_get_vtype(arg);
+
+  obj->drawable = say_drawable_create(id);
   say_drawable_set_custom_data(obj->drawable, obj);
   say_drawable_set_fill_proc(obj->drawable,
                              (say_fill_proc)ray_drawable_fill_proc);
   say_drawable_set_render_proc(obj->drawable,
                                (say_render_proc)ray_drawable_render_proc);
   say_drawable_set_changed(obj->drawable);
+
+  rb_iv_set(self, "@vertex_type_class", NIL_P(arg) ?
+            rb_path2class("Ray::Vertex") : arg);
+
+  obj->vsize = say_vertex_type_get_size(say_get_vertex_type(id));
 
   return self;
 }
@@ -102,7 +131,10 @@ VALUE ray_drawable_init_copy(VALUE self, VALUE orig) {
   ray_drawable *obj = NULL;
   Data_Get_Struct(self, ray_drawable, obj);
 
-  obj->drawable = say_drawable_create(0);
+  ray_drawable *other = ray_rb2full_drawable(orig);
+
+  size_t vid = say_drawable_get_vertex_type(other->drawable);
+  obj->drawable = say_drawable_create(vid);
   say_drawable_set_custom_data(obj->drawable, obj);
   say_drawable_set_fill_proc(obj->drawable,
                              (say_fill_proc)ray_drawable_fill_proc);
@@ -110,7 +142,10 @@ VALUE ray_drawable_init_copy(VALUE self, VALUE orig) {
                                (say_render_proc)ray_drawable_render_proc);
   say_drawable_set_changed(obj->drawable);
 
-  say_drawable_copy(obj->drawable, ray_rb2drawable(orig));
+  say_drawable_copy(obj->drawable, other->drawable);
+
+  rb_iv_set(self, "@vertex_type_class", rb_iv_get(orig, "@vertex_type_class"));
+  obj->vsize = other->vsize;
 
   return self;
 }
@@ -343,7 +378,7 @@ VALUE ray_drawable_set_textured(VALUE self, VALUE val) {
 void Init_ray_drawable() {
   ray_cDrawable = rb_define_class_under(ray_mRay, "Drawable", rb_cObject);
   rb_define_alloc_func(ray_cDrawable, ray_drawable_alloc);
-  rb_define_method(ray_cDrawable, "initialize", ray_drawable_init, 0);
+  rb_define_method(ray_cDrawable, "initialize", ray_drawable_init, -1);
   rb_define_method(ray_cDrawable, "initialize_copy", ray_drawable_init_copy, 1);
 
   rb_define_method(ray_cDrawable, "origin", ray_drawable_origin, 0);

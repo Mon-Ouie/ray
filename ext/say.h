@@ -129,11 +129,11 @@ typedef struct {
 
 typedef struct {
   float x, y;
-} say_vector2;
+} __attribute__((packed)) say_vector2;
 
 typedef struct {
   float x, y, z;
-} say_vector3;
+} __attribute__((packed)) say_vector3;
 
 typedef struct {
   float x, y, w, h;
@@ -141,7 +141,7 @@ typedef struct {
 
 typedef struct {
   uint8_t r, g, b, a;
-} say_color;
+} __attribute__((packed)) say_color;
 
 typedef enum {
   SAY_FLOAT,
@@ -721,6 +721,7 @@ say_vertex_elem_type say_vertex_type_get_type(say_vertex_type *type, size_t i);
 const char *say_vertex_type_get_name(say_vertex_type *type, size_t i);
 size_t say_vertex_type_get_elem_count(say_vertex_type *type);
 size_t say_vertex_type_get_size(say_vertex_type *type);
+size_t say_vertex_type_get_offset(say_vertex_type *type, size_t elem);
 
 /* Views */
 
@@ -823,9 +824,12 @@ say_matrix *say_matrix_scale(float x, float y, float z);
 say_matrix *say_matrix_rotation(float angle, float x, float y, float z);
 say_matrix *say_matrix_ortho(float left, float right, float bottom, float top,
                              float near, float far);
+say_matrix *say_matrix_perspective(float fovy, float aspect,
+                                   float near, float far);
 say_matrix *say_matrix_looking_at(float eye_x, float eye_y, float eye_z,
-                                  float center_x, float center_y, float center_z,
-                                    float up_x, float up_y, float up_z);
+                                  float center_x, float center_y,
+                                  float center_z,
+                                  float up_x, float up_y, float up_z);
 
 void say_matrix_set(say_matrix *matrix, int x, int y, float value);
 float say_matrix_get(say_matrix *matrix, int x, int y);
@@ -849,6 +853,9 @@ void say_matrix_rotate(say_matrix *matrix, float angle, float x, float y,
 void say_matrix_set_ortho(say_matrix *matrix,
                           float left, float right, float bottom, float top,
                           float near, float far);
+void say_matrix_set_perspective(say_matrix *matrix,
+                                float fovy, float aspect,
+                                float near, float far);
 void say_matrix_look_at(say_matrix *matrix,
                         float eye_x, float eye_y, float eye_z,
                         float center_x, float center_y, float center_z,

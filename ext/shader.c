@@ -84,6 +84,25 @@ VALUE ray_shader_link(VALUE self) {
 }
 
 /*
+  @overload apply_vertex(klass)
+    Sets the vertex layout to use. It is required to link the vertex again for
+    this change to be applied.
+
+    @param [Class] klass Class of the vertex to use with this shader.
+*/
+static
+VALUE ray_shader_apply_vertex(VALUE self, VALUE klass) {
+  say_shader *shader = ray_rb2shader(self);
+
+  if (klass == rb_path2class("Ray::Vertex"))
+    say_shader_apply_vertex_type(shader, 0);
+  else
+    say_shader_apply_vertex_type(shader, ray_get_vtype(klass));
+
+  return klass;
+}
+
+/*
   @overload locate(name)
     @param [String, Symbol] name Name of the attribute
     @return [Integer, nil] Location of the attribute
@@ -215,6 +234,8 @@ void Init_ray_shader() {
   rb_define_method(ray_cShader, "compile_frag", ray_shader_compile_frag, 1);
   rb_define_method(ray_cShader, "compile_vertex", ray_shader_compile_vertex, 1);
   rb_define_method(ray_cShader, "link", ray_shader_link, 0);
+
+  rb_define_method(ray_cShader, "apply_vertex", ray_shader_apply_vertex, 1);
 
   rb_define_method(ray_cShader, "locate", ray_shader_locate, 1);
 

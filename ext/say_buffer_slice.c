@@ -23,7 +23,8 @@ static void say_global_buffer_free(say_global_buffer *buf) {
   say_array_free(buf->ranges);
 }
 
-static say_global_buffer *say_global_buffer_create(say_array *bufs, size_t vtype, size_t size) {
+static say_global_buffer *say_global_buffer_create(say_array *bufs,
+                                                   size_t vtype, size_t size) {
   say_global_buffer buffer;
 
   buffer.buf    = say_buffer_create(vtype, SAY_STREAM, size);
@@ -137,7 +138,8 @@ static size_t say_global_buffer_reserve(size_t vtype, size_t size, size_t *ret_i
     say_array_resize(say_global_buffers, vtype + 1);
   }
 
-  say_array *global_bufs = *(say_array**)say_array_get(say_global_buffers, vtype);
+  say_array *global_bufs = *(say_array**)say_array_get(say_global_buffers,
+                                                       vtype);
 
   size_t i = 0;
   for (say_global_buffer *buf = say_array_get(global_bufs, 0);
@@ -153,12 +155,14 @@ static size_t say_global_buffer_reserve(size_t vtype, size_t size, size_t *ret_i
     i++;
   }
 
+  /* Existing buffers can't store this object, save it somewhere else */
+
   say_vertex_type *type        = say_get_vertex_type(vtype);
   size_t           elem_size   = say_vertex_type_get_size(type);
-  size_t           normal_size = SAY_BUFFER_BYTE_SIZE / (elem_size == 0 ? 1 : elem_size);
+  size_t           normal_size = SAY_BUFFER_BYTE_SIZE /
+    (elem_size == 0 ? 1 : elem_size);
   size_t           buf_size    = normal_size > size ? normal_size : size;
 
-  /* Existing buffers can't store this object, save it somewhere else */
   say_global_buffer *buf = say_global_buffer_create(global_bufs,
                                                     vtype,
                                                     buf_size);

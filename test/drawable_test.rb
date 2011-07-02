@@ -122,15 +122,19 @@ end
 class CustomDrawable < Ray::Drawable
   include Ray::GL
 
+  Vertex = Ray::GL::Vertex.make [
+    [:pos, "pos", :vector2]
+  ]
+
   def initialize
-    super
+    super Vertex
     self.vertex_count = 3
   end
 
   def fill_vertices
-     [Ray::Vertex.new([0,  0]),
-      Ray::Vertex.new([50, 0]),
-      Ray::Vertex.new([50, 50])]
+     [Vertex.new([0,  0]),
+      Vertex.new([50, 0]),
+      Vertex.new([50, 50])]
   end
 
   def render(vertex)
@@ -190,6 +194,5 @@ context "a custom drawable" do
     asserts :textured?
   end
 end
-
 
 run_tests if __FILE__ == $0

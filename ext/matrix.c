@@ -290,6 +290,30 @@ VALUE ray_matrix_orthogonal(VALUE self,
 }
 
 /*
+
+  @overload perspective(fovy, aspect, near, far)
+    Setup a perspective projection.
+
+    @param [Float] fovy Field of view in degrees, in the y direction.
+    @param [Float] aspect Width divided by height
+    @param [Float] near Distance from the viewer to the nearest point
+    @param [Float] far Distance from the viewer to the farthest point
+*/
+static
+VALUE ray_matrix_perspective(VALUE self,
+                             VALUE fovy, VALUE aspect,
+                             VALUE near, VALUE far) {
+  rb_check_frozen(self);
+
+  say_matrix_set_perspective(ray_rb2matrix(self),
+                             NUM2DBL(fovy), NUM2DBL(aspect),
+                             NUM2DBL(near), NUM2DBL(far));
+
+  return self;
+}
+
+
+/*
   Document-class: Ray::Matrix
 
   Ray::Matrix represents a 4x4 matrices. Such matrices can be used to aplly
@@ -321,4 +345,5 @@ void Init_ray_matrix() {
   rb_define_method(ray_cMatrix, "scale", ray_matrix_scale, 1);
   rb_define_method(ray_cMatrix, "rotate", ray_matrix_rotate, 2);
   rb_define_method(ray_cMatrix, "orthogonal", ray_matrix_orthogonal, 6);
+  rb_define_method(ray_cMatrix, "perspective", ray_matrix_perspective, 4);
 }

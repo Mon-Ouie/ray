@@ -87,3 +87,21 @@ size_t say_vertex_type_get_size(say_vertex_type *type) {
 
   return sum;
 }
+
+size_t say_vertex_type_get_offset(say_vertex_type *type, size_t elem) {
+  size_t sum = 0;
+  for (size_t i = 0; i < elem; i++) {
+    switch (say_vertex_type_get_type(type, i)) {
+    case SAY_FLOAT: sum += sizeof(GLfloat); continue;
+    case SAY_INT:   sum += sizeof(GLint);   continue;
+    case SAY_UBYTE: sum += sizeof(GLubyte); continue;
+    case SAY_BOOL:  sum += sizeof(GLint);   continue;
+
+    case SAY_COLOR:   sum += sizeof(GLubyte) * 4; continue;
+    case SAY_VECTOR2: sum += sizeof(GLfloat) * 2; continue;
+    case SAY_VECTOR3: sum += sizeof(GLfloat) * 3; continue;
+    }
+  }
+
+  return sum;
+}

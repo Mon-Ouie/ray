@@ -37,6 +37,12 @@ module Ray
       def orthogonal(*args)
         new.orthogonal(*args)
       end
+
+      # @param [Array<Float>] args (see #perspective)
+      # @return [Ray::Matrix] A perspective projection matrix
+      def perspective(*args)
+        new.perspective(*args)
+      end
     end
 
     # @param [Array<Float>, nil] content Either nothing or the content of each

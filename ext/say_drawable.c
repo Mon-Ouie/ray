@@ -115,7 +115,8 @@ void say_drawable_fill_buffer(say_drawable *drawable, void *vertices) {
 void say_drawable_fill_own_buffer(say_drawable *drawable) {
   if (drawable->has_changed) {
     if (!drawable->slice)
-      drawable->slice = say_buffer_slice_create(0, drawable->vertex_count);
+      drawable->slice = say_buffer_slice_create(drawable->vtype,
+                                                drawable->vertex_count);
 
     if (say_buffer_slice_get_size(drawable->slice) != drawable->vertex_count) {
       say_buffer_slice_recreate(drawable->slice, drawable->vertex_count);

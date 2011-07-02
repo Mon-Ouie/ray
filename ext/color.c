@@ -2,14 +2,7 @@
 
 VALUE ray_cColor = Qnil;
 
-static uint8_t ray_color_clamp(int color) {
-  if (color > 255)
-    return 255;
-  else if (color < 0)
-    return 0;
-  else
-    return color;
-}
+#define ray_color_clamp(col) ray_byte_clamp(col)
 
 say_color ray_rb2col(VALUE object) {
   if (!RAY_IS_A(object, rb_path2class("Ray::Color"))) {

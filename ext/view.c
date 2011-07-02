@@ -32,7 +32,7 @@ VALUE ray_view_alloc(VALUE self) {
     @param [Ray::Vector2] size Size of the view
 
     @param [Ray::Rect] rect The rect this view occupies. It
-  @overload initialize(matirx)
+  @overload initialize(matrix)
     @param [Ray::Matrix] matrix Model view matrix
 */
 static

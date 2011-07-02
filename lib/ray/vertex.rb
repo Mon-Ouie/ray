@@ -1,5 +1,8 @@
 module Ray
   class Vertex
+    # Important settings
+    @vertex_type_id = 0
+
     def x; pos.x; end
     def y; pos.y; end
 

@@ -88,8 +88,25 @@ say_matrix *say_matrix_ortho(float left, float right, float bottom, float top,
   return matrix;
 }
 
+say_matrix *say_matrix_perspective(float fovy, float aspect,
+                                   float near, float far) {
+  say_matrix *matrix = say_matrix_identity();
+
+  float f = 1.0f / tanf(fovy / 2);
+
+  say_matrix_set(matrix, 0, 0, f / aspect);
+  say_matrix_set(matrix, 1, 1, f);
+  say_matrix_set(matrix, 2, 2, (far + near) / (near - far));
+
+  say_matrix_set(matrix, 3, 2, (2 * far * near) / (near - far));
+  say_matrix_set(matrix, 2, 3, -1);
+
+  return matrix;
+}
+
 say_matrix *say_matrix_looking_at(float eye_x, float eye_y, float eye_z,
-                                  float center_x, float center_y, float center_z,
+                                  float center_x, float center_y,
+                                  float center_z,
                                   float up_x, float up_y, float up_z) {
   say_matrix *matrix = say_matrix_identity();
 
@@ -270,6 +287,14 @@ void say_matrix_set_ortho(say_matrix *matrix,
                           float left, float right, float bottom, float top,
                           float near, float far) {
   say_matrix *other = say_matrix_ortho(left, right, bottom, top, near, far);
+  say_matrix_multiply_by(matrix, other);
+  say_matrix_free(other);
+}
+
+void say_matrix_set_perspective(say_matrix *matrix,
+                                float fovy, float aspect,
+                                float near, float far) {
+  say_matrix *other = say_matrix_perspective(fovy, aspect, near, far);
   say_matrix_multiply_by(matrix, other);
   say_matrix_free(other);
 }

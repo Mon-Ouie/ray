@@ -14,6 +14,8 @@ extern "C" {
 typedef struct {
   say_drawable *drawable;
   VALUE         obj;
+
+  size_t vsize;
 } ray_drawable;
 
 /* Classes and modules */
@@ -26,6 +28,8 @@ extern VALUE ray_cMatrix;
 extern VALUE ray_cColor;
 extern VALUE ray_cVertex;
 extern VALUE ray_mGL;
+extern VALUE ray_cGLVertex;
+extern VALUE ray_cIntArray;
 extern VALUE ray_cImage;
 extern VALUE ray_cFont;
 extern VALUE ray_cShader;
@@ -63,6 +67,8 @@ void Init_ray_matrix();
 void Init_ray_color();
 void Init_ray_vertex();
 void Init_ray_gl();
+void Init_ray_gl_vertex();
+void Init_ray_int_array();
 void Init_ray_image();
 void Init_ray_font();
 void Init_ray_shader();
@@ -135,6 +141,20 @@ say_sound_buffer *ray_rb2sound_buffer(VALUE obj);
 say_audio_source *ray_rb2audio_source(VALUE obj);
 say_sound *ray_rb2sound(VALUE obj);
 say_music *ray_rb2music(VALUE obj);
+
+say_array *ray_rb2int_array(VALUE obj);
+
+static uint8_t ray_byte_clamp(int color) {
+  if (color > 255)
+    return 255;
+  else if (color < 0)
+    return 0;
+  else
+    return color;
+}
+
+VALUE ray_get_vertex_class(size_t id);
+size_t ray_get_vtype(VALUE class);
 
 #ifdef __cplusplus
 # if 0
