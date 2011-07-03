@@ -18,13 +18,32 @@ target.draw Ray::Polygon.rectangle([0, 0, 100, 100], Ray::Color.cyan)
 target.draw Ray::Text.new("Testing image targets!", :color => Ray::Color.red)
 target.update
 
+class CustomDrawable < Ray::Drawable
+  include Ray::GL
+
+  def initialize
+    super
+    self.vertex_count = 3
+  end
+
+  def fill_vertices
+     [Ray::Vertex.new([0,  0],  Ray::Color.red),
+      Ray::Vertex.new([50, 0],  Ray::Color.green),
+      Ray::Vertex.new([50, 50], Ray::Color.blue)]
+  end
+
+  def render(vertex)
+    draw_arrays :triangles, vertex, 3
+  end
+end
+
 Ray.game "test", :size => [640, 480] do
   register { add_hook :quit, method(:exit!) }
 
   scene :test do
     window.icon = img
 
-    self.frames_per_second = 60
+    self.frames_per_second = nil
 
     # use deprecated-style shaders to ensure compatibility with old GPUs
     window.shader.compile(:frag => StringIO.new(<<-frag))
@@ -48,8 +67,8 @@ Ray.game "test", :size => [640, 480] do
     frag
 
     @text = text <<eof.chomp, :size => 30, :style => [:italic, :underlined]
-Ce qui se conçoit bien s'énonce clairement
-Et les mots pour le dire arrivent aisément.
+Étonnamment monotone et lasse
+Est ton âme en mon automne, hélas !
 eof
 
     @poly = Ray::Polygon.rectangle @text.rect, Ray::Color.green
@@ -57,6 +76,9 @@ eof
     @sprite = sprite path_of("sprite.png")
     @sprite.origin = @sprite.image.size / 2
     @sprite.color = Ray::Color.new(255, 255, 255, 128)
+
+    @custom_obj = CustomDrawable.new
+    @custom_obj.pos = window.size / 2
 
     always do
       @sprite.pos += [2, 0] if holding? :right
@@ -81,6 +103,7 @@ eof
       win.draw @poly
       win.draw @sprite
       win.draw @text
+      win.draw @custom_obj
     end
   end
 

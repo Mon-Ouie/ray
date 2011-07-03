@@ -291,6 +291,12 @@ void say_shader_set_vector3_loc(say_shader *shader, int loc, say_vector3 val) {
   glUniform3fARB(loc, val.x, val.y, val.z);
 }
 
+void say_shader_set_color_loc(say_shader *shader, int loc, say_color val) {
+  say_shader_bind(shader);
+  float arg[4] = {val.r / 255.0, val.g / 255.0, val.b / 255.0, val.a / 255.0};
+  glUniform4fvARB(loc, 1, arg);
+}
+
 void say_shader_set_matrix_loc(say_shader *shader, int loc, say_matrix *val) {
   say_shader_bind(shader);
   glUniformMatrix4fvARB(loc, 1, GL_FALSE, val->content);

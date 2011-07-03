@@ -2,16 +2,12 @@ $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../lib")
 $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../ext")
 
 require 'ray'
-def path_of(res)
-  File.expand_path File.join(File.dirname(__FILE__), '../../test/res', res)
-end
 
 Ray.game "Circular motion" do
   register { add_hook :quit, method(:exit!) }
 
   scene :rotation do
     @sun = Ray::Polygon.circle([0, 0], 50, Ray::Color.yellow)
-    # @sun = Ray::Polygon.rectangle([0, 0, 50, 50], Ray::Color.yellow)
     @sun.pos = window.size / 2
 
     @earth = Ray::Polygon.circle([0, 0], 20, Ray::Color.blue)
