@@ -1,8 +1,7 @@
 #include "say.h"
 
 say_thread_variable *say_thread_variable_create(say_destructor destructor) {
-  say_thread_variable *var =
-    (say_thread_variable*)malloc(sizeof(say_thread_variable));
+  say_thread_variable *var = malloc(sizeof(say_thread_variable));
 
   pthread_key_create(&(var->key), destructor);
 

@@ -103,6 +103,9 @@ static size_t say_global_buffer_find(say_global_buffer *buf, size_t n) {
 }
 
 static void say_global_buffer_delete_at(say_global_buffer *buf, size_t loc) {
+  if (!buf)
+    return;
+
   size_t n = 0, size = say_array_get_size(buf->ranges);
   for (; n < size; n++) {
     say_range *range = say_array_get(buf->ranges, n);
@@ -171,6 +174,9 @@ static size_t say_global_buffer_reserve(size_t vtype, size_t size, size_t *ret_i
 }
 
 static say_global_buffer *say_global_buffer_at(size_t vtype, size_t id) {
+  if (!say_global_buffers)
+    return NULL;
+
   return say_array_get(*(say_array**)say_array_get(say_global_buffers, vtype),
                        id);
 }
@@ -230,4 +236,11 @@ void say_buffer_slice_update(say_buffer_slice *slice) {
 
 void say_buffer_slice_bind(say_buffer_slice *slice) {
   say_buffer_bind(say_global_buffer_at(slice->vtype, slice->buf_id)->buf);
+}
+
+void say_buffer_slice_clean_up() {
+  if (say_global_buffers) {
+    say_array_free(say_global_buffers);
+    say_global_buffers = NULL;
+  }
 }

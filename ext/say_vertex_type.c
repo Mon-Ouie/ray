@@ -105,3 +105,9 @@ size_t say_vertex_type_get_offset(say_vertex_type *type, size_t elem) {
 
   return sum;
 }
+
+void say_vertex_type_clean_up() {
+  if (say_vertex_types)
+    say_array_free(say_vertex_types);
+  say_vertex_types = NULL;
+}

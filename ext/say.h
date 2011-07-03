@@ -680,6 +680,9 @@ typedef struct {
   io.write       = (sf_vio_write)say_vfile_write;          \
   io.tell        = (sf_vio_tell)say_vfile_tell;
 
+/* Clean up */
+void say_clean_up();
+
 /* String manipulations */
 uint32_t say_utf8_to_utf32(const uint8_t *string);
 char *say_strdup(const char *str);
@@ -697,6 +700,8 @@ void *say_thread_variable_get(say_thread_variable *var);
 const char *say_error_get_last();
 void say_error_set(const char *message);
 
+void say_error_clean_up();
+
 /* Context */
 
 void say_context_ensure();
@@ -710,7 +715,10 @@ void say_context_free(say_context *context);
 void say_context_make_current(say_context *context);
 void say_context_update(say_context *context);
 
+void say_context_clean_up();
+
 /* Vertex types */
+
 size_t say_vertex_type_make_new();
 
 say_vertex_type *say_get_vertex_type(size_t i);
@@ -722,6 +730,8 @@ const char *say_vertex_type_get_name(say_vertex_type *type, size_t i);
 size_t say_vertex_type_get_elem_count(say_vertex_type *type);
 size_t say_vertex_type_get_size(say_vertex_type *type);
 size_t say_vertex_type_get_offset(say_vertex_type *type, size_t elem);
+
+void say_vertex_type_clean_up();
 
 /* Views */
 
@@ -891,6 +901,8 @@ void *say_buffer_slice_get_vertex(say_buffer_slice *slice, size_t id);
 
 void say_buffer_slice_update(say_buffer_slice *slice);
 void say_buffer_slice_bind(say_buffer_slice *slice);
+
+void say_buffer_slice_clean_up();
 
 /* Shaders */
 
@@ -1163,6 +1175,8 @@ size_t say_font_get_kerning(say_font *font, uint32_t first, uint32_t second,
 size_t say_font_get_line_height(say_font *font, size_t size);
 say_image *say_font_get_image(say_font *font, size_t size);
 
+void say_font_clean_up();
+
 /* Texts */
 
 say_text *say_text_create();
@@ -1189,6 +1203,7 @@ say_rect say_text_get_rect(say_text *text);
 /* Audio context */
 
 void say_audio_context_ensure();
+void say_audio_context_clean_up();
 
 /* Audio */
 

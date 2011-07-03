@@ -58,3 +58,6 @@ require 'ray/scene'
 
 require 'ray/game'
 
+at_exit do # Cleaning Ray
+  Ray.send :_clean_up!
+end

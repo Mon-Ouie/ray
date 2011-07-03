@@ -327,3 +327,9 @@ say_image *say_font_get_image(say_font *font, size_t size) {
   say_font_page *page = say_font_get_page(font, size);
   return page->image;
 }
+
+void say_font_clean_up() {
+  if (say_default_font)
+    say_font_free(say_default_font);
+  say_default_font = NULL;
+}

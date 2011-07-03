@@ -19,3 +19,9 @@ void say_error_set(const char *message) {
 
   say_thread_variable_set(say_last_error, say_strdup(message));
 }
+
+void say_error_clean_up() {
+  if (say_last_error)
+    say_thread_variable_free(say_last_error);
+  say_last_error = NULL;
+}

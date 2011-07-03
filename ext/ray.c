@@ -2,8 +2,16 @@
 
 VALUE ray_mRay = Qnil;
 
+VALUE ray_clean_up(VALUE self) {
+  say_clean_up();
+  return Qnil;
+}
+
 void Init_ray_ext() {
   ray_mRay = rb_define_module("Ray");
+
+  rb_define_private_method(rb_singleton_class(ray_mRay),
+                           "_clean_up!", ray_clean_up, 0);
 
   Init_ray_vector();
   Init_ray_rect();

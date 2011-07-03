@@ -45,7 +45,6 @@ VALUE ray_font_init(VALUE self, VALUE arg) {
   else {
     rb_raise(rb_eTypeError, "Can't convert %s into String",
              RAY_OBJ_CLASSNAME(arg));
-
   }
 
   return self;

@@ -22,3 +22,16 @@ void say_audio_context_ensure() {
     alcMakeContextCurrent(say_audio_context);
   }
 }
+
+void say_audio_context_clean_up() {
+  alcMakeContextCurrent(NULL);
+
+  if (say_audio_context)
+    alcDestroyContext(say_audio_context);
+
+  if (say_audio_device)
+    alcCloseDevice(say_audio_device);
+
+  say_audio_context = NULL;
+  say_audio_device  = NULL;
+}
