@@ -933,6 +933,7 @@ int say_shader_locate(say_shader *shader, const char *name);
 
 void say_shader_set_vector2_loc(say_shader *shader, int loc, say_vector2 val);
 void say_shader_set_vector3_loc(say_shader *shader, int loc, say_vector3 val);
+void say_shader_set_color_loc(say_shader *shader, int loc, say_color val);
 void say_shader_set_matrix_loc(say_shader *shader, int loc, say_matrix *val);
 void say_shader_set_float_loc(say_shader *shader, int loc, float val);
 void say_shader_set_floats_loc(say_shader *shader, int loc, size_t count, float *val);

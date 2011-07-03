@@ -31,12 +31,14 @@ module Ray
             raise ArgumentError, "unknown type in a vertex: #{type.inspect}"
           end
         end
+
         vtype = make_type layout.map { |_, *rest| rest }
 
         @vertex_classes[vtype] = Class.new self do
           # Be *very* careful with those values.
-          @vertex_type_id   = vtype
-          @vertex_type_size = Vertex.size(vtype)
+          @vertex_type_id     = vtype
+          @vertex_type_size   = Vertex.size(vtype)
+          @vertex_type_layout = layout
 
           class << self
             undef make
@@ -73,6 +75,20 @@ module Ray
             alias_method "#{attr}?", attr if type == :bool
           end
         end
+      end
+
+      def self.layout
+        @vertex_type_layout
+      end
+
+      def to_s
+        "#<#{self.class} #{pairs}>"
+      end
+
+      def pairs
+        self.class.layout.map { |key, _, _|
+          "#{key}=#{send(key)}"
+        }.join " "
       end
 
       private

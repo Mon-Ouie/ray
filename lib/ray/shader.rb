@@ -54,6 +54,8 @@ module Ray
         set_vector2 loc, value
       when Vector3
         set_vector3 loc, value
+      when Color
+        set_color loc, value
       when Matrix
         set_matrix loc, value
       when true, false, nil

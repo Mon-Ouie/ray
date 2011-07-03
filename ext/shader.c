@@ -129,7 +129,7 @@ static
 VALUE ray_shader_set_vector2(VALUE self, VALUE loc, VALUE val) {
   rb_check_frozen(self);
   rb_hash_aset(rb_iv_get(self, "@images"), loc, Qnil);
-  say_shader_set_vector2_loc(ray_rb2shader(self), FIX2INT(loc),
+  say_shader_set_vector2_loc(ray_rb2shader(self), NUM2INT(loc),
                              ray_convert_to_vector2(val));
   return val;
 }
@@ -138,10 +138,19 @@ static
 VALUE ray_shader_set_vector3(VALUE self, VALUE loc, VALUE val) {
   rb_check_frozen(self);
   rb_hash_aset(rb_iv_get(self, "@images"), loc, Qnil);
-  say_shader_set_vector3_loc(ray_rb2shader(self), FIX2INT(loc),
+  say_shader_set_vector3_loc(ray_rb2shader(self), NUM2INT(loc),
                              ray_convert_to_vector3(val));
   return val;
 }
+
+static
+VALUE ray_shader_set_color(VALUE self, VALUE loc, VALUE val) {
+  rb_check_frozen(self);
+  rb_hash_aset(rb_iv_get(self, "@images"), loc, Qnil);
+  say_shader_set_color_loc(ray_rb2shader(self), NUM2INT(loc), ray_rb2col(val));
+  return val;
+}
+
 
 static
 VALUE ray_shader_set_array(VALUE self, VALUE loc, VALUE val) {
@@ -173,7 +182,7 @@ VALUE ray_shader_set_array(VALUE self, VALUE loc, VALUE val) {
     return Qnil;
   }
 
-  say_shader_set_floats_loc(ray_rb2shader(self), FIX2INT(loc),
+  say_shader_set_floats_loc(ray_rb2shader(self), NUM2INT(loc),
                             size, vector);
   return val;
 }
@@ -182,7 +191,7 @@ static
 VALUE ray_shader_set_numeric(VALUE self, VALUE loc, VALUE val) {
   rb_check_frozen(self);
   rb_hash_aset(rb_iv_get(self, "@images"), loc, Qnil);
-  say_shader_set_float_loc(ray_rb2shader(self), FIX2INT(loc),
+  say_shader_set_float_loc(ray_rb2shader(self), NUM2INT(loc),
                            NUM2DBL(val));
   return val;
 }
@@ -191,7 +200,7 @@ static
 VALUE ray_shader_set_image(VALUE self, VALUE loc, VALUE val) {
   rb_check_frozen(self);
   rb_hash_aset(rb_iv_get(self, "@images"), loc, val);
-  say_shader_set_image_loc(ray_rb2shader(self), FIX2INT(loc),
+  say_shader_set_image_loc(ray_rb2shader(self), NUM2INT(loc),
                            ray_rb2image(val));
   return val;
 }
@@ -200,7 +209,7 @@ static
 VALUE ray_shader_set_current_texture(VALUE self, VALUE loc) {
   rb_check_frozen(self);
   rb_hash_aset(rb_iv_get(self, "@images"), loc, Qnil);
-  say_shader_set_current_texture_loc(ray_rb2shader(self), FIX2INT(loc));
+  say_shader_set_current_texture_loc(ray_rb2shader(self), NUM2INT(loc));
   return Qnil;
 }
 
@@ -208,7 +217,7 @@ static
 VALUE ray_shader_set_bool(VALUE self, VALUE loc, VALUE val) {
   rb_check_frozen(self);
   rb_hash_aset(rb_iv_get(self, "@images"), loc, Qnil);
-  say_shader_set_bool_loc(ray_rb2shader(self), FIX2INT(loc),
+  say_shader_set_bool_loc(ray_rb2shader(self), NUM2INT(loc),
                           RTEST(val));
   return val;
 }
@@ -217,7 +226,7 @@ static
 VALUE ray_shader_set_matrix(VALUE self, VALUE loc, VALUE val) {
   rb_check_frozen(self);
   rb_hash_aset(rb_iv_get(self, "@images"), loc, Qnil);
-  say_shader_set_matrix_loc(ray_rb2shader(self), FIX2INT(loc),
+  say_shader_set_matrix_loc(ray_rb2shader(self), NUM2INT(loc),
                           ray_rb2matrix(val));
   return val;
 }
@@ -241,6 +250,7 @@ void Init_ray_shader() {
 
   rb_define_method(ray_cShader, "set_vector2", ray_shader_set_vector2, 2);
   rb_define_method(ray_cShader, "set_vector3", ray_shader_set_vector3, 2);
+  rb_define_method(ray_cShader, "set_color", ray_shader_set_color, 2);
   rb_define_method(ray_cShader, "set_matrix", ray_shader_set_matrix, 2);
   rb_define_method(ray_cShader, "set_numeric", ray_shader_set_numeric, 2);
   rb_define_method(ray_cShader, "set_array", ray_shader_set_array, 2);
