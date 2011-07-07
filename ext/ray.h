@@ -144,14 +144,7 @@ say_music *ray_rb2music(VALUE obj);
 
 say_array *ray_rb2int_array(VALUE obj);
 
-static uint8_t ray_byte_clamp(int color) {
-  if (color > 255)
-    return 255;
-  else if (color < 0)
-    return 0;
-  else
-    return color;
-}
+uint8_t ray_byte_clamp(int color);
 
 VALUE ray_get_vertex_class(size_t id);
 size_t ray_get_vtype(VALUE class);

@@ -19,15 +19,18 @@
 
 #include <pthread.h>
 
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-
-#ifdef HAVE_XRANDR
-# include <X11/extensions/Xrandr.h>
-#endif
-
 #include <GL/glew.h>
-#include <GL/glx.h>
+
+#ifdef SAY_OSX
+# include "say_osx.h"
+#else
+# include <X11/Xlib.h>
+# include <X11/Xatom.h>
+# ifdef HAVE_XRANDR
+#  include <X11/extensions/Xrandr.h>
+# endif
+# include <GL/glx.h>
+#endif
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -35,8 +38,13 @@
 #include FT_OUTLINE_H
 #include FT_BITMAP_H
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#ifdef SAY_OSX
+# include <OpenAL/al.h>
+# include <OpenAL/alc.h>
+#else
+# include <AL/al.h>
+# include <AL/alc.h>
+#endif
 
 #include <sndfile.h>
 
@@ -113,14 +121,18 @@ typedef struct {
 } say_thread_variable;
 
 typedef struct {
-  GLXContext context;
-
   uint32_t count;
+
+#ifdef SAY_OSX
+  SayContext *context;
+#else
+  GLXContext context;
 
   Display *dis;
   Window win;
 
   uint8_t should_free_window;
+#endif
 } say_context;
 
 typedef struct {
@@ -463,10 +475,10 @@ typedef struct {
   union {
     say_event_mouse_motion motion;
     say_event_wheel_motion wheel;
-    say_event_button button;
-    say_event_text text;
-    say_event_key key;
-    say_event_resize resize;
+    say_event_button       button;
+    say_event_text         text;
+    say_event_key          key;
+    say_event_resize       resize;
   } ev;
 } say_event;
 
@@ -479,8 +491,14 @@ typedef struct {
   say_target *target;
   say_input input;
 
+  bool show_cursor;
+
+#ifdef SAY_OSX
+  SayWindow *win;
+#else
   Display *dis;
   Window win;
+  int screen_id;
 
   XVisualInfo *vi;
   GLXFBConfig config;
@@ -491,15 +509,13 @@ typedef struct {
   XIC ic;
 
   Cursor hidden_cursor;
-  bool show_cursor;
 
   int old_video_mode;
 
   Atom delete_event;
 
-  int screen_id;
-
   uint8_t style;
+#endif
 } say_window;
 
 typedef struct {

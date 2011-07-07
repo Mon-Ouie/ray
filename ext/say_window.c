@@ -4,20 +4,31 @@ static void say_window_unbind_fbo(void *window) {
   say_image_target_unbind();
 }
 
+#ifdef SAY_OSX
+# include "say_osx_window.h"
+#endif
+
+#ifdef SAY_X11
 unsigned long  say_event_mask =
   FocusChangeMask   | ButtonPressMask        | ButtonReleaseMask |
   ButtonMotionMask  | PointerMotionMask      | KeyPressMask      |
   KeyReleaseMask    | StructureNotifyMask    | EnterWindowMask   |
   LeaveWindowMask;
+#endif
 
 say_window *say_window_create() {
   say_window *win = (say_window*)malloc(sizeof(say_window));
 
-  win->dis = NULL;
-  win->win = None;
-
   win->target = say_target_create();
   say_input_reset(&win->input);
+
+  win->show_cursor = true;
+
+#ifdef SAY_OSX
+  win->win = [SayWindow new];
+#else
+  win->dis = NULL;
+  win->win = None;
 
   win->vi = NULL;
 
@@ -25,15 +36,15 @@ say_window *say_window_create() {
   win->ic = NULL;
 
   win->hidden_cursor = None;
-  win->show_cursor   = true;
-
   win->old_video_mode = -1;
 
   win->cached_event.type = SAY_EVENT_NONE;
+#endif
 
   return win;
 }
 
+#ifdef SAY_X11
 static void say_window_find_config(say_window *win) {
   static int visual_attribs[] = {
     GLX_DOUBLEBUFFER, GL_TRUE,
@@ -53,13 +64,20 @@ static void say_window_find_config(say_window *win) {
   win->vi = glXGetVisualFromFBConfig(win->dis, configs[0]);
   XFree(configs);
 }
+#endif
 
 void say_window_free(say_window *win) {
   say_window_close(win);
   say_target_free(win->target);
+
+#ifdef SAY_OSX
+  [win->win release];
+#endif
+
   free(win);
 }
 
+#ifdef SAY_X11
 static void say_window_build_cursor(say_window *win) {
   Pixmap pixmap = XCreatePixmap(win->dis, win->win, 1, 1, 1);
   GC gc = XCreateGC(win->dis, pixmap, 0, NULL);
@@ -74,8 +92,10 @@ static void say_window_build_cursor(say_window *win) {
 
   XFreePixmap(win->dis, pixmap);
 }
+#endif
 
-#ifdef HAVE_XRANDR
+#ifdef SAY_X11
+# ifdef HAVE_XRANDR
 static bool say_window_enable_fullscreen(say_window *win, size_t w, size_t h) {
   int version;
   if (!XQueryExtension(win->dis, "RANDR", &version, &version, &version)) {
@@ -116,21 +136,29 @@ static bool say_window_enable_fullscreen(say_window *win, size_t w, size_t h) {
   XRRFreeScreenConfigInfo(conf);
   return false;
 }
-#else
+# else
 static bool say_window_enable_fullscreen(say_window *win, size_t w, size_t h) {
   say_error_set("can't create fullscreen windows (XRANDR not supported)");
   return false;
 }
+# endif
 #endif
-#include <X11/extensions/xf86vmode.h>
+
 int say_window_open(say_window *win, size_t w, size_t h, const char *title,
                     uint8_t style) {
-
   if (w < 1 || h < 1) {
     say_error_set("window size must be at least (1,1)");
     return 0;
   }
 
+#ifdef SAY_OSX
+  if (![win->win openWithTitle:title
+                         width:w
+                        height:h
+                         style:style]) {
+    return false;
+  }
+#else
   if (win->dis)
     say_window_close(win);
 
@@ -285,6 +313,7 @@ int say_window_open(say_window *win, size_t w, size_t h, const char *title,
     XMapWindow(win->dis, win->win);
 
   XFlush(win->dis);
+#endif
 
   say_target_set_context_proc(win->target,
                               (say_context_proc)say_context_create_for_window);
@@ -302,10 +331,14 @@ void say_window_close(say_window *win) {
   say_target_set_context_proc(win->target, NULL);
 
   say_input_reset(&win->input);
+
+#ifdef SAY_OSX
+  [win->win close];
+#else
   win->cached_event.type = SAY_EVENT_NONE;
 
   if (win->dis && win->old_video_mode >= 0) {
-#ifdef HAVE_XRANDR
+# ifdef HAVE_XRANDR
     XRRScreenConfiguration *conf = XRRGetScreenInfo(win->dis,
                                                     RootWindow(win->dis,
                                                                win->screen_id));
@@ -319,7 +352,7 @@ void say_window_close(say_window *win) {
                          current_rot, CurrentTime);
       XRRFreeScreenConfigInfo(conf);
     }
-#endif
+# endif
   }
 
   if (win->hidden_cursor) {
@@ -353,15 +386,18 @@ void say_window_close(say_window *win) {
     XCloseDisplay(win->dis);
     win->dis = NULL;
   }
+#endif
 }
 
 void say_window_update(say_window *win) {
   say_target_update(win->target);
-  if (say_target_make_current(win->target))
-    glXSwapBuffers(win->dis, win->win);
 }
 
 void say_window_hide_cursor(say_window *win) {
+#ifdef SAY_OSX
+  [NSCursor hide];
+  win->show_cursor = false;
+#else
   if (win->dis) {
     if (!win->hidden_cursor)
       say_window_build_cursor(win);
@@ -369,13 +405,19 @@ void say_window_hide_cursor(say_window *win) {
     XDefineCursor(win->dis, win->win, win->hidden_cursor);
     win->show_cursor = false;
   }
+#endif
 }
 
 void say_window_show_cursor(say_window *win) {
+#ifdef SAY_OSX
+  [NSCursor unhide];
+  win->show_cursor = true;
+#else
   if (win->dis) {
     XDefineCursor(win->dis, win->win, None);
     win->show_cursor = true;
   }
+#endif
 }
 
 bool say_window_is_cursor_shown(say_window *win) {
@@ -383,6 +425,10 @@ bool say_window_is_cursor_shown(say_window *win) {
 }
 
 bool say_window_set_icon(say_window *win, say_image *icon) {
+#ifdef SAY_OSX
+  /* TODO: Set icon */
+  return true;
+#else
   if (!win->win) {
     say_error_set("window has not been opened");
     return false;
@@ -426,8 +472,10 @@ bool say_window_set_icon(say_window *win, say_image *icon) {
   free(pixels);
 
   return true;
+#endif
 }
 
+#ifdef SAY_X11
 static say_button say_window_convert_button(unsigned int button) {
   switch (button) {
     case Button1: return SAY_BUTTON_LEFT;
@@ -753,6 +801,7 @@ static int say_window_parse_event(say_window *win, say_event *ev) {
 
   return 0;
 }
+#endif
 
 static void say_window_process_event(say_window *win, say_event *ev) {
   switch (ev->type) {
@@ -776,6 +825,7 @@ static void say_window_process_event(say_window *win, say_event *ev) {
       break;
     }
 
+#ifdef SAY_X11
     case SAY_EVENT_FOCUS_GAIN: {
       if (win->ic) XSetICFocus(win->ic);
       break;
@@ -785,12 +835,21 @@ static void say_window_process_event(say_window *win, say_event *ev) {
       if (win->ic) XUnsetICFocus(win->ic);
       break;
     }
+#endif
 
     default: break; /* Prevent some warnings */
   }
 }
 
 int say_window_poll_event(say_window *win, say_event *ev) {
+#ifdef SAY_OSX
+  if ([win->win pollEvent:ev]) {
+    say_window_process_event(win, ev);
+    return true;
+  }
+
+  return false;
+#else
   if (win->cached_event.type != SAY_EVENT_NONE) {
     say_window_process_event(win, &win->cached_event);
 
@@ -813,9 +872,14 @@ int say_window_poll_event(say_window *win, say_event *ev) {
   } while (XPending(win->dis));
 
   return 0;
+#endif
 }
 
 void say_window_wait_event(say_window *win, say_event *ev) {
+#ifdef SAY_OSX
+  [win->win waitEvent:ev];
+  say_window_process_event(win, ev);
+#else
   if (win->cached_event.type != SAY_EVENT_NONE) {
     *ev = win->cached_event;
     win->cached_event.type = SAY_EVENT_NONE;
@@ -833,6 +897,7 @@ void say_window_wait_event(say_window *win, say_event *ev) {
       return;
     }
   }
+#endif
 }
 
 say_input *say_window_get_input(say_window *win) {

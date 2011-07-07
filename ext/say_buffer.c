@@ -52,7 +52,10 @@ static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
 
 static void say_buffer_build_vao(say_buffer *buf, GLuint vao) {
   say_vao_make_current(vao);
+
   say_buffer_make_current(buf->vbo);
+  /* forcefully bind */
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB, buf->vbo);
 
   say_vertex_type *type = say_get_vertex_type(buf->vtype);
 
@@ -175,11 +178,10 @@ void say_buffer_unbind() {
 }
 
 void say_buffer_update_part(say_buffer *buf, size_t id, size_t size) {
-  say_context_ensure();
-
   if (size == 0) return;
 
-  say_buffer_make_current(buf->vbo);
+  say_context_ensure();
+  say_buffer_bind(buf);
 
   size_t byte_size = say_array_get_elem_size(buf->buffer);
   glBufferSubDataARB(GL_ARRAY_BUFFER_ARB,
@@ -199,7 +201,7 @@ size_t say_buffer_get_size(say_buffer *buf) {
 void say_buffer_resize(say_buffer *buf, size_t size) {
   say_array_resize(buf->buffer, size);
 
-  say_buffer_make_current(buf->vbo);
+  say_buffer_bind(buf);
   glBufferDataARB(GL_ARRAY_BUFFER_ARB,
                   size * say_array_get_elem_size(buf->buffer),
                   say_buffer_get_vertex(buf, 0),

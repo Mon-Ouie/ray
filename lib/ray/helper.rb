@@ -155,5 +155,10 @@ module Ray
         end
       end
     end
+
+    # (see Ray::Input#mouse_pos)
+    def mouse_pos
+      window.input.mouse_pos
+    end
   end
 end

@@ -202,5 +202,10 @@ void say_target_draw_buffer(say_target *target,
 }
 
 void say_target_update(say_target *target) {
+  say_context *context = say_target_get_context(target);
+  if (context) {
+    say_context_update(context);
+  }
+
   target->up_to_date = 1;
 }
