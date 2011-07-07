@@ -3,7 +3,7 @@
 
 #include "say_basic_type.h"
 
-typedef struct {
+typedef struct say_image {
   GLuint texture;
 
   say_color *pixels;

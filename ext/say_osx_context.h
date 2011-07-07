@@ -65,3 +65,30 @@
 }
 
 @end
+
+void say_imp_context_free(say_imp_context ctxt) {
+  [ctxt release];
+}
+
+say_imp_context say_imp_context_create() {
+  return [[SayContext alloc] initWithShared:nil];
+}
+
+say_imp_context say_imp_context_create_shared(say_imp_context shared) {
+  return [[SayContext alloc] initWithShared:shared];
+}
+
+say_imp_context say_imp_context_create_for_window(say_imp_context shared,
+                                                  say_imp_window  win) {
+  SayContext *ctxt = [[SayContext alloc] initWithShared:shared];
+  [ctxt setView:win.view];
+  return ctxt;
+}
+
+void say_imp_context_make_current(say_imp_context ctxt) {
+  [ctxt makeCurrent];
+}
+
+void say_imp_context_update(say_imp_context ctxt) {
+  [ctxt update];
+}

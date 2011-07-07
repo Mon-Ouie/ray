@@ -25,7 +25,7 @@ say_window *say_window_create() {
   win->show_cursor = true;
 
 #ifdef SAY_OSX
-  win->win = [SayWindow new];
+  win->win = say_imp_window_create();
 #else
   win->dis = NULL;
   win->win = None;
@@ -71,7 +71,7 @@ void say_window_free(say_window *win) {
   say_target_free(win->target);
 
 #ifdef SAY_OSX
-  [win->win release];
+  say_imp_window_free(win->win);
 #endif
 
   free(win);
@@ -152,12 +152,8 @@ int say_window_open(say_window *win, size_t w, size_t h, const char *title,
   }
 
 #ifdef SAY_OSX
-  if (![win->win openWithTitle:title
-                         width:w
-                        height:h
-                         style:style]) {
+  if (!say_imp_window_open(win->win, title, w, h, style))
     return false;
-  }
 #else
   if (win->dis)
     say_window_close(win);
@@ -329,11 +325,10 @@ int say_window_open(say_window *win, size_t w, size_t h, const char *title,
 
 void say_window_close(say_window *win) {
   say_target_set_context_proc(win->target, NULL);
-
   say_input_reset(&win->input);
 
 #ifdef SAY_OSX
-  [win->win close];
+  say_imp_window_close(win->win);
 #else
   win->cached_event.type = SAY_EVENT_NONE;
 
@@ -395,7 +390,7 @@ void say_window_update(say_window *win) {
 
 void say_window_hide_cursor(say_window *win) {
 #ifdef SAY_OSX
-  [NSCursor hide];
+  say_imp_window_hide_cursor(win->win);
   win->show_cursor = false;
 #else
   if (win->dis) {
@@ -410,7 +405,7 @@ void say_window_hide_cursor(say_window *win) {
 
 void say_window_show_cursor(say_window *win) {
 #ifdef SAY_OSX
-  [NSCursor unhide];
+  say_imp_window_show_cursor(win->win);
   win->show_cursor = true;
 #else
   if (win->dis) {
@@ -843,7 +838,7 @@ static void say_window_process_event(say_window *win, say_event *ev) {
 
 int say_window_poll_event(say_window *win, say_event *ev) {
 #ifdef SAY_OSX
-  if ([win->win pollEvent:ev]) {
+  if (say_imp_window_poll_event(win->win, ev)) {
     say_window_process_event(win, ev);
     return true;
   }
@@ -877,7 +872,7 @@ int say_window_poll_event(say_window *win, say_event *ev) {
 
 void say_window_wait_event(say_window *win, say_event *ev) {
 #ifdef SAY_OSX
-  [win->win waitEvent:ev];
+  say_imp_window_wait_event(win->win, ev);
   say_window_process_event(win, ev);
 #else
   if (win->cached_event.type != SAY_EVENT_NONE) {

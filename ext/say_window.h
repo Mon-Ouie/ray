@@ -16,7 +16,7 @@ typedef struct say_window {
   bool show_cursor;
 
 #ifdef SAY_OSX
-  SayWindow *win;
+  say_imp_window win;
 #else
   Display *dis;
   Window win;

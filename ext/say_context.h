@@ -9,7 +9,7 @@ typedef struct {
   uint32_t count;
 
 #ifdef SAY_OSX
-  SayContext *context;
+  say_imp_context context;
 #else
   GLXContext context;
 

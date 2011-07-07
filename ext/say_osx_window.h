@@ -562,3 +562,45 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
 }
 
 @end
+
+say_imp_window say_imp_window_create() {
+  return [SayWindow new];
+}
+
+void say_imp_window_free(say_imp_window win) {
+  [win release];
+}
+
+bool say_imp_window_open(say_imp_window win,
+                         const char *title,
+                         size_t w, size_t h,
+                         uint8_t flags) {
+  return [win openWithTitle:title
+                      width:w
+                     height:h
+                      style:flags];
+}
+
+void say_imp_window_close(say_imp_window win) {
+  [win close];
+}
+
+void say_imp_window_show_cursor(say_imp_window win) {
+  [NSCursor unhide];
+}
+
+void say_imp_window_hide_cursor(say_imp_window win) {
+  [NSCursor hide];
+}
+
+void say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
+  /* TODO: set icon */
+}
+
+bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev) {
+  return [win pollEvent:ev];
+}
+
+void say_imp_window_wait_event(say_imp_window win, struct say_event *ev) {
+  [win waitEvent:ev];
+}

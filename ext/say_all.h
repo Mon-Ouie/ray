@@ -53,6 +53,8 @@
 # include <GL/glx.h>
 #endif
 
+#include "say_imp.h"
+
 /* Clean up */
 void say_clean_up();
 

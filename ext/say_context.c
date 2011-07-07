@@ -63,9 +63,9 @@ say_context *say_context_create_for_window(say_window *window) {
     say_context_create_initial();
 
 #ifdef SAY_OSX
-  SayContext *shared = say_shared_context->context;
-  context->context = [[SayContext alloc] initWithShared:shared];
-  [context->context setView:[window->win view]];
+  say_imp_context shared = say_shared_context->context;
+  context->context = say_imp_context_create_for_window(shared,
+                                                       window->win);
 #else
   context->dis = window->dis;
   context->win = window->win;
@@ -85,7 +85,7 @@ say_context *say_context_create_for_window(say_window *window) {
 
 void say_context_free(say_context *context) {
 #ifdef SAY_OSX
-  [context->context release];
+  say_imp_context_free(context->context);
 #else
   if (context->context) {
     if (glXGetCurrentContext() == context->context)
@@ -112,7 +112,7 @@ void say_context_free(say_context *context) {
 void say_context_make_current(say_context *context) {
   if (say_context_current() != context) {
 #ifdef SAY_OSX
-    [context->context makeCurrent];
+    say_imp_context_make_current(context->context);
 #else
     glXMakeCurrent(context->dis, context->win, context->context);
 #endif
@@ -123,7 +123,7 @@ void say_context_make_current(say_context *context) {
 
 void say_context_update(say_context *context) {
 #ifdef SAY_OSX
-  [context->context update];
+  say_imp_context_update(context->context);
 #else
   if (context->win)
     glXSwapBuffers(context->dis, context->win);
@@ -150,10 +150,10 @@ static void say_context_create_initial() {
 
 static void say_context_setup(say_context *context) {
 #ifdef SAY_OSX
-  SayContext *shared = say_shared_context == context ? nil :
+  say_imp_context shared = say_shared_context == context ? nil :
     say_shared_context->context;
 
-  context->context = [[SayContext alloc] initWithShared:shared];
+  context->context = say_imp_context_create_shared(shared);
 #else
   context->dis = XOpenDisplay(NULL);
 
