@@ -97,23 +97,8 @@ context "a sound" do
   denies(:looping?)
 
   context "after enabling looping" do
-    hookup { topic.looping = true }
+    hiookup { topic.looping = true }
     asserts(:looping?)
-  end
-
-  context "after starting playback" do
-    hookup { topic.play }
-    asserts(:status).equals :playing
-
-    context "and pausing it" do
-      hookup { topic.pause }
-      asserts(:status).equals :paused
-    end
-
-    context "and stopping it" do
-      hookup { topic.stop }
-      asserts(:status).equals :stopped
-    end
   end
 end
 
@@ -133,21 +118,6 @@ context "a music" do
   context "after enabling looping" do
     hookup { topic.looping = true }
     asserts(:looping?)
-  end
-
-  context "after starting playback" do
-    hookup { topic.play }
-    asserts(:status).equals :playing
-
-    context "and pausing it" do
-      hookup { topic.pause }
-      asserts(:status).equals :paused
-    end
-
-    context "and stopping it" do
-      hookup { topic.stop }
-      asserts(:status).equals :stopped
-    end
   end
 end
 
