@@ -177,8 +177,7 @@ static NSEvent *say_osx_get_event(bool patient) {
   }
 }
 
-- (BOOL)pollEvent:(void*)arg {
-  say_event *ev = (say_event*)arg;
+- (BOOL)pollEvent:(say_event*)ev {
   NSEvent *nsev = nil;
 
   NSAutoreleasePool *pool = [NSAutoreleasePool new];
@@ -199,8 +198,7 @@ static NSEvent *say_osx_get_event(bool patient) {
   return NO;
 }
 
-- (void)waitEvent:(void*)arg {
-  say_event *ev = (say_event*)arg;
+- (void)waitEvent:(say_event*)ev {
   NSEvent *nsev = nil;
 
   NSAutoreleasePool *pool = [NSAutoreleasePool new];

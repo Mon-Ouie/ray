@@ -2,8 +2,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define say_event void
-#define say_array void
+struct say_event;
+struct say_array;
 
 @interface SayContext : NSObject {
   NSOpenGLContext *context;
@@ -25,7 +25,7 @@
   NSWindow *window;
   NSOpenGLView *view;
 
-  say_array *events;
+  struct say_array *events;
 
   BOOL allow_close;
 
@@ -40,12 +40,9 @@
                 style:(uint8_t)style;
 - (void)close;
 
-- (BOOL)pollEvent:(say_event*)ev;
-- (void)waitEvent:(say_event*)ev;
+- (BOOL)pollEvent:(struct say_event*)ev;
+- (void)waitEvent:(struct say_event*)ev;
 
 @property (readonly) NSOpenGLView *view;
 
 @end
-
-#undef say_event
-#undef say_array
