@@ -2,10 +2,6 @@
 
 VALUE ray_mRay = Qnil;
 
-#ifdef SAY_OSX
-static NSAutoreleasePool *ray_osx_pool = nil;
-#endif
-
 static
 VALUE ray_clean_up(VALUE self) {
   say_clean_up();
