@@ -100,7 +100,10 @@ VALUE ray_window_set_title(VALUE self, VALUE title) {
 static
 VALUE ray_window_resize(VALUE self, VALUE size) {
   say_vector2 c_size = ray_convert_to_vector2(size);
-  say_window_resize(ray_rb2window(self), c_size.x, c_size.y);
+  if (!say_window_resize(ray_rb2window(self), c_size.x, c_size.y)) {
+    rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
+
   return size;
 }
 

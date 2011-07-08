@@ -472,17 +472,16 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
 - (BOOL)resignFirstResponder  { return  NO; }
 
 - (void)keyDown:(NSEvent*)nsev {
-  if ([nsev isARepeat])
-    return;
+  if (![nsev isARepeat]) {
+    say_event ev;
+    ev.type = SAY_EVENT_KEY_PRESS;
 
-  say_event ev;
-  ev.type = SAY_EVENT_KEY_PRESS;
+    ev.ev.key.code        = say_osx_convert_key(nsev);
+    ev.ev.key.mod         = say_osx_convert_mod(nsev);
+    ev.ev.key.native_code = nsev.keyCode;
 
-  ev.ev.key.code        = say_osx_convert_key(nsev);
-  ev.ev.key.mod         = say_osx_convert_mod(nsev);
-  ev.ev.key.native_code = nsev.keyCode;
-
-  say_array_push(events, &ev);
+    say_array_push(events, &ev);
+  }
 
   NSText *text = [window fieldEditor:YES forObject:self];
   [text interpretKeyEvents:[NSArray arrayWithObject:nsev]];
@@ -733,23 +732,27 @@ void say_imp_window_hide_cursor(say_imp_window win) {
   [NSCursor hide];
 }
 
-void say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
+bool say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
   [win setIcon:img];
+  return true;
 }
 
 void say_imp_window_set_title(say_imp_window win, const char *title) {
   [win setTitle:title];
 }
 
-void say_imp_window_resize(say_imp_window win, size_t w, size_t h) {
+bool say_imp_window_resize(say_imp_window win, size_t w, size_t h) {
   [win resizeToWidth:w height:h];
+  return true;
 }
 
-bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev) {
+bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev,
+                               say_input *input) {
   return [win pollEvent:ev];
 }
 
-void say_imp_window_wait_event(say_imp_window win, struct say_event *ev) {
+void say_imp_window_wait_event(say_imp_window win, struct say_event *ev,
+                               say_input *input) {
   [win waitEvent:ev];
 }
 

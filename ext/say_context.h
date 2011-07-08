@@ -7,17 +7,7 @@ struct say_window;
 
 typedef struct {
   uint32_t count;
-
-#ifdef SAY_OSX
   say_imp_context context;
-#else
-  GLXContext context;
-
-  Display *dis;
-  Window win;
-
-  uint8_t should_free_window;
-#endif
 } say_context;
 
 void say_context_ensure();

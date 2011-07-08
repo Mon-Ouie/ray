@@ -44,13 +44,10 @@
 
 #ifdef SAY_OSX
 # include "say_osx.h"
-#else
-# include <X11/Xlib.h>
-# include <X11/Xatom.h>
-# ifdef HAVE_XRANDR
-#  include <X11/extensions/Xrandr.h>
-# endif
-# include <GL/glx.h>
+#endif
+
+#ifdef SAY_X11
+# include "say_x11.h"
 #endif
 
 #include "say_imp.h"

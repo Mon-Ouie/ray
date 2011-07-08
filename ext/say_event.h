@@ -3,7 +3,6 @@
 
 #include "say_basic_type.h"
 
-
 typedef enum {
   SAY_EVENT_NONE = 0,
 
@@ -196,7 +195,7 @@ typedef struct say_event {
   } ev;
 } say_event;
 
-typedef struct {
+typedef struct say_input {
   uint8_t keys[SAY_KEY_COUNT - 1]; /* Don't count SAY_KEY_UNKNOWN */
   say_vector2 mouse_pos;
 } say_input;
