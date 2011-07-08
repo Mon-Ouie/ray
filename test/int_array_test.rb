@@ -28,6 +28,13 @@ context "an int array" do
       asserts(:size).equals 3
       asserts(:to_a).equals [3, 2, 1]
     end
+
+    context "but cleared" do
+      hookup { topic.clear }
+
+      asserts(:to_a).equals []
+      asserts(:size).equals 0
+    end
   end
 
   context "resized with []=" do

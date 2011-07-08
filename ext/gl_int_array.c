@@ -103,6 +103,13 @@ VALUE ray_int_array_size(VALUE self) {
   return INT2FIX(say_array_get_size(ray_rb2int_array(self)));
 }
 
+/* Removes all the elements from the array */
+static
+VALUE ray_int_array_clear(VALUE self) {
+  say_array_resize(ray_rb2int_array(self), 0);
+  return self;
+}
+
 /*
   DocumentClass: Ray::GL::IntArray
 
@@ -119,4 +126,6 @@ void Init_ray_int_array() {
   rb_define_method(ray_cIntArray, "[]=", ray_int_array_set, 2);
 
   rb_define_method(ray_cIntArray, "size", ray_int_array_size, 0);
+
+  rb_define_method(ray_cIntArray, "clear", ray_int_array_clear, 0);
 }
