@@ -487,6 +487,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   [text interpretKeyEvents:[NSArray arrayWithObject:nsev]];
 
   if (text.string.length != 0) {
+    say_event ev;
     ev.type = SAY_EVENT_TEXT_ENTERED;
     ev.ev.text.text = [text.string characterAtIndex:0];
 
