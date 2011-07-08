@@ -63,10 +63,8 @@ int say_image_load_file(say_image *img, const char *filename) {
   int width, height, comp = 4;
 
   stbi_uc *buf = stbi_load(filename, &width, &height, &comp, 4);
-  if (!buf) {
-    say_error_set(stbi_failure_reason());
+  if (!buf)
     return 0;
-  }
 
   say_image_load_raw(img, width, height, (say_color*)buf);
   stbi_image_free(buf);
@@ -80,10 +78,8 @@ int say_image_load_from_memory(say_image *img, size_t size,
 
   stbi_uc *buf = stbi_load_from_memory((const uint8_t*)buffer, size,
                                        &width, &height, &comp, 4);
-  if (!buf) {
-    say_error_set(stbi_failure_reason());
+  if (!buf)
     return 0;
-  }
 
   say_image_load_raw(img, width, height, (say_color*)buf);
   stbi_image_free(buf);
