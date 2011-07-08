@@ -262,6 +262,30 @@ VALUE ray_matrix_rotate(VALUE self, VALUE angle, VALUE rb_vector) {
 }
 
 /*
+  @overload look_at(eye, center, up)
+    Creates a view matrix, usually for 3D.
+
+    @param [Ray::Vector3] eye Position of the eye
+    @param [Ray::Vector3] center Reference point
+    @param [Ray::Vector3] up
+ */
+static
+VALUE ray_matrix_look_at(VALUE self, VALUE eye, VALUE center, VALUE up) {
+  say_matrix *mat = ray_rb2matrix(self);
+
+  say_vector3 c_eye    = ray_convert_to_vector3(eye);
+  say_vector3 c_center = ray_convert_to_vector3(center);
+  say_vector3 c_up     = ray_convert_to_vector3(up);
+
+  say_matrix_look_at(mat,
+                     c_eye.x, c_eye.y, c_eye.z,
+                     c_center.x, c_center.y, c_center.z,
+                     c_up.x, c_up.y, c_up.z);
+
+  return self;
+}
+
+/*
   @overload orthogonal(left, right, bottom, top, near, far)
     Setup an orthogonal projection.
 
@@ -344,6 +368,7 @@ void Init_ray_matrix() {
   rb_define_method(ray_cMatrix, "translate", ray_matrix_translate, 1);
   rb_define_method(ray_cMatrix, "scale", ray_matrix_scale, 1);
   rb_define_method(ray_cMatrix, "rotate", ray_matrix_rotate, 2);
+  rb_define_method(ray_cMatrix, "look_at", ray_matrix_look_at, 3);
   rb_define_method(ray_cMatrix, "orthogonal", ray_matrix_orthogonal, 6);
   rb_define_method(ray_cMatrix, "perspective", ray_matrix_perspective, 4);
 }

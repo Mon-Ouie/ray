@@ -32,6 +32,11 @@ module Ray
         new.rotate(angle, vector)
       end
 
+      # (see #look_at)
+      def looking_at(eye, center, up)
+        new.look_at(eye, center, up)
+      end
+
       # @param [Array<Float>] args (see #orthogonal)
       # @return [Ray::Matrix] An orthogonal projection matrix
       def orthogonal(*args)

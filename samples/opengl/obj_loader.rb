@@ -67,7 +67,6 @@ class Model < Ray::Drawable
     @positions << Ray::Vector3[*args.map(&:to_f)]
   end
 
-
   def add_normal(args)
     @normals << Ray::Vector3[*args.map(&:to_f)]
   end
