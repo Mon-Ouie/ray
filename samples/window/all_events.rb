@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-$:.unshift File.expand_path(File.dirname(__FILE__) + "/../lib")
-$:.unshift File.expand_path(File.dirname(__FILE__) + "/../ext")
+$:.unshift File.expand_path(File.dirname(__FILE__) + "/../../lib")
+$:.unshift File.expand_path(File.dirname(__FILE__) + "/../../ext")
 
 require 'ray'
 
-Ray.game "run_scene", :resizable => true do
+Ray.game "all events", :fullscreen => false do
   register { add_hook :quit, method(:exit!) }
 
   scene :main do
@@ -29,7 +29,7 @@ Ray.game "run_scene", :resizable => true do
     end
 
     on :text_entered do |text|
-      puts text.encode("utf-8")
+      puts Ray::TextHelper.convert(text)
     end
 
     @obj = Ray::Polygon.rectangle [50, 100, 100, 50], Ray::Color.red

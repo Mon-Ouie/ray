@@ -25,6 +25,9 @@ void say_imp_window_hide_cursor(say_imp_window win);
 
 void say_imp_window_set_icon(say_imp_window win, struct say_image *img);
 
+void say_imp_window_set_title(say_imp_window win, const char *title);
+void say_imp_window_resize(say_imp_window win, size_t w, size_t h);
+
 bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev);
 void say_imp_window_wait_event(say_imp_window win, struct say_event *ev);
 

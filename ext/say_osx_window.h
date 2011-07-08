@@ -16,6 +16,14 @@ static void say_osx_setup_process() {
   }
 }
 
+@interface SayWindowImp : NSWindow
+@end
+
+@implementation SayWindowImp
+- (BOOL)canBecomeKeyWindow  { return YES; }
+- (BOOL)canBecomeMainWindow { return YES; }
+@end
+
 @interface SayWindow ()
 - (void)ownMouseDown:(NSEvent*)nsev;
 - (void)ownMouseUp:(NSEvent*)nsev;
@@ -58,32 +66,55 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
 
   unsigned int cocoa_style = NSBorderlessWindowMask;
 
-  if (!(style & SAY_WINDOW_NO_FRAME)) {
+  if (!((style & SAY_WINDOW_NO_FRAME) || (style & SAY_WINDOW_FULLSCREEN))) {
     cocoa_style |= (NSTitledWindowMask |
                     NSMiniaturizableWindowMask |
                     NSClosableWindowMask);
+
+    if (style & SAY_WINDOW_RESIZABLE) {
+      cocoa_style |= NSResizableWindowMask;
+    }
   }
 
-  if (style & SAY_WINDOW_RESIZABLE) {
-    cocoa_style |= NSResizableWindowMask;
+  if (style & SAY_WINDOW_FULLSCREEN) {
+    rect = [[NSScreen mainScreen] frame];
+
+    real_w = w;
+    real_h = h;
+
+    screen_w = rect.size.width;
+    screen_h = rect.size.height;
   }
 
   allow_close = NO;
 
-  window = [[NSWindow alloc] initWithContentRect:rect
-                                       styleMask:cocoa_style
-                                         backing:NSBackingStoreBuffered
-                                           defer:NO];
+  window = [[SayWindowImp alloc] initWithContentRect:rect
+                                           styleMask:cocoa_style
+                                             backing:NSBackingStoreBuffered
+                                               defer:NO];
 
   if (!window) {
     say_error_set("could not create window");
     return NO;
   }
 
-  [window center];
+  /*
+   * Beware: this must be called before setting the content view.
+   * Otherwise, no drawing will happen.
+   */
   [window makeKeyAndOrderFront:nil];
 
+  if (style & SAY_WINDOW_FULLSCREEN) {
+    [window setOpaque:YES];
+    [window setHidesOnDeactivate:YES];
+    [window setLevel:NSMainMenuWindowLevel+1];
+    [NSMenu setMenuBarVisible:NO];
+  }
+
+  [window center];
+
   if (view) { [view release]; }
+
   view = [[NSOpenGLView alloc] initWithFrame:rect
                                  pixelFormat:[SayContext format]];
 
@@ -103,14 +134,104 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
 
   [window setDelegate:self];
 
+  [self setTitle:title];
+
   modifiers = say_osx_convert_mod([NSApp currentEvent]);
 
   return YES;
 }
 
+- (void)setIcon:(say_image*)img {
+  id pool = [NSAutoreleasePool new];
+
+  size_t w = say_image_get_width(img);
+  size_t h = say_image_get_width(img);
+
+  NSBitmapImageRep *rep;
+  rep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:0
+                                                pixelsWide:w
+                                                pixelsHigh:h
+                                             bitsPerSample:8
+
+                                           samplesPerPixel:4
+                                                  hasAlpha:YES
+                                                  isPlanar:NO
+
+                                            colorSpaceName:NSCalibratedRGBColorSpace
+                                               bytesPerRow:0
+
+                                              bitsPerPixel:0];
+
+
+  say_color *buf = say_image_get_buffer(img);
+  for (size_t y = 0; y < h; y++) {
+    for (size_t x = 0; x < w; x++) {
+      say_color col = buf[x + y * w];
+      NSUInteger pixel[] = {col.r, col.g, col.b, col.a};
+
+      [rep setPixel:pixel atX:x y:y];
+    }
+  }
+
+  NSImage *icon = [[NSImage alloc] initWithSize:NSMakeSize(w, h)];
+  [icon addRepresentation:rep];
+
+  [NSApp setApplicationIconImage:icon];
+
+  [icon release];
+  [rep release];
+
+  [pool drain];
+}
+
+- (void)setTitle:(const char*)title {
+  NSString *str = [[NSString alloc] initWithUTF8String:title];
+  if (str)
+    [window setTitle:str];
+
+  [str release];
+}
+
+- (void)updateContext:(NSOpenGLContext*)context {
+  if (real_w == 0 || real_h == 0)
+    return;
+
+  CGLContextObj cgcontext = (CGLContextObj)[context CGLContextObj];
+
+  GLint size[] = {real_w, real_h};
+
+  CGLSetParameter(cgcontext, kCGLCPSurfaceBackingSize, size);
+  CGLEnable(cgcontext, kCGLCESurfaceBackingSize);
+}
+
+- (void)resizeToWidth:(size_t)w height:(size_t)h {
+  if (real_w != 0 && real_h != 0) {
+    real_w = w;
+    real_h = h;
+
+    [self updateContext:[view openGLContext]];
+
+    say_event ev;
+    ev.type = SAY_EVENT_RESIZE;
+    ev.ev.resize.size = say_make_vector2(w, h);
+    say_array_push(events, &ev);
+  }
+  else {
+    NSRect frame = view.frame;
+    frame.size = NSMakeSize(w, h);
+
+    NSUInteger style = window.styleMask;
+    NSRect window_frame = [NSWindow frameRectForContentRect:frame
+                                                  styleMask:style];
+
+    window_frame.origin = window.frame.origin;
+    [window setFrame:window_frame display:NO animate:NO];
+  }
+}
+
 - (void)close {
   if (window) {
-    allow_close = YES;
+     allow_close = YES;
     [window close];
     [window release];
     window = nil;
@@ -314,8 +435,6 @@ static say_key say_osx_convert_key(NSEvent *ev) {
   case NSDeleteFunctionKey: return SAY_KEY_DELETE;
   case NSPauseFunctionKey: return SAY_KEY_PAUSE;
 
-    /* TODO: modifiers */
-
   default: return SAY_KEY_UNKNOWN;
   }
 }
@@ -433,6 +552,12 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   point   = [view convertPoint:point fromView:nil];
   point.y = view.frame.size.height - point.y;
 
+  /* Convert to real position in fullscreen mode */
+  if (real_w != 0 && real_h != 0) {
+    point.x = (point.x / screen_w) * real_w;
+    point.y = (point.y / screen_h) * real_h;
+  }
+
   return say_make_vector2(point.x, point.y);
 }
 
@@ -547,10 +672,13 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
 - (void)windowDidResize:(NSNotification*)not {
   NSSize size = view.frame.size;
 
-  say_event ev;
-  ev.type = SAY_EVENT_RESIZE;
-  ev.ev.resize.size = say_make_vector2(size.width, size.height);
-  say_array_push(events, &ev);
+  /* Ignore resize events in fullscreen windows */
+  if (real_w == 0 && real_h == 0) {
+    say_event ev;
+    ev.type = SAY_EVENT_RESIZE;
+    ev.ev.resize.size = say_make_vector2(size.width, size.height);
+    say_array_push(events, &ev);
+  }
 
   [view removeTrackingRect:track];
   track = [view addTrackingRect:view.frame
@@ -594,7 +722,15 @@ void say_imp_window_hide_cursor(say_imp_window win) {
 }
 
 void say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
-  /* TODO: set icon */
+  [win setIcon:img];
+}
+
+void say_imp_window_set_title(say_imp_window win, const char *title) {
+  [win setTitle:title];
+}
+
+void say_imp_window_resize(say_imp_window win, size_t w, size_t h) {
+  [win resizeToWidth:w height:h];
 }
 
 bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev) {

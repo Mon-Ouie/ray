@@ -421,7 +421,13 @@ bool say_window_is_cursor_shown(say_window *win) {
 
 bool say_window_set_icon(say_window *win, say_image *icon) {
 #ifdef SAY_OSX
-  /* TODO: Set icon */
+  if (say_image_get_width(icon)  == 0 ||
+      say_image_get_height(icon) == 0) {
+    say_error_set("can't create icon from empty string");
+    return false;
+  }
+
+  say_imp_window_set_icon(win->win, icon);
   return true;
 #else
   if (!win->win) {
@@ -467,6 +473,18 @@ bool say_window_set_icon(say_window *win, say_image *icon) {
   free(pixels);
 
   return true;
+#endif
+}
+
+void say_window_set_title(say_window *win, const char *title) {
+#ifdef SAY_OSX
+  say_imp_window_set_title(win->win, title);
+#endif
+}
+
+void say_window_resize(say_window *win, size_t w, size_t h) {
+#ifdef SAY_OSX
+  say_imp_window_resize(win->win, w, h);
 #endif
 }
 

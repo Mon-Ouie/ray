@@ -40,13 +40,13 @@ VALUE ray_window_open(int argc, VALUE *argv, VALUE self) {
 
   uint8_t flags = 0;
   if (!NIL_P(opts)) {
-    if (!NIL_P(rb_hash_aref(opts, RAY_SYM("resizable"))))
+    if (RTEST(rb_hash_aref(opts, RAY_SYM("resizable"))))
       flags |= SAY_WINDOW_RESIZABLE;
 
-    if (!NIL_P(rb_hash_aref(opts, RAY_SYM("no_frame"))))
+    if (RTEST(rb_hash_aref(opts, RAY_SYM("no_frame"))))
       flags |= SAY_WINDOW_NO_FRAME;
 
-    if (!NIL_P(rb_hash_aref(opts, RAY_SYM("fullscreen"))))
+    if (RTEST(rb_hash_aref(opts, RAY_SYM("fullscreen"))))
       flags |= SAY_WINDOW_FULLSCREEN;
   }
 
@@ -79,6 +79,29 @@ VALUE ray_window_set_icon(VALUE self, VALUE icon) {
   }
 
   return icon;
+}
+
+/*
+  @overload title=(title)
+    Sets the title of the window
+    @param [String] title
+ */
+static
+VALUE ray_window_set_title(VALUE self, VALUE title) {
+  say_window_set_title(ray_rb2window(self), StringValuePtr(title));
+  return title;
+}
+
+/*
+  @overload resize(size)
+    Resizes the window
+    @param [Ray::Vector2] size New window size
+*/
+static
+VALUE ray_window_resize(VALUE self, VALUE size) {
+  say_vector2 c_size = ray_convert_to_vector2(size);
+  say_window_resize(ray_rb2window(self), c_size.x, c_size.y);
+  return size;
 }
 
 /*
@@ -147,6 +170,8 @@ void Init_ray_window() {
   rb_define_method(ray_cWindow, "show_cursor", ray_window_show_cursor, 0);
 
   rb_define_method(ray_cWindow, "icon=", ray_window_set_icon, 1);
+  rb_define_method(ray_cWindow, "title=", ray_window_set_title, 1);
+  rb_define_method(ray_cWindow, "resize", ray_window_resize, 1);
 
   rb_define_method(ray_cWindow, "poll_event", ray_window_poll_event, 1);
   rb_define_method(ray_cWindow, "wait_event", ray_window_wait_event, 1);

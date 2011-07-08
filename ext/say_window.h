@@ -54,6 +54,9 @@ void say_window_show_cursor(say_window *win);
 
 bool say_window_set_icon(say_window *win, say_image *icon);
 
+void say_window_set_title(say_window *win, const char *title);
+void say_window_resize(say_window *win, size_t w, size_t h);
+
 int  say_window_poll_event(say_window *win, say_event *ev);
 void say_window_wait_event(say_window *win, say_event *ev);
 

@@ -44,8 +44,9 @@
   return self;
 }
 
-- (void)setView:(NSOpenGLView*)view {
-  [context setView:view];
+- (void)setWindow:(SayWindow*)arg {
+  win = arg;
+  [context setView:win.view];
 }
 
 - (void)update {
@@ -53,6 +54,7 @@
 }
 
 - (void)makeCurrent {
+  [win updateContext:context];
   [(NSOpenGLView*)[context view] setOpenGLContext:context];
   [context makeCurrentContext];
 }
@@ -81,7 +83,7 @@ say_imp_context say_imp_context_create_shared(say_imp_context shared) {
 say_imp_context say_imp_context_create_for_window(say_imp_context shared,
                                                   say_imp_window  win) {
   SayContext *ctxt = [[SayContext alloc] initWithShared:shared];
-  [ctxt setView:win.view];
+  [ctxt setWindow:win];
   return ctxt;
 }
 
