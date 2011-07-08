@@ -95,6 +95,10 @@ void say_image_create_with_size(say_image *img, size_t w, size_t h) {
   if (img->width != w || img->height != h) {
     if (img->pixels) free(img->pixels);
     img->pixels = malloc(sizeof(say_color) * w * h);
+
+    say_texture_make_current(img->texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
   }
 
   img->width  = w;
@@ -190,8 +194,11 @@ void say_image_update_texture(say_image *img) {
   if (!img->pixels)
     return;
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, img->width, img->height, 0, GL_RGBA,
-               GL_UNSIGNED_BYTE, img->pixels);
+  say_texture_make_current(img->texture);
+  glTexSubImage2D(GL_TEXTURE_2D, 0,
+                  0, 0,
+                  img->width, img->height,
+                  GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
 
   img->texture_updated = 1;
 }
