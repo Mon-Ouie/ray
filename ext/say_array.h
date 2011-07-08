@@ -18,6 +18,8 @@ say_array *say_array_create(size_t size_el, say_destructor dtor,
                             say_creator ctor);
 void say_array_free(say_array *ary);
 
+void say_array_copy(say_array *ary, say_array *src);
+
 void   *say_array_get(say_array *ary, size_t i);
 void    say_array_next(say_array *ary, void **i);
 void   *say_array_get_end(say_array *ary);

@@ -27,6 +27,17 @@ void say_array_free(say_array *ary) {
   free(ary);
 }
 
+void say_array_copy(say_array *ary, say_array *src) {
+  ary->elem_size = src->elem_size;
+
+  ary->create  = src->create;
+  ary->destroy = src->destroy;
+
+  say_array_resize(ary, src->size);
+
+  memcpy(ary->buf, src->buf, ary->elem_size * src->size);
+}
+
 static void *say_array_get_quick(say_array *ary, size_t i) {
   return ((uint8_t*)ary->buf + (ary->elem_size * i));
 }

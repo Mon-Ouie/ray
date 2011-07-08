@@ -35,6 +35,13 @@ context "an int array" do
       asserts(:to_a).equals []
       asserts(:size).equals 0
     end
+
+    context "copied" do
+      setup { topic.dup }
+
+      asserts(:size).equals 3
+      asserts(:to_a).equals [3, 0, 1]
+    end
   end
 
   context "resized with []=" do

@@ -41,6 +41,12 @@ VALUE ray_int_array_init(int argc, VALUE *argv, VALUE self) {
   return self;
 }
 
+static
+VALUE ray_int_array_init_copy(VALUE self, VALUE orig) {
+  say_array_copy(ray_rb2int_array(self), ray_rb2int_array(orig));
+  return self;
+}
+
 /*
   @overload <<(val)
     @param [Integer] val Element to push
@@ -119,6 +125,8 @@ void Init_ray_int_array() {
   ray_cIntArray = rb_define_class_under(ray_mGL, "IntArray", rb_cObject);
   rb_define_alloc_func(ray_cIntArray, ray_int_array_alloc);
   rb_define_method(ray_cIntArray, "initialize", ray_int_array_init, -1);
+  rb_define_method(ray_cIntArray, "initialize_copy", ray_int_array_init_copy,
+                   1);
 
   rb_define_method(ray_cIntArray, "<<", ray_int_array_push, 1);
 
