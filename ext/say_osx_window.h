@@ -1,5 +1,17 @@
 /* -*- mode: objc -*- */
 
+void say_osx_flip_pool() {
+  static say_thread_variable *var = NULL;
+  if (!var) {
+    var = say_thread_variable_create(NULL);
+  }
+
+  NSAutoreleasePool *pool = say_thread_variable_get(var);
+  [pool drain];
+
+  say_thread_variable_set(var, [NSAutoreleasePool new]);
+}
+
 static void say_osx_setup_process() {
   static bool started = false;
 
@@ -142,7 +154,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
 }
 
 - (void)setIcon:(say_image*)img {
-  id pool = [NSAutoreleasePool new];
+  say_osx_flip_pool();
 
   size_t w = say_image_get_width(img);
   size_t h = say_image_get_width(img);
@@ -181,7 +193,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
   [icon release];
   [rep release];
 
-  [pool drain];
+  say_osx_flip_pool();
 }
 
 - (void)setTitle:(const char*)title {
@@ -239,14 +251,14 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
 }
 
 - (void)dealloc {
-  NSAutoreleasePool *pool = [NSAutoreleasePool new];
+  say_osx_flip_pool();
 
   [self close];
   [view release];
   say_array_free(events);
   [super dealloc];
 
-  [pool drain];
+  say_osx_flip_pool();
 }
 
 /*

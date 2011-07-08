@@ -6,6 +6,8 @@ struct say_event;
 struct say_array;
 struct say_image;
 
+void say_osx_flip_pool();
+
 @class SayWindow;
 
 @interface SayContext : NSObject {

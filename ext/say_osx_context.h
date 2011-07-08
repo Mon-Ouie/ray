@@ -28,6 +28,8 @@
 }
 
 - (id)initWithShared:(SayContext*)shared {
+  say_osx_flip_pool();
+
   if (!(self = [super init]))
     return nil;
 

@@ -9,14 +9,6 @@ static NSAutoreleasePool *ray_osx_pool = nil;
 static
 VALUE ray_clean_up(VALUE self) {
   say_clean_up();
-#ifdef SAY_OSX
-  /*
-   *  Not going to release the pool here, as it causes Cocoa to warn when other
-   *  objects get freed. Anyway, we're leaving now, so it won't change much.
-   */
-
-  /* [ray_osx_pool drain]; */
-#endif
   return Qnil;
 }
 
@@ -29,7 +21,7 @@ VALUE ray_screen_size(VALUE self) {
 
 void Init_ray_ext() {
 #ifdef SAY_OSX
-  ray_osx_pool = [NSAutoreleasePool new];
+  say_osx_flip_pool();
 #endif
 
   ray_mRay = rb_define_module("Ray");
