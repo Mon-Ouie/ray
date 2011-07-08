@@ -20,6 +20,13 @@ VALUE ray_text_alloc(VALUE self) {
   return Data_Wrap_Struct(self, NULL, say_text_free, text);
 }
 
+static
+VALUE ray_text_init_copy(VALUE self, VALUE orig) {
+  say_text_copy(ray_rb2text(self), ray_rb2text(orig));
+  rb_iv_set(self, "@font", rb_iv_get(orig, "@font"));
+  return self;
+}
+
 /* @return [Ray::Font] */
 static
 VALUE ray_text_font(VALUE self) {
@@ -134,6 +141,7 @@ VALUE ray_text_rect(VALUE self) {
 void Init_ray_text() {
   ray_cText = rb_define_class_under(ray_mRay, "Text", ray_cDrawable);
   rb_define_alloc_func(ray_cText, ray_text_alloc);
+  rb_define_method(ray_cText, "initialize_copy", ray_text_init_copy, 1);
 
   rb_define_method(ray_cText, "font", ray_text_font, 0);
   rb_define_method(ray_cText, "font=", ray_text_set_font, 1);

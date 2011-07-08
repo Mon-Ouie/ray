@@ -33,6 +33,8 @@ typedef struct {
 say_text *say_text_create();
 void say_text_free(say_text *text);
 
+void say_text_copy(say_text *text, say_text *src);
+
 uint32_t *say_text_get_string(say_text *text);
 size_t say_text_get_string_length(say_text *text);
 void say_text_set_string(say_text *text, uint32_t *string, size_t length);

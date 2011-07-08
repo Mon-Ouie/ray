@@ -312,6 +312,26 @@ void say_text_free(say_text *text) {
   free(text);
 }
 
+void say_text_copy(say_text *text, say_text *src) {
+  say_drawable_copy(text->drawable, src->drawable);
+
+  text->font = src->font;
+  text->size = src->size;
+
+  say_text_set_string(text, src->string, src->str_length);
+
+  text->style = src->style;
+
+  text->color = src->color;
+
+  text->rect_size    = src->rect_size;
+  text->rect_updated = src->rect_updated;
+
+  text->last_img_size = src->last_img_size;
+
+  text->underline_vertex = src->underline_vertex;
+}
+
 uint32_t *say_text_get_string(say_text *text) {
   return text->string;
 }

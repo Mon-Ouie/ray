@@ -22,6 +22,17 @@ context "a text" do
 
     asserts(:encoding).matches(/utf-8/i)
     asserts(:string).equals "héllo"
+
+    context "copied" do
+      setup { topic.dup }
+
+      asserts(:style).equals Ray::Text::Normal
+      asserts(:size).equals 12
+      asserts(:color).equals Ray::Color.white
+
+      asserts(:encoding).matches(/utf-8/i)
+      asserts(:string).equals "héllo"
+    end
   end
 
   context "after changing character size" do
