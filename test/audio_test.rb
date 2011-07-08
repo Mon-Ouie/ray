@@ -97,7 +97,7 @@ context "a sound" do
   denies(:looping?)
 
   context "after enabling looping" do
-    hiookup { topic.looping = true }
+    hookup { topic.looping = true }
     asserts(:looping?)
   end
 end
