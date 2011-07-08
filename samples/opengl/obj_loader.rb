@@ -21,8 +21,8 @@ class Model < Ray::Drawable
 
     @vertices  = []
 
-    @positions = []
-    @normals   = []
+    positions = []
+    normals   = []
 
     open(filename) do |io|
       io.each_line do |line|
@@ -31,14 +31,18 @@ class Model < Ray::Drawable
         word, *args = line.split(" ")
 
         case word # lacks many features.
-        when "v"  then add_position(args)
-        when "vn" then add_normal(args)
-        when "f"  then add_face(args)
+        when "v"  then positions << Ray::Vector3[*args.map(&:to_f)]
+        when "vn" then normals   << Ray::Vector3[*args.map(&:to_f)]
+        when "f"  then
+          args.each do |arg|
+            pos, normal = arg.split("//").map { |s| s.to_i - 1 }
+            @vertices << Vertex.new(positions[pos],
+                                    normals[normal],
+                                    Ray::Color.gray)
+          end
         end
       end
     end
-
-    @positions = @normal = nil
 
     self.vertex_count = @vertices.size
     rotate(0, 0, 0)
@@ -60,24 +64,6 @@ class Model < Ray::Drawable
 
   def render(first)
     draw_arrays :triangles, first, @vertices.size
-  end
-
-  private
-  def add_position(args)
-    @positions << Ray::Vector3[*args.map(&:to_f)]
-  end
-
-  def add_normal(args)
-    @normals << Ray::Vector3[*args.map(&:to_f)]
-  end
-
-  def add_face(args)
-    args.each do |arg|
-      pos, normal = arg.split("//").map { |s| s.to_i - 1 }
-      @vertices << Vertex.new(@positions[pos],
-                              @normals[normal],
-                              Ray::Color.gray)
-    end
   end
 end
 
