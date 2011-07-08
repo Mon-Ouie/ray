@@ -6,6 +6,7 @@ VALUE ray_mRay = Qnil;
 static NSAutoreleasePool *ray_osx_pool = nil;
 #endif
 
+static
 VALUE ray_clean_up(VALUE self) {
   say_clean_up();
 #ifdef SAY_OSX
@@ -19,6 +20,13 @@ VALUE ray_clean_up(VALUE self) {
   return Qnil;
 }
 
+/* @return [Ray::Vector2] Size of the screen */
+static
+VALUE ray_screen_size(VALUE self) {
+  return ray_vector2_to_rb(say_make_vector2(say_imp_screen_get_width(),
+                                            say_imp_screen_get_height()));
+}
+
 void Init_ray_ext() {
 #ifdef SAY_OSX
   ray_osx_pool = [NSAutoreleasePool new];
@@ -28,6 +36,8 @@ void Init_ray_ext() {
 
   rb_define_private_method(rb_singleton_class(ray_mRay),
                            "_clean_up!", ray_clean_up, 0);
+
+  rb_define_module_function(ray_mRay, "screen_size", ray_screen_size, 0);
 
   Init_ray_vector();
   Init_ray_rect();

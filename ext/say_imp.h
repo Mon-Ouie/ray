@@ -12,6 +12,9 @@ typedef SayContext *say_imp_context;
 struct say_event;
 struct say_image;
 
+size_t say_imp_screen_get_width();
+size_t say_imp_screen_get_height();
+
 say_imp_window say_imp_window_create();
 void say_imp_window_free(say_imp_window win);
 

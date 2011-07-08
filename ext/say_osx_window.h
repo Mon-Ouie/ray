@@ -740,3 +740,11 @@ bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev) {
 void say_imp_window_wait_event(say_imp_window win, struct say_event *ev) {
   [win waitEvent:ev];
 }
+
+size_t say_imp_screen_get_width() {
+  return [[NSScreen mainScreen] frame].size.width;
+}
+
+size_t say_imp_screen_get_height() {
+  return [[NSScreen mainScreen] frame].size.height;
+}
