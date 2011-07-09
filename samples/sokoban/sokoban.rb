@@ -280,23 +280,18 @@ module Sokoban
 
           if @level.can_move?(dir)
             @level.move(dir)
-            need_render!
           end
         end
       end
 
       on :key_press, key(:r) do
         next if @level.solved?
-
         @level.reset
-        need_render!
       end
 
       on :key_press, key(:u) do
         next if @level.solved?
-
         @level.undo
-        need_render!
       end
 
       on :level_solved do

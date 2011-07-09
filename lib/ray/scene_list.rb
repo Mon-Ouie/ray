@@ -29,7 +29,6 @@ module Ray
 
       scene.setup(*@scene_args.last)
       scene.register_events
-      scene.need_render!
       scene.run
     end
 

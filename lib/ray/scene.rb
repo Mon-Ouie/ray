@@ -94,7 +94,6 @@ module Ray
       @scene_render_block     = nil
       @scene_clean_block      = nil
 
-      @scene_need_render      = true
       @scene_loops_per_second = 60
 
       @scene_animations       = Ray::AnimationList.new
@@ -187,11 +186,6 @@ module Ray
     # Registers a block to be excuted as often as possible.
     def always(&block)
       @scene_always_block = block
-    end
-
-    # Marks the scene should be redrawn.
-    def need_render!
-      @scene_need_render = true
     end
 
     # Registers the block to draw the scene.
