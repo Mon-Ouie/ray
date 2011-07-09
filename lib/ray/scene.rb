@@ -125,15 +125,7 @@ module Ray
       until @scene_exit
         loop_start = Time.now
 
-        collect_events
-
-        @scene_always_block.call if @scene_always_block
-        listener_runner.run
-        @scene_animations.update
-
-        @scene_window.clear(Ray::Color.none)
-        render @scene_window
-        @scene_window.update
+        run_tick
 
         if @scene_loops_per_second
           ellapsed_time = Time.now - loop_start
@@ -144,6 +136,23 @@ module Ray
       end
 
       clean_up
+    end
+
+    # Runs one tick of the scene, checking for events, running the event loop,
+    # and drawing on the window.
+    #
+    # @param [true, false] check_events True to check for events
+    def run_tick(check_events = true)
+      collect_events if check_events
+
+      @scene_always_block.call if @scene_always_block
+      listener_runner.run
+
+      @scene_animations.update
+
+      @scene_window.clear Ray::Color.none
+      render @scene_window
+      @scene_window.update
     end
 
     # Runs another scene over the current one.

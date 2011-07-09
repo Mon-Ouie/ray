@@ -2,9 +2,12 @@ require File.expand_path(File.dirname(__FILE__)) + '/helpers.rb'
 
 context "a scene" do
   setup do
+    always_proc = @always_proc = Proc.new {}
+
     @game = a_small_game
-    @game.scene(:test)  { always { exit! } }
-    @game.scene(:other) { always { exit! } }
+    @game.scene(:test)   { always { exit! } }
+    @game.scene(:other)  { always { exit! } }
+    @game.scene(:normal) { always { always_proc.call } }
 
     @game.registered_scene :test
   end
@@ -82,6 +85,27 @@ context "a scene" do
     asserts("current scene") { @game.scenes.current }.equals {
       @game.registered_scene :test
     }
+  end
+
+  context "run using #run_tick" do
+    setup do
+      scene = @game.registered_scene :normal
+
+      scene.register_events
+
+      proxy(scene).clean_up
+      proxy(scene).render
+      proxy(@always_proc).call
+      proxy(scene.animations).update
+
+      scene.run_tick(false)
+      scene
+    end
+
+    denies_topic.received :clean_up
+    asserts_topic.received(:render) { @game.window }
+    asserts("always block") { @always_proc }.received(:call)
+    asserts(:animations).received :update
   end
 
   context "after #exit!" do
