@@ -218,7 +218,7 @@ module Ray
       end
     end
 
-    def inspcet
+    def inspect
       "#<#{self.class} game=#{self.game.inspect}>"
     end
 
