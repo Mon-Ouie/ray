@@ -29,6 +29,11 @@ int say_image_load_file(say_image *img, const char *filename);
 int say_image_load_from_memory(say_image *img, size_t size, const char *buffer);
 void say_image_create_with_size(say_image *img, size_t w, size_t h);
 
+bool say_image_write_bmp(say_image *img, const char *filename);
+bool say_image_write_png(say_image *img, const char *filename);
+bool say_image_write_tga(say_image *img, const char *filename);
+bool say_image_write(say_image *img, const char *filename);
+
 uint8_t say_image_is_smooth(say_image *img);
 void say_image_set_smooth(say_image *img, uint8_t val);
 

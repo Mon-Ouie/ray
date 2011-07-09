@@ -75,6 +75,26 @@ context "an image copy" do
   asserts(:[], 0, 1).equals Ray::Color.green
   asserts(:[], 1, 0).equals Ray::Color.blue
   asserts(:[], 1, 1).equals Ray::Color.white
+
+  context "saved and loaded againe" do
+    path = path_of("test_save.png")
+
+    setup do
+      topic.write path
+      Ray::Image.new path
+    end
+
+    asserts(:size).equals Ray::Vector2[2, 2]
+
+    asserts(:[], 0, 0).equals Ray::Color.red
+    asserts(:[], 0, 1).equals Ray::Color.green
+    asserts(:[], 1, 0).equals Ray::Color.blue
+    asserts(:[], 1, 1).equals Ray::Color.white
+
+    teardown do
+      File.delete path if File.exist? path
+    end
+  end
 end
 
 run_tests if __FILE__ == $0

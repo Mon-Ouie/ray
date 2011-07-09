@@ -58,12 +58,66 @@ VALUE ray_image_init(VALUE self, VALUE arg) {
   return self;
 }
 
+static
 VALUE ray_image_init_copy(VALUE self, VALUE other) {
   say_image *orig = ray_rb2image(other);
 
   say_image_load_raw(ray_rb2image(self),
                      say_image_get_width(orig), say_image_get_height(orig),
                      say_image_get_buffer(orig));
+
+  return self;
+}
+
+/*
+ * @overload write_bmp(filename)
+ *   Saves the image as a BMP.
+ */
+static
+VALUE ray_image_write_bmp(VALUE self, VALUE filename) {
+  if (!say_image_write_bmp(ray_rb2image(self), StringValuePtr(filename))) {
+    rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
+
+  return self;
+}
+
+/*
+ * @overload write_png(filename)
+ *   Saves the image as a PNG.
+ */
+static
+VALUE ray_image_write_png(VALUE self, VALUE filename) {
+  if (!say_image_write_png(ray_rb2image(self), StringValuePtr(filename))) {
+    rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
+
+  return self;
+}
+
+/*
+ * @overload write_tga(filename)
+ *   Saves the image as a TGA.
+ */
+static
+VALUE ray_image_write_tga(VALUE self, VALUE filename) {
+  if (!say_image_write_tga(ray_rb2image(self), StringValuePtr(filename))) {
+    rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
+
+  return self;
+}
+
+/*
+ * @overload write(filename)
+ *   Saves the image, tyring to guess the format. If it cannot be guessed, BMP
+ *   will be used.
+ */
+static
+VALUE ray_image_write(VALUE self, VALUE filename) {
+  if (!say_image_write(ray_rb2image(self), StringValuePtr(filename))) {
+    rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
 
   return self;
 }
@@ -186,6 +240,11 @@ void Init_ray_image() {
   rb_define_alloc_func(ray_cImage, ray_image_alloc);
   rb_define_method(ray_cImage, "initialize", ray_image_init, 1);
   rb_define_method(ray_cImage, "initialize_copy", ray_image_init_copy, 1);
+
+  rb_define_method(ray_cImage, "write_bmp", ray_image_write_bmp, 1);
+  rb_define_method(ray_cImage, "write_png", ray_image_write_png, 1);
+  rb_define_method(ray_cImage, "write_tga", ray_image_write_tga, 1);
+  rb_define_method(ray_cImage, "write", ray_image_write, 1);
 
   rb_define_method(ray_cImage, "width", ray_image_width, 0);
   rb_define_method(ray_cImage, "height", ray_image_height, 0);

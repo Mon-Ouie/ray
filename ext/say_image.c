@@ -1,5 +1,9 @@
 #include "say.h"
+
 #include "stb_image.h"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION 1
+#include "stb_image_write.h"
 
 static GLuint say_current_texture = 0;
 static say_context *say_texture_last_context = NULL;
@@ -101,6 +105,60 @@ void say_image_create_with_size(say_image *img, size_t w, size_t h) {
   img->height = h;
 
   img->texture_updated = 0;
+}
+
+static bool say_image_assert_non_empty(say_image *img) {
+  if (img->width == 0 || img->height == 0) {
+    say_error_set("can't save empty image");
+    return false;
+  }
+
+  return true;
+}
+
+bool say_image_write_bmp(say_image *img, const char *filename) {
+  if (!say_image_assert_non_empty(img))
+    return false;
+
+  stbi_write_bmp(filename, img->width, img->height, 4, img->pixels);
+
+  return true;
+}
+
+bool say_image_write_png(say_image *img, const char *filename) {
+  if (!say_image_assert_non_empty(img))
+    return false;
+
+  stbi_write_png(filename, img->width, img->height, 4, img->pixels, 0);
+
+  return true;
+}
+
+bool say_image_write_tga(say_image *img, const char *filename) {
+  if (!say_image_assert_non_empty(img))
+    return false;
+
+  stbi_write_tga(filename, img->width, img->height, 4, img->pixels);
+
+  return true;
+}
+
+bool say_image_write(say_image *img, const char *filename) {
+  size_t len = strlen(filename);
+
+  if (len < 4)
+    return say_image_write_bmp(img, filename);
+  else {
+    const char *ext = (filename + len - 4);
+    if (strcmp(ext, ".png") == 0 || strcmp(ext, ".PNG") == 0)
+      return say_image_write_png(img, filename);
+    else if (strcmp(ext, ".tga") == 0 || strcmp(ext, ".TGA") == 0)
+      return say_image_write_tga(img, filename);
+    else
+      say_image_write_bmp(img, filename);
+  }
+
+  return true;
 }
 
 size_t say_image_get_width(say_image *img) {
