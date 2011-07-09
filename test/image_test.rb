@@ -76,7 +76,7 @@ context "an image copy" do
   asserts(:[], 1, 0).equals Ray::Color.blue
   asserts(:[], 1, 1).equals Ray::Color.white
 
-  context "saved and loaded againe" do
+  context "saved and loaded again" do
     path = path_of("test_save.png")
 
     setup do
