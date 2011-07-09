@@ -178,8 +178,6 @@ VALUE ray_polygon_size(VALUE self) {
 */
 static
 VALUE ray_polygon_add_point(int argc, VALUE *argv, VALUE self) {
-  rb_check_frozen(self);
-
   say_polygon *poly = ray_rb2polygon(self);
 
   VALUE rb_pos = Qnil, rb_col = Qnil, rb_outline_col = Qnil;
@@ -208,7 +206,6 @@ VALUE ray_polygon_add_point(int argc, VALUE *argv, VALUE self) {
 */
 static
 VALUE ray_polygon_resize(VALUE self, VALUE size) {
-  rb_check_frozen(self);
   say_polygon_resize(ray_rb2polygon(self), NUM2ULONG(size));
   return self;
 }
@@ -220,7 +217,6 @@ VALUE ray_polygon_resize(VALUE self, VALUE size) {
 */
 static
 VALUE ray_polygon_set_filled(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_polygon_set_filled(ray_rb2polygon(self), RTEST(val));
   return val;
 }
@@ -232,7 +228,6 @@ VALUE ray_polygon_set_filled(VALUE self, VALUE val) {
 */
 static
 VALUE ray_polygon_set_outlined(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_polygon_set_outlined(ray_rb2polygon(self), RTEST(val));
   return val;
 }
@@ -262,7 +257,6 @@ VALUE ray_polygon_outline_width(VALUE self) {
 */
 static
 VALUE ray_polygon_set_outline_width(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_polygon_set_outline(ray_rb2polygon(self), NUM2DBL(val));
   return val;
 }
@@ -319,8 +313,6 @@ VALUE ray_polygon_outline_of(VALUE self, VALUE rb_id) {
 */
 static
 VALUE ray_polygon_set_pos_of(VALUE self, VALUE rb_id, VALUE val) {
-  rb_check_frozen(self);
-
   say_polygon *poly = ray_rb2polygon(self);
   size_t id = NUM2ULONG(rb_id);
 
@@ -341,8 +333,6 @@ VALUE ray_polygon_set_pos_of(VALUE self, VALUE rb_id, VALUE val) {
 */
 static
 VALUE ray_polygon_set_color_of(VALUE self, VALUE rb_id, VALUE val) {
-  rb_check_frozen(self);
-
   say_polygon *poly = ray_rb2polygon(self);
   size_t id = NUM2ULONG(rb_id);
 
@@ -363,8 +353,6 @@ VALUE ray_polygon_set_color_of(VALUE self, VALUE rb_id, VALUE val) {
 */
 static
 VALUE ray_polygon_set_outline_of(VALUE self, VALUE rb_id, VALUE val) {
-  rb_check_frozen(self);
-
   say_polygon *poly = ray_rb2polygon(self);
   size_t id = NUM2ULONG(rb_id);
 
@@ -385,7 +373,6 @@ VALUE ray_polygon_set_outline_of(VALUE self, VALUE rb_id, VALUE val) {
 */
 static
 VALUE ray_polygon_set_color(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_polygon_set_color(ray_rb2polygon(self), ray_rb2col(val));
   return val;
 }
@@ -397,7 +384,6 @@ VALUE ray_polygon_set_color(VALUE self, VALUE val) {
 */
 static
 VALUE ray_polygon_set_outline(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_polygon_set_outline_color(ray_rb2polygon(self), ray_rb2col(val));
   return val;
 }

@@ -169,7 +169,6 @@ VALUE ray_drawable_origin(VALUE self) {
 */
 static
 VALUE ray_drawable_set_origin(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_drawable_set_origin(ray_rb2drawable(self), ray_convert_to_vector2(val));
   return val;
 }
@@ -192,7 +191,6 @@ VALUE ray_drawable_scale(VALUE self) {
     @param [Ray::Vector2] val The scaling factor
  */
 VALUE ray_drawable_set_scale(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_drawable_set_scale(ray_rb2drawable(self), ray_convert_to_vector2(val));
   return val;
 }
@@ -215,7 +213,6 @@ VALUE ray_drawable_pos(VALUE self) {
 */
 static
 VALUE ray_drawable_set_pos(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_drawable_set_pos(ray_rb2drawable(self), ray_convert_to_vector2(val));
   return val;
 }
@@ -243,7 +240,6 @@ VALUE ray_drawable_z(VALUE self) {
 */
 static
 VALUE ray_drawable_set_z(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_drawable_set_z(ray_rb2drawable(self), NUM2DBL(val));
   return val;
 }
@@ -267,7 +263,6 @@ VALUE ray_drawable_angle(VALUE self) {
 */
 static
 VALUE ray_drawable_set_angle(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_drawable_set_angle(ray_rb2drawable(self), NUM2DBL(val));
   return val;
 }

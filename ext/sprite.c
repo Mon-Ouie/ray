@@ -26,7 +26,6 @@ VALUE ray_sprite_alloc(VALUE self) {
 */
 static
 VALUE ray_sprite_set_image(VALUE self, VALUE img) {
-  rb_check_frozen(self);
   say_sprite_set_image(ray_rb2sprite(self),
                        NIL_P(img) ? NULL : ray_rb2image(img));
   rb_iv_set(self, "@image", img);
@@ -40,7 +39,6 @@ VALUE ray_sprite_set_image(VALUE self, VALUE img) {
 */
 static
 VALUE ray_sprite_set_sub_rect(VALUE self, VALUE rect) {
-  rb_check_frozen(self);
   say_sprite_set_rect(ray_rb2sprite(self), ray_convert_to_rect(rect));
   return rect;
 }
@@ -53,7 +51,6 @@ VALUE ray_sprite_set_sub_rect(VALUE self, VALUE rect) {
 */
 static
 VALUE ray_sprite_set_color(VALUE self, VALUE color) {
-  rb_check_frozen(self);
   say_sprite_set_color(ray_rb2sprite(self), ray_rb2col(color));
   return color;
 }
@@ -64,7 +61,6 @@ VALUE ray_sprite_set_color(VALUE self, VALUE color) {
 */
 static
 VALUE ray_sprite_set_flip_x(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_sprite_flip_x(ray_rb2sprite(self), RTEST(val));
   return val;
 }
@@ -75,7 +71,6 @@ VALUE ray_sprite_set_flip_x(VALUE self, VALUE val) {
 */
 static
 VALUE ray_sprite_set_flip_y(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_sprite_flip_y(ray_rb2sprite(self), RTEST(val));
   return val;
 }
@@ -123,7 +118,6 @@ VALUE ray_sprite_y_flipped(VALUE self) {
 */
 static
 VALUE ray_sprite_set_sheet_size(VALUE self, VALUE size) {
-  rb_check_frozen(size);
   say_sprite_set_sheet_size(ray_rb2sprite(self), ray_convert_to_vector2(size));
   return size;
 }
@@ -154,8 +148,6 @@ VALUE ray_sprite_sheet_size(VALUE self) {
 */
 static
 VALUE ray_sprite_set_sheet_pos(VALUE self, VALUE size) {
-  rb_check_frozen(size);
-
   say_sprite *sprite = ray_rb2sprite(self);
 
   if (say_sprite_uses_sprite_sheet(sprite))
@@ -199,7 +191,6 @@ VALUE ray_sprite_sprite_height(VALUE self) {
 /* Disables usage of sprite sheet */
 static
 VALUE ray_sprite_disable_sprite_sheet(VALUE self) {
-  rb_check_frozen(self);
   say_sprite_disable_sprite_sheet(ray_rb2sprite(self));
   return self;
 }

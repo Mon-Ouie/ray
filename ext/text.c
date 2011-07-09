@@ -40,7 +40,6 @@ VALUE ray_text_font(VALUE self) {
 */
 static
 VALUE ray_text_set_font(VALUE self, VALUE font) {
-  rb_check_frozen(self);
   say_text_set_font(ray_rb2text(self), ray_rb2font(font));
   rb_iv_set(self, "@font", font);
   return font;
@@ -61,8 +60,6 @@ VALUE ray_text_basic_string(VALUE self) {
 
 static
 VALUE ray_text_set_basic_string(VALUE self, VALUE str) {
-  rb_check_frozen(self);
-
   say_text *text = ray_rb2text(self);
 
   uint32_t *c_str = (uint32_t*)StringValuePtr(str);
@@ -85,7 +82,6 @@ VALUE ray_text_size(VALUE self) {
 */
 static
 VALUE ray_text_set_size(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_text_set_size(ray_rb2text(self), NUM2ULONG(val));
   return val;
 }
@@ -105,7 +101,6 @@ VALUE ray_text_style(VALUE self) {
 */
 static
 VALUE ray_text_set_style(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_text_set_style(ray_rb2text(self), NUM2ULONG(val));
   return val;
 }
@@ -124,7 +119,6 @@ VALUE ray_text_color(VALUE self) {
 */
 static
 VALUE ray_text_set_color(VALUE self, VALUE val) {
-  rb_check_frozen(self);
   say_text_set_color(ray_rb2text(self), ray_rb2col(val));
   return val;
 }
