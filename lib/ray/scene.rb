@@ -209,11 +209,6 @@ module Ray
       exit
     end
 
-    # @see Ray::Game#resize_window
-    def resize_window(w, h)
-      game.resize_window(w, h)
-    end
-
     # Cleans the scene or registers a block to clean it.
     def clean_up(&block)
       if block_given?

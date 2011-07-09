@@ -183,11 +183,6 @@ module Ray
       @game_scenes.clear
     end
 
-    # Resizes the window and raises a window_resize event
-    def resize_window(w, h)
-      # TODO: resize
-    end
-
     def title
       @game_title
     end
