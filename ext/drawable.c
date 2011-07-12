@@ -34,9 +34,10 @@ void ray_drawable_render_proc(ray_drawable *drawable, size_t first,
 }
 
 ray_drawable *ray_rb2full_drawable(VALUE obj) {
-  if (rb_obj_is_kind_of(obj, rb_path2class("Ray::Text"))   ||
-      rb_obj_is_kind_of(obj, rb_path2class("Ray::Sprite")) ||
-      rb_obj_is_kind_of(obj, rb_path2class("Ray::Polygon"))) {
+  if (rb_obj_is_kind_of(obj, rb_path2class("Ray::Text"))    ||
+      rb_obj_is_kind_of(obj, rb_path2class("Ray::Sprite"))  ||
+      rb_obj_is_kind_of(obj, rb_path2class("Ray::Polygon")) ||
+      !rb_obj_is_kind_of(obj, rb_path2class("Ray::Drawable"))) {
     rb_raise(rb_eTypeError, "can't get drawable pointer from %s",
              RAY_OBJ_CLASSNAME(obj));
   }
