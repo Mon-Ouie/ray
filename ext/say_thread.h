@@ -2,7 +2,6 @@
 #define SAY_THREAD_H_
 
 #include "say_basic_type.h"
-#include <windows.h>
 
 typedef void *(*say_thread_func)(void *data);
 
