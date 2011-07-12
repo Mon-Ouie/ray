@@ -124,6 +124,6 @@ void say_image_target_bind(say_image_target *target) {
 }
 
 void say_image_target_unbind() {
-  say_context_ensure();
-  say_fbo_make_current(0);
+  if (say_image_target_is_available())
+    say_fbo_make_current(0);
 }
