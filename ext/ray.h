@@ -38,6 +38,7 @@ extern VALUE ray_cDrawable;
 extern VALUE ray_cPolygon;
 extern VALUE ray_cSprite;
 extern VALUE ray_cText;
+extern VALUE ray_cBufferRenderer;
 extern VALUE ray_cTarget;
 extern VALUE ray_cWindow;
 extern VALUE ray_cImageTarget;
@@ -77,6 +78,7 @@ void Init_ray_drawable();
 void Init_ray_polygon();
 void Init_ray_sprite();
 void Init_ray_text();
+void Init_ray_buffer_renderer();
 void Init_ray_target();
 void Init_ray_window();
 void Init_ray_image_target();
@@ -144,10 +146,13 @@ say_music *ray_rb2music(VALUE obj);
 
 say_array *ray_rb2int_array(VALUE obj);
 
+say_buffer_renderer *ray_rb2buf_renderer(VALUE obj);
+
 uint8_t ray_byte_clamp(int color);
 
 VALUE ray_get_vertex_class(size_t id);
 size_t ray_get_vtype(VALUE class);
+GLenum say_buf_type(VALUE type);
 
 #ifdef __cplusplus
 # if 0

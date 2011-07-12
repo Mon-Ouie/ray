@@ -87,15 +87,6 @@ VALUE ray_init_rect(int argc, VALUE *argv, VALUE self) {
       rb_raise(rb_eArgError, "missing option :height");
     }
   }
-  else {
-    if (NIL_P(y)) {
-      rb_raise(rb_eArgError, "wrong number of arguments (1 for 2)");
-    }
-
-    if (!NIL_P(w) && NIL_P(h)) {
-      rb_raise(rb_eArgError, "wrong number of arguments (3 for 4)");
-    }
-  }
 
   say_rect *rect;
   Data_Get_Struct(self, say_rect, rect);

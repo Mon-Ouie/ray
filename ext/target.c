@@ -98,11 +98,16 @@ VALUE ray_target_clear(VALUE self, VALUE color) {
 /*
   @overload draw(obj)
     Draws an object on the target.
-    @param [Ray::Drawable, #to_drawable] obj Object to be drawn
+    @param [Ray::Drawable, Ray::BufferRenderer] obj Object to be drawn
 */
 static
 VALUE ray_target_draw(VALUE self, VALUE obj) {
-  say_target_draw(ray_rb2target(self), ray_rb2drawable(obj));
+  if (RAY_IS_A(obj, rb_path2class("Ray::BufferRenderer"))) {
+    say_target_draw_buffer(ray_rb2target(self),
+                           ray_rb2buf_renderer(obj));
+  }
+  else
+    say_target_draw(ray_rb2target(self), ray_rb2drawable(obj));
   return self;
 }
 

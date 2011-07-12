@@ -161,7 +161,7 @@ void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
     }
 
     say_buffer_slice_bind(drawable->slice);
-    
+
     drawable->render_proc(drawable->data,
                           say_buffer_slice_get_loc(drawable->slice),
                           used_shader);

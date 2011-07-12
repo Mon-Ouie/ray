@@ -43,6 +43,7 @@ void Init_ray_ext() {
   Init_ray_polygon();
   Init_ray_sprite();
   Init_ray_text();
+  Init_ray_buffer_renderer();
   Init_ray_target();
   Init_ray_window();
   Init_ray_image_target();
