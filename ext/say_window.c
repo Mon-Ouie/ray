@@ -12,6 +12,10 @@ static void say_window_unbind_fbo(void *window) {
 # include "say_x11_window.h"
 #endif
 
+#ifdef SAY_WIN
+# include "say_win_window.h"
+#endif
+
 say_window *say_window_create() {
   say_window *win = (say_window*)malloc(sizeof(say_window));
 
@@ -21,7 +25,7 @@ say_window *say_window_create() {
   win->show_cursor = true;
 
   win->win = say_imp_window_create();
-
+  
   return win;
 }
 
@@ -42,7 +46,7 @@ int say_window_open(say_window *win, size_t w, size_t h, const char *title,
   }
 
   win->show_cursor = true;
-
+  
   if (!say_imp_window_open(win->win, title, w, h, style))
     return false;
 
@@ -117,7 +121,7 @@ static void say_window_process_event(say_window *win, say_event *ev) {
       say_input_release(&win->input, ev->ev.key.code);
       break;
     }
-
+    
     case SAY_EVENT_MOUSE_MOTION: {
       say_input_set_mouse_pos(&win->input, ev->ev.motion.pos);
       break;

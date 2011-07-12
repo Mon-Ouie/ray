@@ -24,6 +24,8 @@ void say_audio_context_ensure() {
 }
 
 void say_audio_context_clean_up() {
+/* Can't clean properly on windows... */
+#ifndef SAY_WIN
   alcMakeContextCurrent(NULL);
 
   if (say_audio_context)
@@ -34,4 +36,5 @@ void say_audio_context_clean_up() {
 
   say_audio_context = NULL;
   say_audio_device  = NULL;
+#endif
 }

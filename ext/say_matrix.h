@@ -14,9 +14,9 @@ say_matrix *say_matrix_translation(float x, float y, float z);
 say_matrix *say_matrix_scale(float x, float y, float z);
 say_matrix *say_matrix_rotation(float angle, float x, float y, float z);
 say_matrix *say_matrix_ortho(float left, float right, float bottom, float top,
-                             float near, float far);
+                             float z_near, float z_far);
 say_matrix *say_matrix_perspective(float fovy, float aspect,
-                                   float near, float far);
+                                   float z_near, float z_far);
 say_matrix *say_matrix_looking_at(float eye_x, float eye_y, float eye_z,
                                   float center_x, float center_y,
                                   float center_z,
@@ -43,10 +43,10 @@ void say_matrix_rotate(say_matrix *matrix, float angle, float x, float y,
                        float z);
 void say_matrix_set_ortho(say_matrix *matrix,
                           float left, float right, float bottom, float top,
-                          float near, float far);
+                          float z_near, float z_far);
 void say_matrix_set_perspective(say_matrix *matrix,
                                 float fovy, float aspect,
-                                float near, float far);
+                                float z_near, float z_far);
 void say_matrix_look_at(say_matrix *matrix,
                         float eye_x, float eye_y, float eye_z,
                         float center_x, float center_y, float center_z,

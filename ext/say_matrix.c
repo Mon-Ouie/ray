@@ -74,31 +74,31 @@ say_matrix *say_matrix_rotation(float angle, float x, float y, float z) {
 }
 
 say_matrix *say_matrix_ortho(float left, float right, float bottom, float top,
-                             float near, float far) {
+                             float z_near, float z_far) {
   say_matrix *matrix = say_matrix_identity();
 
   say_matrix_set(matrix, 0, 0, +2 / (right - left));
   say_matrix_set(matrix, 1, 1, +2 / (top - bottom));
-  say_matrix_set(matrix, 2, 2, -2 / (far - near));
+  say_matrix_set(matrix, 2, 2, -2 / (z_far - z_near));
 
   say_matrix_set(matrix, 3, 0, -(right + left) / (right - left));
   say_matrix_set(matrix, 3, 1, -(top + bottom) / (top - bottom));
-  say_matrix_set(matrix, 3, 2, -(far + near) / (far - near));
+  say_matrix_set(matrix, 3, 2, -(z_far + z_near) / (z_far - z_near));
 
   return matrix;
 }
 
 say_matrix *say_matrix_perspective(float fovy, float aspect,
-                                   float near, float far) {
+                                   float z_near, float z_far) {
   say_matrix *matrix = say_matrix_identity();
 
   float f = 1.0f / tanf(fovy / 2);
 
   say_matrix_set(matrix, 0, 0, f / aspect);
   say_matrix_set(matrix, 1, 1, f);
-  say_matrix_set(matrix, 2, 2, (far + near) / (near - far));
+  say_matrix_set(matrix, 2, 2, (z_far + z_near) / (z_near - z_far));
 
-  say_matrix_set(matrix, 3, 2, (2 * far * near) / (near - far));
+  say_matrix_set(matrix, 3, 2, (2 * z_far * z_near) / (z_near - z_far));
   say_matrix_set(matrix, 2, 3, -1);
 
   return matrix;
@@ -285,16 +285,16 @@ void say_matrix_rotate(say_matrix *matrix, float angle, float x, float y,
 
 void say_matrix_set_ortho(say_matrix *matrix,
                           float left, float right, float bottom, float top,
-                          float near, float far) {
-  say_matrix *other = say_matrix_ortho(left, right, bottom, top, near, far);
+                          float z_near, float z_far) {
+  say_matrix *other = say_matrix_ortho(left, right, bottom, top, z_near, z_far);
   say_matrix_multiply_by(matrix, other);
   say_matrix_free(other);
 }
 
 void say_matrix_set_perspective(say_matrix *matrix,
                                 float fovy, float aspect,
-                                float near, float far) {
-  say_matrix *other = say_matrix_perspective(fovy, aspect, near, far);
+                                float z_near, float z_far) {
+  say_matrix *other = say_matrix_perspective(fovy, aspect, z_near, z_far);
   say_matrix_multiply_by(matrix, other);
   say_matrix_free(other);
 }

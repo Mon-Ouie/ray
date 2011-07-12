@@ -31,7 +31,7 @@ context "an image loaded from a file" do
 end
 
 context "an image loaded from an IO" do
-  setup { open(path_of("sprite.png")) { |io| Ray::Image.new(io) } }
+  setup { open(path_of("sprite.png"), "rb") { |io| Ray::Image.new(io) } }
 
   asserts(:width).equals 128
   asserts(:height).equals 192

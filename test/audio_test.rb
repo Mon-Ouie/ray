@@ -78,7 +78,7 @@ context "an audio source" do
 
   context "after changing volume" do
     hookup { topic.volume = 40 }
-    asserts(:volume).equals 40
+    asserts(:volume).almost_equals 40, 1e-6
   end
 end
 

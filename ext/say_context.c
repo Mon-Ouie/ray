@@ -8,6 +8,10 @@
 # include "say_x11_context.h"
 #endif
 
+#ifdef SAY_WIN
+# include "say_win_context.h"
+#endif
+
 static say_context *say_shared_context = NULL;
 
 static say_thread_variable *say_current_context = NULL;
@@ -80,7 +84,7 @@ void say_context_free(say_context *context) {
   }
 
   say_imp_context_free(context->context);
-
+  
   free(context);
 }
 
@@ -107,9 +111,11 @@ static void say_context_create_initial() {
   /* Identify GLSL version to be used */
   const GLubyte *str = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-  /* if GLSL 1.40 is supported */
-  if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'4')) {
-    say_shader_enable_new_glsl();
+  /* if GLSL 1.40 and GL_EXT_gpu_shader4 are supported */
+  if (__GLEW_EXT_gpu_shader4) {
+    if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'4')) {
+      say_shader_enable_new_glsl();
+    }
   }
 }
 

@@ -239,7 +239,7 @@ int say_shader_link(say_shader *shader) {
 
 void say_shader_set_matrix(say_shader *shader, const char *name,
                            say_matrix *matrix) {
-  say_shader_bind(shader);
+  say_shader_bind(shader);  
   GLint location = glGetUniformLocationARB(shader->program, name);
   glUniformMatrix4fvARB(location, 1, GL_FALSE, matrix->content);
 }

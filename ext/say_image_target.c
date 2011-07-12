@@ -38,6 +38,10 @@ void say_image_target_will_delete(GLuint fbo, GLuint rbo) {
     say_current_rbo = 0;
 }
 
+bool say_image_target_is_available() {
+  return __GLEW_EXT_framebuffer_object != 0;
+}
+
 say_image_target *say_image_target_create() {
   say_context_ensure();
   say_image_target *target = malloc(sizeof(say_image_target));

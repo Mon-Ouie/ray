@@ -21,6 +21,14 @@ typedef struct say_x11_window  *say_imp_window;
 typedef struct say_x11_context *say_imp_context;
 #endif
 
+#ifdef SAY_WIN
+struct say_win_window;
+struct say_win_context;
+
+typedef struct say_win_window  *say_imp_window;
+typedef struct say_win_context *say_imp_context;
+#endif
+
 struct say_event;
 struct say_input;
 struct say_image;

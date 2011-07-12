@@ -8,5 +8,8 @@ pkg/
 *.log
 *.so
 *.bundle
+.redcar/
+ext/*.dll
+ext/*.def
 Makefile
 /test.rb

@@ -302,13 +302,13 @@ static
 VALUE ray_matrix_orthogonal(VALUE self,
                             VALUE left, VALUE right,
                             VALUE bottom, VALUE top,
-                            VALUE near, VALUE far) {
+                            VALUE z_near, VALUE z_far) {
   rb_check_frozen(self);
 
   say_matrix_set_ortho(ray_rb2matrix(self),
                        NUM2DBL(left), NUM2DBL(right),
                        NUM2DBL(bottom), NUM2DBL(top),
-                       NUM2DBL(near), NUM2DBL(far));
+                       NUM2DBL(z_near), NUM2DBL(z_far));
 
   return self;
 }
@@ -326,12 +326,12 @@ VALUE ray_matrix_orthogonal(VALUE self,
 static
 VALUE ray_matrix_perspective(VALUE self,
                              VALUE fovy, VALUE aspect,
-                             VALUE near, VALUE far) {
+                             VALUE z_near, VALUE z_far) {
   rb_check_frozen(self);
 
   say_matrix_set_perspective(ray_rb2matrix(self),
                              NUM2DBL(fovy), NUM2DBL(aspect),
-                             NUM2DBL(near), NUM2DBL(far));
+                             NUM2DBL(z_near), NUM2DBL(z_far));
 
   return self;
 }

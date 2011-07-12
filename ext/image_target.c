@@ -15,6 +15,9 @@ say_image_target *ray_rb2image_target(VALUE obj) {
 }
 
 VALUE ray_image_target_alloc(VALUE self) {
+  if (!say_image_target_is_available())
+    rb_raise(rb_eRuntimeError, "Ray::RenderImage is not supported here");
+  
   say_image_target *target = say_image_target_create();
   return Data_Wrap_Struct(ray_cImageTarget, NULL, say_image_target_free,
                           target);
@@ -50,8 +53,20 @@ VALUE ray_image_target_bind(VALUE self) {
  * current target will call this automatically.
  */
 VALUE ray_image_target_unbind(VALUE self) {
-  say_image_target_unbind();
+  /*
+   * No need for an error when this is not supported, because it just means
+   * we don't need to unbind anything.
+   */
+  if (say_image_target_is_available())
+    say_image_target_unbind();
   return Qnil;
+}
+
+/*
+ * @return [true, false] True when ImageTargets are available
+ */
+VALUE ray_image_target_available(VALUE self) {
+  return say_image_target_is_available() ? Qtrue : Qfalse;
 }
 
 void Init_ray_image_target() {
@@ -59,6 +74,7 @@ void Init_ray_image_target() {
   rb_define_alloc_func(ray_cImageTarget, ray_image_target_alloc);
 
   rb_define_singleton_method(ray_cImageTarget, "unbind", ray_image_target_unbind, 0);
+  rb_define_singleton_method(ray_cImageTarget, "available?", ray_image_target_available, 0);
 
   rb_define_method(ray_cImageTarget, "image=", ray_image_target_set_image, 1);
   rb_define_method(ray_cImageTarget, "image", ray_image_target_image, 0);

@@ -16,6 +16,8 @@ begin
 
   Jeweler::Tasks.new do |s|
     s.name = "ray"
+    
+    s.version = "0.1.0pre"
 
     s.summary     = "A library to write games (or to play with) in Ruby"
     s.description = "Written to play with Ruby"
@@ -25,7 +27,8 @@ begin
     s.authors = ["Mon ouïe"]
 
     s.files |= FileList["lib/**/*.rb"]
-    s.files |= FileList["ext/**/*.{cpp,h}"]
+    s.files |= FileList["ext/**/*.{c,h}"]
+    s.files |= FileList["ext/vendor/**/*"]
     s.files |= FileList["*.md"]
     s.files << ".gemtest" << "Rakefile"
 

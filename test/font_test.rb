@@ -12,11 +12,11 @@ context Ray::Font do
   }.raises_kind_of RuntimeError
 
   denies("creating a font from an IO object") {
-    open(path_of("VeraMono.ttf")) { |io| topic.new(io) }
+    open(path_of("VeraMono.ttf"), "rb") { |io| topic.new(io) }
   }.raises_kind_of RuntimeError
 
   asserts("creating a font from an invalid IO object") {
-    open(path_of("aqua.png")) { |io| topic.new(io) }
+    open(path_of("aqua.png"), "rb") { |io| topic.new(io) }
   }.raises_kind_of RuntimeError
 end
 

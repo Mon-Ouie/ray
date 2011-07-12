@@ -14,7 +14,6 @@ context "an image target" do
 
     asserts("color of image") { img[0, 0] }.equals Ray::Color.red
   end
-end
-
+end if Ray::ImageTarget.available?
 
 run_tests if __FILE__ == $0

@@ -2,7 +2,6 @@
 
 say_renderer *say_renderer_create() {
   say_renderer *renderer = (say_renderer*)malloc(sizeof(say_renderer));
-
   renderer->shader = say_shader_create();
   say_renderer_reset_states(renderer);
 

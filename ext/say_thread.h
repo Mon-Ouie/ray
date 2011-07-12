@@ -2,9 +2,21 @@
 #define SAY_THREAD_H_
 
 #include "say_basic_type.h"
+#include <windows.h>
 
 typedef void *(*say_thread_func)(void *data);
 
+#ifdef SAY_WIN
+typedef struct {
+  DWORD key;
+} say_thread_variable;
+
+typedef struct {
+  HANDLE th;
+  say_thread_func func;
+  void *data;
+  } say_thread;
+#else
 typedef struct {
   pthread_key_t key;
 } say_thread_variable;
@@ -12,6 +24,7 @@ typedef struct {
 typedef struct {
   pthread_t th;
 } say_thread;
+#endif
 
 say_thread_variable *say_thread_variable_create(say_destructor destructor);
 void say_thread_variable_free(say_thread_variable *var);

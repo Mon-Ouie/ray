@@ -13,7 +13,9 @@
 #include <unistd.h>
 
 /* Threading */
-#include <pthread.h>
+#ifndef SAY_WIN
+# include <pthread.h>
+#endif
 
 /* OpenGL */
 #include <GL/glew.h>
@@ -48,6 +50,10 @@
 
 #ifdef SAY_X11
 # include "say_x11.h"
+#endif
+
+#ifdef SAY_WIN
+# include "say_win.h"
 #endif
 
 #include "say_imp.h"

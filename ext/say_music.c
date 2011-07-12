@@ -78,8 +78,13 @@ static void *say_music_playback_thread(say_music *music) {
         }
       }
     }
-
-    usleep(250 * 1000); /* sleep for 0.25s */
+    
+    /* sleep for 0.25s */
+#ifdef SAY_WIN
+    Sleep(250);
+#else
+    usleep(250 * 1000); 
+#endif
   }
 
   return NULL;

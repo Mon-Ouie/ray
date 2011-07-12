@@ -1,15 +1,20 @@
 #include "say.h"
 
-static GLuint say_current_buffer = 0;
-static say_context *say_buffer_last_context = NULL;
+static bool say_has_vao() {
+  return __GLEW_ARB_vertex_array_object ||
+    __GLEW_APPLE_vertex_array_object;
+}
 
-static void say_buffer_make_current(GLuint vbo) {
+static GLuint say_current_vbo = 0;
+static say_context *say_vbo_last_context = NULL;
+
+static void say_vbo_make_current(GLuint vbo) {
   say_context *context = say_context_current();
 
-  if (context != say_buffer_last_context ||
-      vbo != say_current_buffer) {
-    say_current_buffer = vbo;
-    say_buffer_last_context = context;
+  if (context != say_vbo_last_context ||
+      vbo != say_current_vbo) {
+    say_current_vbo      = vbo;
+    say_vbo_last_context = context;
 
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo);
   }
@@ -28,16 +33,38 @@ static void say_vao_make_current(GLuint vao) {
 
   if (context != say_vao_last_context ||
       vao != say_current_vao) {
-    say_current_vao = vao;
+    say_current_vao      = vao;
     say_vao_last_context = context;
 
     glBindVertexArray(vao);
   }
 }
 
-static void say_buffer_will_delete(GLuint vbo) {
-  if (vbo == say_current_buffer)
-    say_current_buffer = 0;
+static say_buffer  *say_current_buffer      = NULL;
+static say_context *say_buffer_last_context = NULL;
+;
+static void say_buffer_setup_pointer(say_buffer *buf);
+
+static void say_buffer_make_current(say_buffer *buf) {
+  say_context *context = say_context_current();
+
+  if (context != say_buffer_last_context ||
+      buf != say_current_buffer) {
+    say_current_buffer      = buf;
+    say_buffer_last_context = context;
+
+    say_buffer_setup_pointer(buf);
+  }
+}
+
+static void say_vbo_will_delete(GLuint vbo) {
+  if (vbo == say_current_vbo)
+    say_current_vbo = 0;
+}
+
+static void say_buffer_will_delete(say_buffer *buf) {
+  if (buf == say_current_buffer)
+    say_current_buffer = NULL;
 }
 
 static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
@@ -50,12 +77,8 @@ static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
   free(pair);
 }
 
-static void say_buffer_build_vao(say_buffer *buf, GLuint vao) {
-  say_vao_make_current(vao);
-
-  say_buffer_make_current(buf->vbo);
-  /* forcefully bind */
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, buf->vbo);
+static void say_buffer_setup_pointer(say_buffer *buf) {
+  say_vbo_make_current(buf->vbo);
 
   say_vertex_type *type = say_get_vertex_type(buf->vtype);
 
@@ -64,7 +87,8 @@ static void say_buffer_build_vao(say_buffer *buf, GLuint vao) {
 
   size_t offset = 0;
 
-  for (size_t i = 0; i < count; i++) {
+  size_t i = 0;
+  for (; i < count; i++) {
     say_vertex_elem_type t = say_vertex_type_get_type(type, i);
 
     switch (t) {
@@ -105,6 +129,26 @@ static void say_buffer_build_vao(say_buffer *buf, GLuint vao) {
 
     glEnableVertexAttribArrayARB(i);
   }
+
+  /*
+   * Say will always use all the attribs. Disable all of them until
+   * finding one that is already disabled.
+   */
+  for (; i < GL_MAX_VERTEX_ATTRIBS_ARB; i++) {
+    GLint enabled;
+    glGetVertexAttribivARB(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED_ARB, &enabled);
+    
+    if (enabled)
+      glDisableVertexAttribArrayARB(i);
+    else
+      break;
+  }
+}
+
+static void say_buffer_build_vao(say_buffer *buf, GLuint vao) {
+  say_vao_make_current(vao);
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB, buf->vbo); /* forcefully bind */
+  say_buffer_setup_pointer(buf);
 }
 
 static GLuint say_buffer_get_vao(say_buffer *buf) {
@@ -133,12 +177,16 @@ say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size) {
   say_context_ensure();
 
   say_buffer *buf = (say_buffer*)malloc(sizeof(say_buffer));
-  buf->vaos = say_table_create((say_destructor)say_buffer_delete_vao_pair);
+
+  if (say_has_vao())
+    buf->vaos = say_table_create((say_destructor)say_buffer_delete_vao_pair);
+  else
+    buf->vaos = NULL;
 
   buf->vtype = vtype;
 
   glGenBuffersARB(1, &buf->vbo);
-  say_buffer_make_current(buf->vbo);
+  say_vbo_make_current(buf->vbo);
 
   buf->type = type;
 
@@ -154,9 +202,12 @@ say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size) {
 void say_buffer_free(say_buffer *buf) {
   say_context_ensure();
 
-  say_table_free(buf->vaos);
+  if (buf->vaos)
+    say_table_free(buf->vaos);
+  else
+    say_buffer_will_delete(buf);
 
-  say_buffer_will_delete(buf->vbo);
+  say_vbo_will_delete(buf->vbo);
   glDeleteBuffersARB(1, &(buf->vbo));
 
   say_array_free(buf->buffer);
@@ -169,12 +220,29 @@ void *say_buffer_get_vertex(say_buffer *buf, size_t id) {
 
 void say_buffer_bind(say_buffer *buf) {
   say_context_ensure();
-  say_vao_make_current(say_buffer_get_vao(buf));
+
+  if (say_has_vao())
+    say_vao_make_current(say_buffer_get_vao(buf));
+  else
+    say_buffer_make_current(buf);
 }
 
 void say_buffer_unbind() {
-  say_buffer_make_current(0);
-  say_vao_make_current(0);
+  say_vbo_make_current(0);
+  
+  if (say_has_vao())
+    say_vao_make_current(0);
+  else { /* disable vertex attribs */
+    for (size_t i = 0; i < GL_MAX_VERTEX_ATTRIBS_ARB; i++) {
+      GLint enabled;
+      glGetVertexAttribivARB(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED_ARB, &enabled);
+    
+      if (enabled)
+        glDisableVertexAttribArrayARB(i);
+      else
+        break;
+    }
+  }
 }
 
 void say_buffer_update_part(say_buffer *buf, size_t id, size_t size) {

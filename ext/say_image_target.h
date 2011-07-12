@@ -10,6 +10,8 @@ typedef struct {
   say_target *target;
 } say_image_target;
 
+bool say_image_target_is_available();
+
 say_image_target *say_image_target_create();
 void say_image_target_free(say_image_target *target);
 

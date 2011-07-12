@@ -104,7 +104,8 @@ context "an orthogonal projection" do
   setup { Ray::Matrix.orthogonal(0, 100, 100, 0, 1, -1) }
 
   asserts(:transform, [0, 0, 0]).equals Ray::Vector3[-1, 1, 0]
-  asserts(:transform, [100, 100, 0.5]).equals Ray::Vector3[1, -1, 0.5]
+  asserts(:transform, [100, 100, 0.5]).
+    almost_equals Ray::Vector3[1, -1, 0.5], 1e-6
 end
 
 context "a rotation then a translation" do

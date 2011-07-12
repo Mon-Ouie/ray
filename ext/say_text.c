@@ -264,15 +264,19 @@ static void say_text_draw(say_text *text, size_t first, say_shader *shader) {
   if (!img)
     return;
 
+  /*
+   * Following condition is true when the font image has been resized because of 
+   * new characters that have been loaded.
+   */
   say_vector2 img_size = say_image_get_size(img);
   if (img_size.x != text->last_img_size.x ||
       img_size.y != text->last_img_size.y) {
     /*
-      Unfortunately, this means we'd have to draw the text a second time to
-      display it correctly (but we won't let the text appear in this case).
-
-      There should be a way to update the text whenever image size is changed.
-    */
+     * Unfortunately, this means we'd have to draw the text a second time to
+     * display it correctly (but we won't let the text appear in this case).
+     *
+     * There should be a way to update the text whenever image size is changed.
+     */
     say_drawable_set_changed(text->drawable);
   }
   else {
