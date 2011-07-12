@@ -3,7 +3,7 @@ What is Ray?
 
 Ray is a library than can create windows, play music, and draw 2D graphics (or
 not too complex 3D by doing just a bit more work, thanks to OpenGL). It is meant
-to be easy and fun too use (à la Shoes), and still flexible and powerful.
+to be easy and fun to use (à la Shoes), and still flexible and powerful.
 
 Features
 ========
