@@ -39,6 +39,7 @@ void say_image_target_will_delete(GLuint fbo, GLuint rbo) {
 }
 
 bool say_image_target_is_available() {
+  say_context_ensure();
   return __GLEW_EXT_framebuffer_object != 0;
 }
 
