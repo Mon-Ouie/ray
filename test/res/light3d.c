@@ -7,18 +7,14 @@ attribute vec4 in_Color;
 uniform mat4 in_ModelView;
 uniform mat4 in_Projection;
 
-uniform vec3 in_Light;
-uniform vec4 in_LightColor;
-
 varying vec4 var_Color;
+varying vec3 var_Normal;
 
 void main() {
-  gl_Position = vec4(in_Position, 1) * in_ModelView * in_Projection;
+  mat4 mvp = in_ModelView * in_Projection;
+  gl_Position = vec4(in_Position, 1) * mvp;
 
-  vec3 light  = normalize(in_Light - gl_Position.xyz);
-  vec3 normal = normalize(in_Normal);
-
-  float diff = dot(normal, light);
-
-  var_Color = vec4(in_Color.rgb + in_LightColor.rgb * diff, 1.0);
+  var_Color  = in_Color;
+  /* Ignoring projection, willingly */
+  var_Normal = (vec4(in_Normal, 1) * in_ModelView).xyz;
 }

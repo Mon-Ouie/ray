@@ -38,7 +38,7 @@ class Model < Ray::Drawable
             pos, normal = arg.split("//").map { |s| s.to_i - 1 }
             @vertices << Vertex.new(positions[pos],
                                     normals[normal],
-                                    Ray::Color.gray)
+                                    Ray::Color.new(120, 100, 255))
           end
         end
       end
@@ -49,7 +49,7 @@ class Model < Ray::Drawable
   end
 
   def rotate(x, y, z)
-    mat = Ray::Matrix.translation [0, 0, -5]
+    mat = Ray::Matrix.translation [0, 0, -4]
 
     mat.rotate(x, [1, 0, 0])
     mat.rotate(y, [0, 1, 0])
@@ -77,10 +77,9 @@ Ray.game "A teapot!" do
 
     window.shader.apply_vertex Model::Vertex
     window.shader.compile(:vertex => path_of("light3d.c"),
-                          :frag   => path_of("frag3d.c"))
+                          :frag   => path_of("frag_light3d.c"))
 
-    window.shader["in_Light"]      = Ray::Vector3[0, 1, 0]
-    window.shader["in_LightColor"] = Ray::Color.white
+    window.shader["in_Light"] = Ray::Vector3[1, 0, 0]
 
     window.view = Ray::View.new Ray::Matrix.perspective(90, 1, 1, 10)
 
