@@ -57,54 +57,67 @@ void say_image_free(say_image *img) {
   free(img);
 }
 
-void say_image_load_raw(say_image *img, size_t width, size_t height,
+bool say_image_load_raw(say_image *img, size_t width, size_t height,
                         say_color *pixels) {
-  say_image_create_with_size(img, width, height);
+  if (!say_image_create_with_size(img, width, height))
+    return false;
+
   memcpy(img->pixels, pixels, sizeof(say_color) * width * height);
+  return true;
 }
 
-int say_image_load_file(say_image *img, const char *filename) {
+bool say_image_load_file(say_image *img, const char *filename) {
   int width, height, comp = 4;
 
   stbi_uc *buf = stbi_load(filename, &width, &height, &comp, 4);
   if (!buf)
-    return 0;
+    return false;
 
-  say_image_load_raw(img, width, height, (say_color*)buf);
+  if (!say_image_load_raw(img, width, height, (say_color*)buf))
+    return false;
   stbi_image_free(buf);
 
-  return 1;
+  return true;
 }
 
-int say_image_load_from_memory(say_image *img, size_t size,
+bool say_image_load_from_memory(say_image *img, size_t size,
                                 const char *buffer) {
   int width, height, comp = 4;
 
   stbi_uc *buf = stbi_load_from_memory((const uint8_t*)buffer, size,
                                        &width, &height, &comp, 4);
   if (!buf)
-    return 0;
+    return false;
 
-  say_image_load_raw(img, width, height, (say_color*)buf);
+  if (!say_image_load_raw(img, width, height, (say_color*)buf))
+    return false;
   stbi_image_free(buf);
 
-  return 1;
+  return true;
 }
 
-void say_image_create_with_size(say_image *img, size_t w, size_t h) {
+bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
   if (img->width != w || img->height != h) {
     if (img->pixels) free(img->pixels);
     img->pixels = malloc(sizeof(say_color) * w * h);
 
     say_texture_make_current(img->texture);
+    glGetError(); /* Ignore potential previous errors */
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
+                 GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    if (glGetError()) {
+      say_error_set("could not create texture");
+      return false;
+    }
   }
 
   img->width  = w;
   img->height = h;
 
   img->texture_updated = 0;
+
+  return true;
 }
 
 static bool say_image_assert_non_empty(say_image *img) {
@@ -173,13 +186,14 @@ say_vector2 say_image_get_size(say_image *img) {
   return say_make_vector2(img->width, img->height);
 }
 
-void say_image_resize(say_image *img, size_t w, size_t h) {
+bool say_image_resize(say_image *img, size_t w, size_t h) {
   size_t old_w = img->width, old_h = img->height;
 
   say_color *cpy = malloc(sizeof(say_color) * img->width * img->height);
   memcpy(cpy, img->pixels, sizeof(say_color) * img->width * img->height);
 
-  say_image_create_with_size(img, w, h);
+  if (!say_image_create_with_size(img, w, h))
+    return false;
 
   size_t row_size = sizeof(say_color) * old_h;
 
@@ -195,6 +209,8 @@ void say_image_resize(say_image *img, size_t w, size_t h) {
   }
 
   free(cpy);
+
+  return true;
 }
 
 uint8_t say_image_is_smooth(say_image *img) {

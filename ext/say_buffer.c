@@ -42,7 +42,7 @@ static void say_vao_make_current(GLuint vao) {
 
 static say_buffer  *say_current_buffer      = NULL;
 static say_context *say_buffer_last_context = NULL;
-;
+
 static void say_buffer_setup_pointer(say_buffer *buf);
 
 static void say_buffer_make_current(say_buffer *buf) {
@@ -137,7 +137,7 @@ static void say_buffer_setup_pointer(say_buffer *buf) {
   for (; i < GL_MAX_VERTEX_ATTRIBS_ARB; i++) {
     GLint enabled;
     glGetVertexAttribivARB(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED_ARB, &enabled);
-    
+
     if (enabled)
       glDisableVertexAttribArrayARB(i);
     else
@@ -229,14 +229,14 @@ void say_buffer_bind(say_buffer *buf) {
 
 void say_buffer_unbind() {
   say_vbo_make_current(0);
-  
+
   if (say_has_vao())
     say_vao_make_current(0);
   else { /* disable vertex attribs */
     for (size_t i = 0; i < GL_MAX_VERTEX_ATTRIBS_ARB; i++) {
       GLint enabled;
       glGetVertexAttribivARB(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED_ARB, &enabled);
-    
+
       if (enabled)
         glDisableVertexAttribArrayARB(i);
       else
