@@ -82,7 +82,7 @@ class CptnRuby
     
     # Jump.
     on :key_press, key(:up) do
-      if @map.solid?(x + @sprite.sprite_width / 2, y + @sprite.sprite_height + 1)
+      if @map.solid?(self.x + @sprite.sprite_width / 2, self.y + @sprite.sprite_height + 1)
         @vy = -JUMP_SPEED
       end
     end
