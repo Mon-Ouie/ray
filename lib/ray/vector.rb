@@ -101,6 +101,7 @@ module Ray
     def dist(other)
       (self - other).length
     end
+    alias distance dist
 
     def ==(other)
       if other.is_a? Vector2
@@ -245,6 +246,7 @@ module Ray
     def dist(other)
       (self - other).length
     end
+    alias distance dist
 
     def ==(other)
       if other.is_a? Vector3
