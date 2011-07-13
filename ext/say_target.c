@@ -224,7 +224,7 @@ say_image *say_target_get_rect(say_target *target, size_t x, size_t y,
   }
 
   /* TODO: use PBOs for this? */
-  glReadPixels(x, (GLint)target->size.y - (GLint)y - 1, w, h, GL_RGBA,
+  glReadPixels(x, (GLint)target->size.y - (GLint)y - (GLint)h, w, h, GL_RGBA,
                GL_UNSIGNED_BYTE, say_image_get_buffer(image));
 
   return image;
