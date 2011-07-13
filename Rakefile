@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+
+begin
+  require 'devkit' # only used on windows
+rescue LoadError
+end
+
 begin
   require 'yard'
 
