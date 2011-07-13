@@ -19,6 +19,12 @@ VALUE ray_sprite_alloc(VALUE self) {
   return Data_Wrap_Struct(self, NULL, say_sprite_free, sprite);
 }
 
+VALUE ray_sprite_init_copy(VALUE self, VALUE orig) {
+  rb_iv_set(self, "@image", rb_iv_get(orig, "@image"));
+  say_sprite_copy(ray_rb2sprite(self), ray_rb2sprite(orig));
+  return self;
+}
+
 /*
   @overload image=(img)
     @param [Ray::Image, nil] img The image this sprite will use. No image means
@@ -204,8 +210,8 @@ VALUE ray_sprite_uses_sprite_sheet(VALUE self) {
 
 void Init_ray_sprite() {
   ray_cSprite = rb_define_class_under(ray_mRay, "Sprite", ray_cDrawable);
-
   rb_define_alloc_func(ray_cSprite, ray_sprite_alloc);
+  rb_define_method(ray_cSprite, "initialize_copy", ray_sprite_init_copy, 1);
 
   rb_define_method(ray_cSprite, "image=", ray_sprite_set_image, 1);
   rb_define_method(ray_cSprite, "sub_rect=", ray_sprite_set_sub_rect, 1);
