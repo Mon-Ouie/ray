@@ -42,10 +42,10 @@ class CptnRuby
   
   # Sprite-sheet positions for the various animations.
   POSITIONS = {
-      :standing => [0, 1],
-      :walking1 => [1, 1],
-      :walking2 => [2, 1],
-      :jumping => [3, 1],
+      :standing => [0, 0],
+      :walking1 => [1, 0],
+      :walking2 => [2, 0],
+      :jumping => [3, 0],
   }
   
   MOVE_SPEED = 5
@@ -82,7 +82,7 @@ class CptnRuby
     
     # Jump.
     on :key_press, key(:up) do
-      if @map.solid?(x + @sprite.sprite_width / 2, y + @sprite.sprite_height + 1)
+      if @map.solid?(self.x + @sprite.sprite_width / 2, self.y + @sprite.sprite_height + 1)
         @vy = -JUMP_SPEED
       end
     end
