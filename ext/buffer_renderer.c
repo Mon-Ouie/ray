@@ -2,7 +2,7 @@
 
 VALUE ray_cBufferRenderer = Qnil;
 
-GLenum say_buf_type(VALUE type) {
+GLenum ray_buf_type(VALUE type) {
   if (type == RAY_SYM("static"))
     return SAY_STATIC;
   else if (type == RAY_SYM("stream"))
@@ -63,7 +63,7 @@ VALUE ray_buffer_renderer_init(VALUE self, VALUE type, VALUE vtype) {
   say_buffer_renderer **ptr;
   Data_Get_Struct(self, say_buffer_renderer*, ptr);
 
-  *ptr = say_buffer_renderer_create(say_buf_type(type),
+  *ptr = say_buffer_renderer_create(ray_buf_type(type),
                                     ray_get_vtype(vtype));
 
   return self;
@@ -86,6 +86,8 @@ VALUE ray_buffer_renderer_clear(VALUE self) {
  */
 static
 VALUE ray_buffer_renderer_push(VALUE self, VALUE obj) {
+  rb_check_frozen(self);
+
   if (!say_buffer_renderer_push(ray_rb2buf_renderer(self),
                                 ray_rb2drawable(obj))) {
     rb_raise(rb_eRuntimeError, "%s", say_error_get_last());

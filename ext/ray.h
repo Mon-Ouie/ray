@@ -30,6 +30,7 @@ extern VALUE ray_cVertex;
 extern VALUE ray_mGL;
 extern VALUE ray_cGLVertex;
 extern VALUE ray_cIntArray;
+extern VALUE ray_cGLBuffer;
 extern VALUE ray_cImage;
 extern VALUE ray_cFont;
 extern VALUE ray_cShader;
@@ -70,6 +71,7 @@ void Init_ray_vertex();
 void Init_ray_gl();
 void Init_ray_gl_vertex();
 void Init_ray_int_array();
+void Init_ray_gl_buffer();
 void Init_ray_image();
 void Init_ray_font();
 void Init_ray_shader();
@@ -152,7 +154,7 @@ uint8_t ray_byte_clamp(int color);
 
 VALUE ray_get_vertex_class(size_t id);
 size_t ray_get_vtype(VALUE class);
-GLenum say_buf_type(VALUE type);
+GLenum ray_buf_type(VALUE type);
 
 #ifdef __cplusplus
 # if 0
