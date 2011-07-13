@@ -16,8 +16,11 @@ module Ray
 
     # @option opts [String, #read] :vertex A vertex shader (filename, or io)
     # @option opts [String, #read] :frag A fragment shader (filename, or io)
+    # @option opts [String, #read] :geometry A geometry shader (filename, or io)
+    #
+    # Compiles the shader.
     def compile(opts)
-      [:vertex, :frag].each do |type|
+      [:vertex, :frag, :geometry].each do |type|
         if opts[type]
           if opts[type].is_a? String
             opts[type] = File.read(opts[type])
@@ -29,6 +32,7 @@ module Ray
 
       compile_vertex(opts[:vertex]) if opts[:vertex]
       compile_frag(opts[:frag]) if opts[:frag]
+      compile_geometry(opts[:geometry]) if opts[:geometry]
 
       link
 

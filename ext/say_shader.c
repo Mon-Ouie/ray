@@ -137,13 +137,19 @@ void say_shader_force_old() {
   say_shader_use_old_force = 1;
 }
 
+bool say_shader_is_geometry_available() {
+  say_context_ensure();
+  return __GLEW_ARB_geometry_shader4 != 0;
+}
+
 say_shader *say_shader_create() {
   say_context_ensure();
 
   say_shader *shader = (say_shader*)malloc(sizeof(say_shader));
 
-  shader->frag_shader   = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-  shader->vertex_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  shader->frag_shader     = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+  shader->vertex_shader   = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  shader->geometry_shader = 0;
 
   if (!say_shader_use_new) {
     say_shader_compile_frag(shader, say_default_frag_shader);
@@ -185,19 +191,42 @@ void say_shader_free(say_shader *shader) {
   glDeleteObjectARB(shader->frag_shader);
   glDeleteObjectARB(shader->vertex_shader);
 
+  say_shader_detach_geometry(shader);
+
   glDeleteObjectARB(shader->program);
 
   free(shader);
 }
 
-int say_shader_compile_frag(say_shader *shader, const char *src) {
+bool say_shader_compile_frag(say_shader *shader, const char *src) {
   say_context_ensure();
   return say_shader_create_shader(shader->frag_shader, src);
 }
 
-int say_shader_compile_vertex(say_shader *shader, const char *src) {
+bool say_shader_compile_vertex(say_shader *shader, const char *src) {
   say_context_ensure();
   return say_shader_create_shader(shader->vertex_shader, src);
+}
+
+bool say_shader_compile_geometry(say_shader *shader, const char *src) {
+  say_context_ensure();
+  if (!__GLEW_ARB_geometry_shader4) {
+    say_error_set("geometry shaders aren't available");
+    return false;
+  }
+
+  shader->geometry_shader = glCreateShaderObjectARB(GL_GEOMETRY_SHADER_ARB);
+  glAttachObjectARB(shader->program, shader->geometry_shader);
+  return say_shader_create_shader(shader->geometry_shader, src);
+}
+
+void say_shader_detach_geometry(say_shader *shader) {
+  if (shader->geometry_shader) {
+    say_context_ensure();
+    glDetachObjectARB(shader->program, shader->geometry_shader);
+    glDeleteObjectARB(shader->geometry_shader);
+    shader->geometry_shader = 0;
+  }
 }
 
 void say_shader_apply_vertex_type(say_shader *shader, size_t vtype) {
@@ -239,7 +268,7 @@ int say_shader_link(say_shader *shader) {
 
 void say_shader_set_matrix(say_shader *shader, const char *name,
                            say_matrix *matrix) {
-  say_shader_bind(shader);  
+  say_shader_bind(shader);
   GLint location = glGetUniformLocationARB(shader->program, name);
   glUniformMatrix4fvARB(location, 1, GL_FALSE, matrix->content);
 }

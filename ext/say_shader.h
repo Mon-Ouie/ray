@@ -40,9 +40,12 @@ typedef struct {
 
   GLuint frag_shader;
   GLuint vertex_shader;
+  GLuint geometry_shader;
 
   GLint locations[SAY_LOC_ID_COUNT];
 } say_shader;
+
+bool say_shader_is_geometry_available();
 
 say_shader *say_shader_create();
 void say_shader_free(say_shader *shader);
@@ -50,8 +53,11 @@ void say_shader_free(say_shader *shader);
 void say_shader_enable_new_glsl();
 void say_shader_force_old();
 
-int say_shader_compile_frag(say_shader *shader, const char *src);
-int say_shader_compile_vertex(say_shader *shader, const char *src);
+bool say_shader_compile_frag(say_shader *shader, const char *src);
+bool say_shader_compile_vertex(say_shader *shader, const char *src);
+bool say_shader_compile_geometry(say_shader *shader, const char *src);
+
+void say_shader_detach_geometry(say_shader *shader);
 
 void say_shader_apply_vertex_type(say_shader *shader, size_t vtype);
 

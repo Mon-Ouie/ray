@@ -201,6 +201,57 @@ void say_target_draw_buffer(say_target *target,
   say_renderer_push_buffer(target->renderer, buf);
 }
 
+say_color say_target_get(say_target *target, size_t x, size_t y) {
+  if (!say_target_make_current(target))
+    return say_make_color(0, 0, 0, 0);
+
+  say_color col;
+  glReadPixels(x, (GLint)target->size.y - (GLint)y - 1, 1, 1, GL_RGBA,
+               GL_UNSIGNED_BYTE, &col);
+
+  return col;
+}
+
+say_image *say_target_get_rect(say_target *target, size_t x, size_t y,
+                               size_t w, size_t h) {
+  if (!say_target_make_current(target))
+    return NULL;
+
+  say_image *image = say_image_create();
+  if (!say_image_create_with_size(image, w, h)) {
+    say_image_free(image);
+    return NULL;
+  }
+
+  /* TODO: use PBOs for this? */
+  glReadPixels(x, (GLint)target->size.y - (GLint)y - (GLint)h, w, h, GL_RGBA,
+               GL_UNSIGNED_BYTE, say_image_get_buffer(image));
+
+  /*
+   * Say keeps pixels from top to bottom, but GL reads from bottom to top. Flip
+   * pixels manually.
+   */
+
+  size_t mem_size = sizeof(say_color) * w;
+
+  say_color *temp_line = malloc(mem_size);
+  say_color *buffer    = say_image_get_buffer(image);
+
+  for (size_t i = 0; i <= h / 2; i++) {
+    memcpy(temp_line, &buffer[w * i], mem_size);
+    memcpy(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
+    memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
+  }
+
+  free(temp_line);
+
+  return image;
+}
+
+say_image *say_target_to_image(say_target *target) {
+  return say_target_get_rect(target, 0, 0, target->size.x, target->size.y);
+}
+
 void say_target_update(say_target *target) {
   say_context *context = say_target_get_context(target);
   if (context) {

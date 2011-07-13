@@ -56,6 +56,12 @@ void say_target_clear(say_target *target, say_color color);
 void say_target_draw(say_target *target, say_drawable *drawable);
 void say_target_draw_buffer(say_target *target,
                             say_buffer_renderer *buf);
+
+say_color say_target_get(say_target *target, size_t x, size_t y);
+say_image *say_target_get_rect(say_target *target, size_t x, size_t y,
+                               size_t w, size_t h);
+say_image *say_target_to_image(say_target *target);
+
 void say_target_update(say_target *target);
 
 #endif

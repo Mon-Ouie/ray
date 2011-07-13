@@ -110,6 +110,24 @@ void say_sprite_free(say_sprite *sprite) {
   free(sprite);
 }
 
+void say_sprite_copy(say_sprite *sprite, say_sprite *orig) {
+  say_drawable_copy(sprite->drawable, orig->drawable);
+
+  sprite->image = orig->image;
+
+  sprite->color = orig->color;
+  sprite->rect  = orig->rect;
+
+  sprite->flip_x = orig->flip_x;
+  sprite->flip_y = orig->flip_y;
+
+  sprite->is_sheet = orig->is_sheet;
+  sprite->sheet_w  = orig->sheet_w;
+  sprite->sheet_h  = orig->sheet_h;
+  sprite->sheet_x  = orig->sheet_x;
+  sprite->sheet_y  = orig->sheet_y;
+}
+
 say_image *say_sprite_get_image(say_sprite *sprite) {
   return sprite->image;
 }

@@ -81,7 +81,7 @@ Ray.game "A teapot!" do
 
     window.shader["in_Light"] = Ray::Vector3[1, 0, 0]
 
-    window.view = Ray::View.new Ray::Matrix.perspective(90, 1, 1, 10)
+    window.view = Ray::View.new Ray::Matrix.perspective(80, 1, 1, 10)
 
     n = 0
     always do

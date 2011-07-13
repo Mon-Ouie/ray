@@ -21,6 +21,8 @@ typedef struct {
 say_sprite *say_sprite_create();
 void say_sprite_free(say_sprite *sprite);
 
+void say_sprite_copy(say_sprite *sprite, say_sprite *orig);
+
 say_image *say_sprite_get_image(say_sprite *sprite);
 void say_sprite_set_image(say_sprite *sprite, say_image *img);
 

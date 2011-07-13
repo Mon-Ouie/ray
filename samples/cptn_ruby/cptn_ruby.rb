@@ -1,13 +1,14 @@
-# Basically, the tutorial game taken to a jump'n'run perspective.
-
+# Basically, the tutorial game taken to a jump'n'run perspective. (Actually,
+# taken from Gosu)
+#
 # Shows how to
 #  * implement jumping/gravity
-#  * implement scrolling using viewports
+#  * implement scrolling using views
 #  * implement a simple tile-based map
 #  * load levels from primitive text files
-
+#
 # Some exercises, starting at the real basics:
-#  0) understand the existing code!
+#  1) understand the existing code!
 # As shown in the tutorial:
 #  2) add gamepad support
 #  3) add a score as in the tutorial game
@@ -17,8 +18,8 @@
 #  6) add background music
 #  7) implement parallax scrolling for the star background!
 # Getting tricky:
-#  8) optimize Map#draw_on so only tiles on screen are drawn (needs modulo, a pen
-#     and paper to figure out)
+#  8) optimize Map#draw_on so only tiles on screen are drawn (needs modulo, a
+#     pen and paper to figure out)
 #  9) add loading of next level when all gems are collected
 # ...Enemies, a more sophisticated object system, weapons, title and credits
 # screens...
@@ -27,157 +28,140 @@ $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../lib")
 $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../ext")
 
 require 'ray'
-require 'forwardable'
-  
+
 def path_of(resource)
   File.expand_path File.join(File.dirname(File.dirname(__FILE__)), resource)
 end
 
-# Player class.
-class CptnRuby 
+
+class CptnRuby
   include Ray::Helper
-  
-  extend Forwardable
-  def_delegators :@sprite, :x, :y, :x=, :y= 
-  
-  # Sprite-sheet positions for the various animations.
-  POSITIONS = {
-      :standing => [0, 0],
-      :walking_start => [1, 0],
-      :walking_end => [2.5, 0], 
-      :jumping => [3, 0],
+
+  Positions = {
+    :standing => Ray::Vector2[0, 0],
+    :walking1 => Ray::Vector2[1, 0],
+    :walking2 => Ray::Vector2[2, 0],
+    :jumping  => Ray::Vector2[3, 0],
   }
-  
-  MOVE_SPEED = 5
-  JUMP_SPEED = 20
-  
-  attr_reader :window # Needed so we can use #holding?
-  
-  def initialize(scene, map, x, y)
-    self.raiser_runner = scene.raiser_runner
-    self.event_runner = scene.event_runner
-    
-    @window = scene.window   
+
+  MoveSpeed = 5
+  JumpSpeed = 20
+
+  def initialize(map, pos)
     @map = map
-  
-    @vy = 0 # Vertical velocity
-   
-    # Load all animation frames
-    @sprite = sprite path_of("_media/CptnRuby.png"), at: [x, y]
+    @vy  = 0
+
+    @sprite = Ray::Sprite.new path_of("_media/CptnRuby.png"), :at => pos
     @sprite.sheet_size = [4, 1]
-    
-    @walking_animation = sprite_animation(:from => POSITIONS[:walking_start],
-        :to => POSITIONS[:walking_end], :duration => 0.3)
-        
-    @walking_animation.start(@sprite)
+
+    @size = Ray::Vector2[@sprite.sprite_width, @sprite.sprite_height]
+
+    @walking_animation = sprite_animation(:from     => Positions[:walking1],
+                                          :to       => Positions[:walking2] + [0.5,0],
+                                          :duration => 1).start(@sprite)
     @walking_animation.pause
-    
+  end
+
+  def register(scene)
+    self.event_runner = @walking_animation.event_runner = scene.event_runner
+    @window           = scene.window
+
     on :animation_end, @walking_animation do
-      @walking_animation.start(@sprite)
+      @walking_animation.start @sprite
     end
-    
-    # Jump.
+
     on :key_press, key(:up) do
-      if @map.solid?(self.x + @sprite.sprite_width / 2, self.y + @sprite.sprite_height + 1)
-        @vy = -JUMP_SPEED
+      if @map.solid?(@sprite.x + @sprite.sprite_width / 2,
+                     @sprite.y + @sprite.sprite_height + 1)
+        @vy = -JumpSpeed
       end
     end
   end
 
-  def draw_on(window)
-    window.draw @sprite
+  def update
+    if holding? :left
+      @state         = :walking
+      @sprite.flip_x = false
+      move_horizontally(-MoveSpeed)
+    elsif holding? :right
+      @state         = :walking
+      @sprite.flip_x = true
+      move_horizontally(+MoveSpeed)
+    else
+      @state = :standing
+    end
+
+    @state = :jumping if @vy < 0
+
+    case @state
+    when :standing, :jumping
+      @walking_animation.pause unless @walking_animation.paused?
+      @sprite.sheet_pos = Positions[@state]
+    when :walking
+      @walking_animation.resume if @walking_animation.paused?
+      @walking_animation.update
+    end
+
+    # Acceleration/gravity
+    # By adding 1 each frame, and (ideally) adding vy to y, the player's
+    # jumping curve will be the parabole we want it to be.
+    move_vertically @vy unless (@vy += 1).zero?
+
+    @map.remove_gems { |gem| @sprite.collide? gem.sprite }
   end
-  
+
+  def pos; @sprite.pos; end
+  def x; pos.x; end
+  def y; pos.y; end
+
+  attr_reader :sprite
+  attr_reader :window
+
+  private
   def move_horizontally(x)
-    step = x / x.abs  
-    (x.abs).times do
+    step = x / x.abs
+    x.abs.times do
       if would_fit?(step, 0)
-        self.x += step
+        @sprite.x += step
       else
         break
       end
     end
   end
-    
+
   def move_vertically(y)
-    step = y / y.abs  
-    (y.abs).times do
+    step = y / y.abs
+    y.abs.times do
       if would_fit?(0, step)
-        self.y += step
+        @sprite.y += step
       else
         @vy = 0 # Hit roof or floor; stop dropping/jumping.
         break
       end
     end
   end
-  
-  # Could the object be placed at x + offs_x/y + offs_y without being stuck?
-  def would_fit?(offs_x, offs_y)
-    # Check at the center/top and center/bottom for map collisions
-    not @map.solid?(x + @sprite.sprite_width / 2 + offs_x, y + offs_y) and
-      not @map.solid?(x + @sprite.sprite_width / 2 + offs_x, y + offs_y + @sprite.sprite_height)
-  end
-  
-  def update
-    # Move left/right.
-    if holding? key(:left)
-      @moving = :walking
-      @sprite.flip_x = false
-      move_horizontally(-MOVE_SPEED)
-    elsif holding? key(:right)
-      @moving = :walking
-      @sprite.flip_x = true
-      move_horizontally(MOVE_SPEED)
-    else
-      @moving = :standing 
-    end
-    
-    if @vy < 0
-      @moving = :jumping
-    end
-    
-    # Select image depending on action.
-    case @moving 
-      when :standing, :jumping        
-        @walking_animation.pause unless @walking_animation.paused?   
-        @sprite.sheet_pos = POSITIONS[@moving]
-      when :walking
-        @walking_animation.resume if @walking_animation.paused?   
-        @walking_animation.update        
-    end
-    
-    # Acceleration/gravity
-    # By adding 1 each frame, and (ideally) adding vy to y, the player's
-    # jumping curve will be the parabole we want it to be.
-    @vy += 1
-    # Vertical movement
-    move_vertically(@vy) if @vy != 0
-    
-    collect_gems
-  end
-  
-  def collect_gems
-    # Same as in the tutorial game.
-    @map.gems.reject! { |c| @sprite.collide?(c) }
+
+  def would_fit?(x, y)
+    !(@map.solid?(@sprite.x + @size.w / 2 + x, @sprite.y + y) ||
+      @map.solid?(@sprite.x + @size.w / 2 + x, @sprite.y + y + @size.h))
   end
 end
 
-class CollectibleGem 
+class CollectibleGem
   include Ray::Helper
-  
-  extend Forwardable
-  def_delegators :@sprite, :x, :y, :to_rect
-  
-  def initialize(scene, x, y)   
-    self.raiser_runner = scene.raiser_runner
-    self.event_runner = scene.event_runner
-  
-    @sprite = sprite path_of("_media/CptnRuby Gem.png"), at: [x, y] 
-    @sprite.origin = @sprite.image.size / 2 # Center
-    
+
+  def initialize(pos)
+    @sprite = Ray::Sprite.new path_of("_media/CptnRuby Gem.png"), :at => pos
+    @sprite.origin = @sprite.image.size / 2
+
     @animation = rotation(:from => -30, :to => 30, :duration => 0.6)
     @reverse_animation = -@animation
-        
+  end
+
+  def register(scene)
+    self.event_runner = scene.event_runner
+    @animation.event_runner = @reverse_animation.event_runner = event_runner
+
     on :animation_end, @animation do
       @reverse_animation.start @sprite
     end
@@ -185,124 +169,107 @@ class CollectibleGem
     on :animation_end, @reverse_animation do
       @animation.start @sprite
     end
-    
-    @animation.start(@sprite)
+
+    @animation.start @sprite
   end
-  
+
   def update
     @animation.update
     @reverse_animation.update
   end
-  
-  def draw_on(window)
-    window.draw @sprite
-  end
+
+  attr_reader :sprite
 end
-  
-# Map class holds and draws tiles and gems.
+
 class Map
-  include Ray::Helper
+  Tileset  = path_of("_media/CptnRuby Tileset.png")
+  PartSize = 60
+  TileSize = 50
 
-  attr_reader :width, :height, :gems
-  
-  TILE_SIZE = 50 # Tiles are 50x50 pixels in size.
-  
-  # Positions of tiles in the sprite-sheet.
-  module Tiles
-    SHEET_SIZE = [2, 1]
-    
-    GRASS = [0, 0]
-    EARTH = [1, 0]
-  end
-  
-  def initialize(scene, filename)
-    @tileset = sprite path_of("_media/CptnRuby Tileset.png")
-    @tileset.sheet_size = Tiles::SHEET_SIZE
+  def initialize(file)
+    @tiles = {}
+    @gems  = []
 
-    @gems = []
+    File.foreach(file).with_index do |line, y|
+      @max_y = y
 
-    lines = File.readlines(filename).map { |line| line.chomp }
-    @height = lines.size
-    @width = lines[0].size
-    @tiles = Array.new(@width) do |x|
-      Array.new(@height) do |y|
-        case lines[y][x, 1]
-        when '"'
-          Tiles::GRASS
-        when '#'
-          Tiles::EARTH
-        when 'x'
-          @gems << CollectibleGem.new(scene, x * TILE_SIZE, y * TILE_SIZE)
-          nil
-        else
-          nil
+      line.each_char.with_index do |char, x|
+        @max_x = x
+
+        case char
+        when ?"
+          @tiles[[x, y]] = Ray::Sprite.new(Tileset, :at => [x * TileSize - 5,
+                                                            y * TileSize - 5])
+          @tiles[[x, y]].sub_rect = [0, 0, PartSize, PartSize]
+        when ?#
+          @tiles[[x, y]] = Ray::Sprite.new(Tileset, :at => [x * TileSize - 5,
+                                                            y * TileSize - 5])
+          @tiles[[x, y]].sub_rect = [PartSize, 0, PartSize, PartSize]
+        when ?x
+          @gems << CollectibleGem.new([x * TileSize, y * TileSize])
         end
       end
     end
+
+    @max_x *= TileSize
+    @max_y *= TileSize
   end
-  
-  def draw_on(window)
-    # Very primitive drawing function:
-    # Draws all the tiles, some off-screen, some on-screen.
-    @height.times do |y|
-      @width.times do |x|
-        tile = @tiles[x][y]
-        if tile
-          # Draw the tile with an offset (tile images have some overlap)
-          # Scrolling is implemented here just as in the game objects.
-          @tileset.sheet_pos = tile
-          @tileset.pos = (x * TILE_SIZE) - 5, (y * TILE_SIZE) - 5
-          window.draw @tileset
-        end
-      end
-    end
-    
-    @gems.each { |c| c.draw_on window }
+
+  def each_tile
+    @tiles.each { |_, tile| yield tile }
   end
-  
-  def update
-    @gems.each(&:update)
+
+  def each_gem(&block)
+    @gems.each(&block)
   end
-  
-  # Solid at a given pixel position?
+
+  def remove_gems(&block)
+    @gems.delete_if(&block)
+  end
+
   def solid?(x, y)
-    y < 0 || @tiles[x / TILE_SIZE][y / TILE_SIZE]
+    y < 0 || @tiles[[x.to_i / TileSize, y.to_i / TileSize]]
   end
+
+  attr_reader :max_x, :max_y
 end
 
-Ray::Game.new("Cptn. Ruby --- [LEFT/RIGHT/UP to play]") do
-  register do
-    add_hook :quit, method(:exit!)
-  end
+Ray.game "Captain Ruby" do
+  register { add_hook :quit, method(:exit!) }
 
-  scene :game do   
-    @sky = sprite path_of("_media/Space.png")
-    @map = Map.new self, path_of("_media/CptnRuby Map.txt")
-    @cptn = CptnRuby.new self, @map, 400, 100
-    @camera = window.default_view # Copy the default view to use as a moving camera.
-    
-    on :key_press, key(:escape) do
-      exit!
-    end
-    
+  scene :game do
+    @half_size = window.size / 2
+
+    @sky  = sprite path_of("_media/Space.png")
+
+    @map  = Map.new path_of("_media/CptnRuby Map.txt")
+    @cptn = CptnRuby.new(@map, [400, 100])
+
+    @camera = Ray::View.new @cptn.pos, window.size
+
+    add_hook :key_press, key(:escape), method(:exit!)
+    @map.each_gem { |gem| gem.register self }
+    @cptn.register self
+
     always do
-      @cptn.update 
-      @map.update      
+      @map.each_gem(&:update)
+      @cptn.update
 
-      # Recalculate the position of the camera.      
-      camera_x = [[@cptn.x, (window.size.width / 2)].max, @map.width * Map::TILE_SIZE - window.size.width / 2].min
-      camera_y = [[@cptn.y, (window.size.height / 2)].max, @map.height * Map::TILE_SIZE - window.size.height / 2].min           
+      # Center camera
+      camera_x = [[@cptn.x, @half_size.w].max, @map.max_x - @half_size.w].min
+      camera_y = [[@cptn.y, @half_size.h].max, @map.max_y - @half_size.h].min
+
       @camera.center = [camera_x, camera_y]
     end
-    
-    render do |win|    
-      # Sky doesn't move.
+
+    render do |win|
       win.draw @sky
 
-      # Draw map and objects based on the player position.
-      win.with_view @camera do
-        @map.draw_on win
-        @cptn.draw_on win
+      win.with_view @camera do # Apply scrolling
+        @map.each_tile { |tile| win.draw tile       }
+        @map.each_gem  { |gem|  win.draw gem.sprite }
+
+        win.draw @cptn.sprite
       end
     end
   end

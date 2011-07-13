@@ -74,6 +74,21 @@ context "a sprite" do
     hookup { topic.flip_y = true }
     asserts :y_flipped?
   end
+
+  context "copied after several changes" do
+    setup do
+      topic.flip_x = true
+      topic.color  = Ray::Color.red
+      topic.dup
+    end
+
+    asserts(:image).equals img
+
+    asserts :x_flipped?
+    denies  :y_flipped?
+
+    asserts(:color).equals Ray::Color.red
+  end
 end
 
 run_tests if __FILE__ == $0
