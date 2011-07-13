@@ -46,6 +46,7 @@ require 'ray/sprite'
 require 'ray/text'
 require 'ray/turtle'
 
+require 'ray/audio'
 require 'ray/sound_buffer'
 require 'ray/sound'
 require 'ray/music'
