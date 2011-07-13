@@ -41,6 +41,14 @@ VALUE ray_shader_use_old(VALUE self) {
 }
 
 /*
+ * @return [true, falsue] True if geometry shaders are available
+ */
+static
+VALUE ray_shader_geometry_available(VALUE self) {
+  return say_shader_is_geometry_available() ? Qtrue : Qfalse;
+}
+
+/*
   @overload compile_frag(src)
     Compiles the fragment shader with a new source code.
     @param [String] src Source code
@@ -66,6 +74,31 @@ VALUE ray_shader_compile_vertex(VALUE self, VALUE src) {
              say_error_get_last());
   }
 
+  return self;
+}
+
+
+/*
+ * @overload compile_vertex(src)
+ *   Compiles the geometry shader with a new source code.
+ *   @param [String] src Source code
+ */
+static
+VALUE ray_shader_compile_geometry(VALUE self, VALUE src) {
+  if (!say_shader_compile_geometry(ray_rb2shader(self), StringValuePtr(src))) {
+    rb_raise(rb_path2class("Ray::Shader::CompileError"), "%s",
+             say_error_get_last());
+  }
+
+  return self;
+}
+
+/*
+ * Detaches any geomtry shader attached to the shader.
+ */
+static
+VALUE ray_shader_detach_geometry(VALUE self) {
+  say_shader_detach_geometry(ray_rb2shader(self));
   return self;
 }
 
@@ -239,9 +272,16 @@ void Init_ray_shader() {
   rb_define_alloc_func(ray_cShader, ray_shader_alloc);
 
   rb_define_singleton_method(ray_cShader, "use_old!", ray_shader_use_old, 0);
+  rb_define_singleton_method(ray_cShader, "geometry_available?",
+                             ray_shader_geometry_available, 0);
 
   rb_define_method(ray_cShader, "compile_frag", ray_shader_compile_frag, 1);
   rb_define_method(ray_cShader, "compile_vertex", ray_shader_compile_vertex, 1);
+  rb_define_method(ray_cShader, "compile_geometry", ray_shader_compile_geometry,
+                   1);
+  rb_define_method(ray_cShader, "detach_geometry", ray_shader_detach_geometry,
+                   0);
+
   rb_define_method(ray_cShader, "link", ray_shader_link, 0);
 
   rb_define_method(ray_cShader, "apply_vertex", ray_shader_apply_vertex, 1);
