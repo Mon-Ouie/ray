@@ -34,5 +34,8 @@ module Ray
 
     alias zoom  scale
     alias zoom= scale=
+
+    alias position  pos
+    alias position= pos=
   end
 end

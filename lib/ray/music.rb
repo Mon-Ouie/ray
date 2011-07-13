@@ -5,5 +5,8 @@ module Ray
     end
 
     alias time= seek
+
+    alias position  pos
+    alias position= pos=
   end
 end

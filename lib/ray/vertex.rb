@@ -17,5 +17,8 @@ module Ray
 
     alias color  col
     alias color= col=
+
+    alias position  pos
+    alias position= pos=
   end
 end
