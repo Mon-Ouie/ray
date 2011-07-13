@@ -35,6 +35,7 @@ void Init_ray_ext() {
   Init_ray_gl();
   Init_ray_gl_vertex();
   Init_ray_int_array();
+  Init_ray_gl_buffer();
   Init_ray_image();
   Init_ray_font();
   Init_ray_shader();

@@ -91,4 +91,6 @@ void Init_ray_vertex() {
   rb_define_method(ray_cVertex, "pos=", ray_vertex_set_pos, 1);
   rb_define_method(ray_cVertex, "tex=", ray_vertex_set_tex, 1);
   rb_define_method(ray_cVertex, "col=", ray_vertex_set_col, 1);
+
+  rb_iv_set(ray_cVertex, "@vertex_type_size", INT2FIX(sizeof(say_vertex)));
 }

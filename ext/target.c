@@ -111,6 +111,55 @@ VALUE ray_target_draw(VALUE self, VALUE obj) {
   return self;
 }
 
+/*
+ * @overload [](x, y)
+ *  @param [Integer] x
+ *  @param [Integer] y
+ *
+ *  @return [Ray::Color] Color of the pixel at that position
+ */
+static
+VALUE ray_target_get(VALUE self, VALUE x, VALUE y) {
+  return ray_col2rb(say_target_get(ray_rb2target(self),
+                                   NUM2ULONG(x),
+                                   NUM2ULONG(y)));
+}
+
+/*
+ * @overload rect(rect)
+ *   @param [Ray::Rect] rect
+ *   @return [Ray::Image] An image containing the pixels of that rect.
+ */
+static
+VALUE ray_target_rect(VALUE self, VALUE rect) {
+  say_rect c_rect  = ray_convert_to_rect(rect);
+  say_image *image = say_target_get_rect(ray_rb2target(self),
+                                         c_rect.x, c_rect.y,
+                                         c_rect.w, c_rect.h);
+
+  if (!image) {
+    rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
+
+  return Data_Wrap_Struct(rb_path2class("Ray::Image"), NULL, say_image_free,
+                          image);
+}
+
+/*
+ * @return [Ray::Image] An image containing all the pixels of the target
+ */
+static
+VALUE ray_target_to_image(VALUE self) {
+  say_image *image = say_target_to_image(ray_rb2target(self));
+
+  if (!image) {
+    rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
+
+  return Data_Wrap_Struct(rb_path2class("Ray::Image"), NULL, say_image_free,
+                          image);
+}
+
 void Init_ray_target() {
   ray_cTarget = rb_define_class_under(ray_mRay, "Target", rb_cObject);
 
@@ -128,4 +177,8 @@ void Init_ray_target() {
   rb_define_method(ray_cTarget, "make_current", ray_target_make_current, 0);
   rb_define_method(ray_cTarget, "clear", ray_target_clear, 1);
   rb_define_method(ray_cTarget, "draw", ray_target_draw, 1);
+
+  rb_define_method(ray_cTarget, "[]", ray_target_get, 2);
+  rb_define_method(ray_cTarget, "rect", ray_target_rect, 1);
+  rb_define_method(ray_cTarget, "to_image", ray_target_to_image, 0);
 }

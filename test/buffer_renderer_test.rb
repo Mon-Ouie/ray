@@ -23,6 +23,11 @@ context "a buffer renderer" do
     hookup { topic << obj }
 
     asserts(:drawables).equals [obj]
+
+    context "and clearing it" do
+      hookup { topic.clear }
+      asserts(:drawables).empty
+    end
   end
 
   asserts("adding a drawable that uses another vertex type") {
