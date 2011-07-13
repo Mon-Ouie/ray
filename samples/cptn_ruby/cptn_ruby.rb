@@ -63,14 +63,11 @@ class CptnRuby
     @vy = 0 # Vertical velocity
    
     # Load all animation frames
-    @sprite = sprite path_of("_media/CptnRuby.png")
-    @sprite.pos = [x, y]
-    @sprite.sheet_size = [4, 1] 
-
-    @moving = :stationary
+    @sprite = sprite path_of("_media/CptnRuby.png"), at: [x, y]
+    @sprite.sheet_size = [4, 1]
     
     @walking_animation = sprite_animation(:from => POSITIONS[:walking1],
-        :to => POSITIONS[:walking2], :duration => 1)
+        :to => POSITIONS[:walking2], :duration => 0.3)
         
     @walking_animation.start(@sprite)
     @walking_animation.pause
@@ -154,9 +151,7 @@ class CptnRuby
     # jumping curve will be the parabole we want it to be.
     @vy += 1
     # Vertical movement
-    if @vy != 0
-      move_vertically(@vy)
-    end
+    move_vertically(@vy) if @vy != 0
     
     collect_gems
   end
@@ -177,8 +172,7 @@ class CollectibleGem
     self.raiser_runner = scene.raiser_runner
     self.event_runner = scene.event_runner
   
-    @sprite = sprite path_of("_media/CptnRuby Gem.png")
-    @sprite.x, @sprite.y = x, y
+    @sprite = sprite path_of("_media/CptnRuby Gem.png"), at: [x, y] 
     @sprite.origin = @sprite.image.size / 2 # Center
     
     @animation = rotation(:from => -30, :to => 30, :duration => 0.6)
@@ -257,7 +251,7 @@ class Map
           # Draw the tile with an offset (tile images have some overlap)
           # Scrolling is implemented here just as in the game objects.
           @tileset.sheet_pos = tile
-          @tileset.x, @tileset.y = (x * TILE_SIZE) - 5, (y * TILE_SIZE) - 5
+          @tileset.pos = (x * TILE_SIZE) - 5, (y * TILE_SIZE) - 5
           window.draw @tileset
         end
       end
