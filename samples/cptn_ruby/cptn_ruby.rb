@@ -42,10 +42,10 @@ class CptnRuby
   
   # Sprite-sheet positions for the various animations.
   POSITIONS = {
-      :standing => [0, 1],
-      :walking1 => [1, 1],
-      :walking2 => [2, 1],
-      :jumping => [3, 1],
+      :standing => [0, 0],
+      :walking1 => [1, 0],
+      :walking2 => [2, 0],
+      :jumping => [3, 0],
   }
   
   MOVE_SPEED = 5
