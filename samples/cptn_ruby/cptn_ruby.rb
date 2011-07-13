@@ -43,8 +43,8 @@ class CptnRuby
   # Sprite-sheet positions for the various animations.
   POSITIONS = {
       :standing => [0, 0],
-      :walking1 => [1, 0],
-      :walking2 => [2, 0],
+      :walking_start => [1, 0],
+      :walking_end => [2.5, 0], 
       :jumping => [3, 0],
   }
   
@@ -66,8 +66,8 @@ class CptnRuby
     @sprite = sprite path_of("_media/CptnRuby.png"), at: [x, y]
     @sprite.sheet_size = [4, 1]
     
-    @walking_animation = sprite_animation(:from => POSITIONS[:walking1],
-        :to => POSITIONS[:walking2], :duration => 0.3)
+    @walking_animation = sprite_animation(:from => POSITIONS[:walking_start],
+        :to => POSITIONS[:walking_end], :duration => 0.3)
         
     @walking_animation.start(@sprite)
     @walking_animation.pause
