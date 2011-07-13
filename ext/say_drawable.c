@@ -7,11 +7,12 @@ static void say_drawable_update_matrix(say_drawable *drawable) {
   say_matrix_reset(drawable->matrix);
 
   say_matrix_translate_by(drawable->matrix,
-                          drawable->pos.x + drawable->origin.x,
-                          drawable->pos.y + drawable->origin.y,
+                          drawable->pos.x,
+                          drawable->pos.y,
                           drawable->z_order);
   say_matrix_rotate(drawable->matrix, drawable->angle, 0, 0, 1);
-  say_matrix_scale_by(drawable->matrix, drawable->scale.x, drawable->scale.y, 1);
+  say_matrix_scale_by(drawable->matrix, drawable->scale.x, drawable->scale.y,
+                      1);
   say_matrix_translate_by(drawable->matrix,
                           -drawable->origin.x,
                           -drawable->origin.y,

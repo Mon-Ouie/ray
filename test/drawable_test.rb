@@ -73,13 +73,12 @@ context "a drawable" do
     # (-20, -10) => (-40, -5)  (scale)
     # (-40, -5)  => (5, -40)   (rotate)
     # (5, -40)   => (15, -20)  (translate)
-    # (15, -20)  => (45, 20)   (cancel origin)
 
-    asserts(:transform, [10, 30]).almost_equals(Ray::Vector3[45, 20, 9], 1e-6)
+    asserts(:transform, [10, 30]).almost_equals(Ray::Vector3[15, -20, 9], 1e-6)
 
     asserts("matrix.transform (10, 30)") {
       topic.matrix.transform [10, 30]
-    }.almost_equals(Ray::Vector3[45, 20, 9], 1e-6)
+    }.almost_equals(Ray::Vector3[15, -20, 9], 1e-6)
 
     context "created from a copy" do
       setup { topic.dup }
@@ -104,7 +103,7 @@ context "a drawable" do
           topic.matrix = nil
         end
 
-        asserts(:transform, [10, 30]).almost_equals(Ray::Vector3[45, 20, 9],
+        asserts(:transform, [10, 30]).almost_equals(Ray::Vector3[15, -20, 9],
                                                     1e-6)
       end
     end
