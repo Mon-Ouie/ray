@@ -16,13 +16,11 @@ class Player
   extend Forwardable
   def_delegators :@sprite, :x, :y, :x=, :y=, :pos, :pos=
   
-  attr_reader :score, :window
+  attr_reader :score, :window, :sprite
 
-  def initialize(scene, stars)
-    @window = scene.window
-    @stars = stars
-    
-    @sprite = sprite path_of("_media/Starfighter.png")
+  def initialize(stars) 
+    @stars = stars  
+    @sprite = Ray::Sprite.new path_of("_media/Starfighter.png")
     @sprite.origin = @sprite.image.size / 2
     
     @beep = sound path_of("_media/Beep.wav")
@@ -30,6 +28,11 @@ class Player
     @vel_x = @vel_y = 0.0
     
     @score = 0    
+  end
+  
+  def register(scene)
+    self.event_runner = scene.event_runner
+    @window = scene.window
   end
   
   def update
@@ -63,10 +66,6 @@ class Player
     @vel_x *= 0.95
     @vel_y *= 0.95
   end
-
-  def draw_on(window)
-    window.draw @sprite
-  end
   
   def collect_stars
     @stars.reject! do |star|
@@ -85,16 +84,12 @@ class Star
   include Ray::Helper
   
   extend Forwardable
-  def_delegators :@sprite, :x, :y, :x=, :y=, :pos 
+  def_delegators :@sprite, :x, :y, :x=, :y=, :pos
+
+  attr_reader :sprite  
   
-  attr_reader :window
-  
-  def initialize(scene)
-    @window = scene.window
-    self.raiser_runner = scene.raiser_runner
-    self.event_runner = scene.event_runner
-    
-    @sprite = sprite path_of("_media/Star.png"), :at => [@window.size.width * rand, @window.size.height * rand]
+  def initialize(position)  
+    @sprite = Ray::Sprite.new path_of("_media/Star.png"), :at => position
     @sprite.sheet_size = [10, 1]
     @sprite.origin = (@sprite.image.size / @sprite.sheet_size) / 2
     @animation = sprite_animation(:from => [0, 0], :to => [9.5, 0], :duration => 2).start(@sprite)
@@ -104,18 +99,19 @@ class Star
     color.green = rand(255 - 40) + 40
     color.blue = rand(255 - 40) + 40
     @sprite.color = color
+  end
+  
+  def register(scene)
+    self.event_runner = scene.event_runner
+    @animation.event_runner = event_runner
     
     on :animation_end, @animation do
       @animation.start @sprite
     end
-  end
+  end    
   
   def update
     @animation.update   
-  end
-
-  def draw_on(window)  
-    window.draw @sprite
   end
 end
 
@@ -130,16 +126,17 @@ Ray::Game.new("Starfighter --- [LEFT/RIGHT/UP to move; collect the stars]") do
     
     @stars = Array.new
     
-    @player = Player.new self, @stars
+    @player = Player.new @stars
+    @player.register self
     @player.warp(window.size / 2)
     
-    on :key_press, key(:escape) do
-      exit!
-    end
+    add_hook :key_press, key(:escape), method(:exit!)
     
     always do     
       if rand(100) < 4 and @stars.size < 25 then
-        @stars << Star.new(self)
+        star = Star.new [window.size.width * rand, window.size.height * rand]
+        star.register self
+        @stars << star
       end
       
       @stars.each(&:update)
@@ -150,8 +147,8 @@ Ray::Game.new("Starfighter --- [LEFT/RIGHT/UP to move; collect the stars]") do
     
     render do |win|    
       win.draw @background_image
-      @stars.each {|star| star.draw_on win }   
-      @player.draw_on win
+      @stars.each {|star| win.draw star.sprite }   
+      win.draw @player.sprite
       win.draw @score_text
     end
   end
