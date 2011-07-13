@@ -64,7 +64,6 @@ class CptnRuby
    
     # Load all animation frames
     @sprite = sprite path_of("_media/CptnRuby.png")
-    @sprite.origin = [@sprite.image.width / 2, @sprite.image.height / 2] # Center
     @sprite.pos = [x, y]
     @sprite.sheet_size = [4, 1] 
 
@@ -180,7 +179,7 @@ class CollectibleGem
   
     @sprite = sprite path_of("_media/CptnRuby Gem.png")
     @sprite.x, @sprite.y = x, y
-    @sprite.origin = @sprite.image.width / 2,  @sprite.image.height / 2
+    @sprite.origin = @sprite.image.size / 2 # Center
     
     @animation = rotation(:from => -30, :to => 30, :duration => 0.6)
     @reverse_animation = -@animation
