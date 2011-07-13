@@ -227,6 +227,24 @@ say_image *say_target_get_rect(say_target *target, size_t x, size_t y,
   glReadPixels(x, (GLint)target->size.y - (GLint)y - (GLint)h, w, h, GL_RGBA,
                GL_UNSIGNED_BYTE, say_image_get_buffer(image));
 
+  /*
+   * Say keeps pixels from top to bottom, but GL reads from bottom to top. Flip
+   * pixels manually.
+   */
+
+  size_t mem_size = sizeof(say_color) * w;
+
+  say_color *temp_line = malloc(mem_size);
+  say_color *buffer    = say_image_get_buffer(image);
+
+  for (size_t i = 0; i <= h / 2; i++) {
+    memcpy(temp_line, &buffer[w * i], mem_size);
+    memcpy(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
+    memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
+  }
+
+  free(temp_line);
+
   return image;
 }
 

@@ -13,6 +13,10 @@ Ray.game "Get Pixels" do
       puts "(50, 430) == #{window[50, 430]}"
     end
 
+    on :key_press, key(:p) do
+      window.to_image.write "screenshot.png"
+    end
+
     @obj = Ray::Polygon.circle([50, 50], 10, Ray::Color.blue)
 
     render do
