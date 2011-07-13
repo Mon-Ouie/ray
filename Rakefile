@@ -16,7 +16,7 @@ begin
 
   Jeweler::Tasks.new do |s|
     s.name = "ray"
-    
+
     s.version = "0.1.0pre"
 
     s.summary     = "A library to write games (or to play with) in Ruby"
@@ -41,7 +41,7 @@ begin
   end
 rescue LoadError
   $stderr.puts("Jeweler is not installed. Please install it " +
-               "with the following command: gem intall jeweler")
+               "with the following command: gem install jeweler")
 end
 
 namespace :ext do
