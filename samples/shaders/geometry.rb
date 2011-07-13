@@ -3,7 +3,7 @@ $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../ext")
 
 require 'ray'
 
-class Line < Ray::Drawable
+class Triangles < Ray::Drawable
   def initialize
     super
     self.vertex_count = 3
@@ -26,7 +26,7 @@ Ray.game "Geometry shader" do
   register { add_hook :quit, method(:exit!) }
 
   scene :shader do
-    @points = Line.new
+    @triangles = Triangles.new
 
     geometry = <<-geometry
 #version 150
@@ -90,7 +90,7 @@ frag
                           :geometry => StringIO.new(geometry))
 
     render do |win|
-      win.draw @points
+      win.draw @triangles
     end
   end
 
