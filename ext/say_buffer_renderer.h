@@ -11,6 +11,8 @@ typedef struct {
   size_t vtype;
 
   size_t current_vertex;
+
+  say_matrix *matrix;
 } say_buffer_renderer;
 
 say_buffer_renderer *say_buffer_renderer_create(GLenum type,

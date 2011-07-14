@@ -197,6 +197,8 @@ void say_target_draw_buffer(say_target *target,
   if (!say_target_make_current(target))
     return;
 
+  buf->matrix = say_view_get_matrix(target->view);
+
   say_target_update_states(target);
   say_renderer_push_buffer(target->renderer, buf);
 }

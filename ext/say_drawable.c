@@ -138,9 +138,16 @@ void say_drawable_draw_at(say_drawable *drawable, size_t id,
   if (!drawable->matrix_updated)
     say_drawable_update_matrix(drawable);
 
-  say_shader_set_matrix_id(shader, SAY_MODEL_VIEW_LOC_ID, drawable->matrix);
+  say_shader *used_shader = drawable->shader ? drawable->shader : shader;
+  say_shader_set_matrix_id(used_shader, SAY_MODEL_VIEW_LOC_ID,
+                           drawable->matrix);
 
   if (drawable->render_proc) {
+    if (drawable->shader) {
+      say_shader_set_int_id(drawable->shader, SAY_TEXTURE_ENABLED_LOC_ID,
+                            drawable->use_texture);
+    }
+
     drawable->render_proc(drawable->data, id, shader);
   }
 }
@@ -153,7 +160,8 @@ void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
 
   /* NB: the current shader is always bound because we set a variable in it. */
   say_shader *used_shader = drawable->shader ? drawable->shader : shader;
-  say_shader_set_matrix_id(used_shader, SAY_MODEL_VIEW_LOC_ID, drawable->matrix);
+  say_shader_set_matrix_id(used_shader, SAY_MODEL_VIEW_LOC_ID,
+                           drawable->matrix);
 
   if (drawable->render_proc) {
     if (drawable->shader) {
