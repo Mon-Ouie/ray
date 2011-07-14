@@ -18,7 +18,7 @@ Ray.game "View" do
 
     @zoomed_view = @normal_view.dup
     @zoomed_view.viewport = [0.05, 0.05, 0.2, 0.2]
-    @zoomed_view.zoom_by [0.1, 0.1]
+    @zoomed_view.zoom_by [10, 10]
 
     render do |win|
       win.with_view @normal_view do
