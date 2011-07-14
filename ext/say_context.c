@@ -84,7 +84,7 @@ void say_context_free(say_context *context) {
   }
 
   say_imp_context_free(context->context);
-  
+
   free(context);
 }
 
@@ -136,6 +136,8 @@ static void say_context_setup_states(say_context *context) {
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
+
+  glReadBuffer(GL_FRONT);
 }
 
 void say_context_clean_up() {

@@ -32,12 +32,8 @@ context "a target" do
 
   context "cleared and updated" do
     hookup do
-      # Why twice?
-      # Because it seems glReadPixels *sometimes* uses the back buffer.
-      2.times do
-        topic.clear Ray::Color.green
-        topic.update
-      end
+      topic.clear Ray::Color.green
+      topic.update
     end
 
     asserts(:[], 10, 30).equals Ray::Color.green
