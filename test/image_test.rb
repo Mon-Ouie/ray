@@ -6,6 +6,8 @@ context Ray::Image do
   asserts(:new, path_of("pop.wav")).raises_kind_of RuntimeError
   asserts(:new, path_of("thing.png")).raises_kind_of RuntimeError
 
+  asserts(:new, [0, 0]).raises_kind_of Exception
+
   asserts(:new, StringIO.new(File.read(path_of("pop.wav")))).
     raises_kind_of RuntimeError
 end

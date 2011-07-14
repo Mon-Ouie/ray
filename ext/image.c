@@ -52,7 +52,8 @@ VALUE ray_image_init(VALUE self, VALUE arg) {
   }
   else {
     say_vector2 size = ray_convert_to_vector2(arg);
-    say_image_create_with_size(img, size.x, size.y);
+    if (!say_image_create_with_size(img, size.x, size.y))
+      rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
   }
 
   return self;

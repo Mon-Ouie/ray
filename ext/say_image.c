@@ -97,6 +97,11 @@ bool say_image_load_from_memory(say_image *img, size_t size,
 }
 
 bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
+  if (w == 0 || h == 0) {
+    say_error_set("can't create empty image");
+    return false;
+  }
+
   if (img->width != w || img->height != h) {
     if (img->pixels) free(img->pixels);
     img->pixels = malloc(sizeof(say_color) * w * h);
