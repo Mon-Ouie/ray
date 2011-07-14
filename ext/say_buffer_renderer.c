@@ -72,9 +72,16 @@ void say_buffer_renderer_render(say_buffer_renderer *renderer,
     say_drawable **e = say_array_get(renderer->drawables, i);
     say_drawable *drawable = *e;
 
-    if (using_texture != say_drawable_is_textured(drawable)) {
+    if (!drawable->shader &&
+        using_texture != say_drawable_is_textured(drawable)) {
       using_texture = !using_texture;
       say_shader_set_int(shader, SAY_TEXTURE_ENABLED_ATTR, using_texture);
+    }
+
+    if (drawable->shader) {
+      say_shader_set_matrix_id(drawable->shader,
+                               SAY_PROJECTION_LOC_ID,
+                               renderer->matrix);
     }
 
     size_t next_vertex = current_vertex +
