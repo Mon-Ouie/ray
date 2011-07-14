@@ -288,16 +288,25 @@ size_t say_polygon_get_size(say_polygon *polygon) {
 }
 
 void say_polygon_set_pos_for(say_polygon *polygon, size_t id, say_vector2 pos) {
+  if (say_vector2_eq(pos, polygon->points[id].pos))
+    return;
+
   polygon->points[id].pos = pos;
   say_drawable_set_changed(polygon->drawable);
 }
 
 void say_polygon_set_color_for(say_polygon *polygon, size_t id, say_color col) {
+  if (say_color_eq(col, polygon->points[id].col))
+    return;
+
   polygon->points[id].col = col;
   say_drawable_set_changed(polygon->drawable);
 }
 
 void say_polygon_set_outline_for(say_polygon *polygon, size_t id, say_color col) {
+  if (say_color_eq(col, polygon->points[id].outline_color))
+    return;
+
   polygon->points[id].outline_color = col;
   say_drawable_set_changed(polygon->drawable);
 }
@@ -315,6 +324,9 @@ say_color say_polygon_get_outline_for(say_polygon *polygon, size_t id) {
 }
 
 void say_polygon_set_outline(say_polygon *polygon, float size) {
+  if (polygon->outline_width == size)
+    return;
+
   polygon->outline_width = size;
 
   if (polygon->outlined)

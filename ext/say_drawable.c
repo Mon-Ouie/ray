@@ -69,8 +69,8 @@ void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
 
   drawable->use_texture = other->use_texture;
 
-  drawable->matrix_updated = 0;
-  drawable->has_changed    = 1;
+  drawable->matrix_updated = false;
+  drawable->has_changed    = true;
 }
 
 void say_drawable_free(say_drawable *drawable) {
@@ -81,11 +81,17 @@ void say_drawable_free(say_drawable *drawable) {
 }
 
 void say_drawable_set_custom_data(say_drawable *drawable, void *data) {
+  if (data == drawable->data)
+    return;
+
   drawable->data        = data;
   drawable->has_changed = 1;
 }
 
 void say_drawable_set_vertex_count(say_drawable *drawable, size_t size) {
+  if (size == drawable->vertex_count)
+    return;
+
   drawable->vertex_count = size;
   drawable->has_changed  = 1;
 }

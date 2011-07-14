@@ -36,6 +36,11 @@ typedef struct {
 #define say_make_color(r, g, b, a)     ((say_color){r, g, b, a})
 #define say_make_vertex(pos, col, tex) ((say_vertex){pos, col, tex})
 
+bool say_vector2_eq(say_vector2 a, say_vector2 b);
+bool say_vector3_eq(say_vector3 a, say_vector3 b);
+bool say_rect_eq(say_rect a, say_rect b);
+bool say_color_eq(say_color a, say_color b);
+
 typedef void (*say_destructor)(void *data);
 typedef void (*say_creator)(void *data);
 

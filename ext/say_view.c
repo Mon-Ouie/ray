@@ -65,18 +65,27 @@ void say_view_zoom_by(say_view *view, say_vector2 scale) {
 }
 
 void say_view_set_size(say_view *view, say_vector2 size) {
+  if (say_vector2_eq(view->size, size))
+    return;
+
   view->size = size;
   view->matrix_updated = 0;
   view->has_changed = 1;
 }
 
 void say_view_set_center(say_view *view, say_vector2 center) {
+  if (say_vector2_eq(view->center, center))
+    return;
+
   view->center = center;
   view->matrix_updated = 0;
   view->has_changed = 1;
 }
 
 void say_view_set_viewport(say_view *view, say_rect viewport) {
+  if (say_rect_eq(view->rect, viewport))
+    return;
+
   view->viewport = viewport;
   view->has_changed = 1;
 }
