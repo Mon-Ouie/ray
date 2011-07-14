@@ -3,6 +3,12 @@ module Ray
   # need to, the other classes and methods written with them being what
   # you should use instead.
   module DSL; end
+
+  class NoRunnerError < StandardError
+    def initialize(o)
+      super "#{o.inspect} has no runner object"
+    end
+  end
 end
 
 require 'ray/dsl/matcher'

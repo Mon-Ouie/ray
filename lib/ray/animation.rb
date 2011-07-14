@@ -147,7 +147,7 @@ module Ray
           @end_time = nil
 
           end_animation
-          raise_event :animation_end, self
+          raise_event :animation_end, self if raiser_runner
         end
       end
     end
@@ -183,7 +183,8 @@ module Ray
       end
     end
 
-    # @return [Ray::Animation::Combination] Combination of self and the argument.
+    # @return [Ray::Animation::Combination] Combination of self and the
+    #   argument.
     def +(other)
       animation_combination(self, other)
     end

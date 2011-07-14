@@ -11,7 +11,7 @@ module Ray
       # @param [DSL::Matcher, Regexp, Object] args List of arguments that should
       #   match the event's (if empty, the block will be called anyway).
       def on(event, *args, &block)
-        return unless listener_runner
+        raise NoRunnerError, self unless listener_runner
         listener_runner.add_handler(event, current_event_group, args, block)
       end
 
@@ -22,7 +22,7 @@ module Ray
       #   @example
       #     add_hook :quit, method(:exit!)
       def add_hook(event, *args)
-        return unless listener_runner
+        raise NoRunnerError, self unless listener_runner
         listener_runner.add_handler(event, current_event_group, args[0...-1],
                                     args.last)
       end

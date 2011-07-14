@@ -5,7 +5,7 @@ module Ray
     module EventRaiser
       # Raises a new event, with the given type and arguments.
       def raise_event(type, *args)
-        return unless raiser_runner
+        raise NoRunnerError, self unless raiser_runner
         raiser_runner.add_event(type, args)
       end
 

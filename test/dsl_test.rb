@@ -92,4 +92,20 @@ context "an event runner" do
   }.received(:event)
 end
 
+context "an object with no raiser runner" do
+  setup do
+    Object.new.extend Ray::DSL::EventRaiser
+  end
+
+  asserts(:raise_event, :test).raises_kind_of Ray::NoRunnerError
+end
+
+context "an object with no listener runner" do
+  setup do
+    Object.new.extend Ray::DSL::EventListener
+  end
+
+  asserts(:add_hook, :test, proc {}).raises_kind_of Ray::NoRunnerError
+end
+
 run_tests if __FILE__ == $0
