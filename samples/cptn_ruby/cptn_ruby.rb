@@ -206,7 +206,8 @@ class Map
                                                             y * TileSize - 5])
           @tiles[[x, y]].sub_rect = [PartSize, 0, PartSize, PartSize]
         when ?x
-          @gems << CollectibleGem.new([x * TileSize, y * TileSize])
+          @gems << CollectibleGem.new([x * TileSize + TileSize / 2,
+                                       y * TileSize + TileSize / 2])
         end
       end
     end
