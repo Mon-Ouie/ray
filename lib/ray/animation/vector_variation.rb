@@ -94,25 +94,6 @@ module Ray
       def last_value
         @initial_value + @variation if @initial_value
       end
-
-      def inspect
-        hash = {
-          :duration => duration,
-          :running => running?,
-          :attribute => attribute,
-          :target => target,
-          :progression => progression,
-          :at => current_value
-        }
-
-        if @initial_value
-          hash.merge!(:from => initial_value, :to => last_value)
-        else
-          hash.merge!(:of => variation)
-        end
-
-        "vector_variation(#{hash.inspect})"
-      end
     end
   end
 
@@ -125,12 +106,6 @@ module Ray
     # Same as #vector_variation, but :attribute is set to :scale.
     def scale_variation(opts)
       vector_variation(opts.merge(:attribute => :scale))
-    end
-
-    # Same as #vector_variation, but :attribute is set to :sheet_pos.
-    # This can be used to animate a sprite while it is moving.
-    def sprite_animation(opts)
-      vector_variation(opts.merge(:attribute => :sheet_pos))
     end
   end
 end

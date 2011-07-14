@@ -66,10 +66,6 @@ module Ray
 
       # @return [Array<Ray::Animation>]
       attr_reader :animations
-
-      def inspect
-        "animation_combination(#{animations.map(&:inspect).join(', ')})"
-      end
     end
   end
 end

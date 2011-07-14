@@ -57,7 +57,7 @@ class CptnRuby
     @size = Ray::Vector2[@sprite.sprite_width, @sprite.sprite_height]
 
     @walking_animation = sprite_animation(:from     => Positions[:walking1],
-                                          :to       => Positions[:walking2] + [0.5,0],
+                                          :to       => Positions[:walking2],
                                           :duration => 1).start(@sprite)
     @walking_animation.pause
   end

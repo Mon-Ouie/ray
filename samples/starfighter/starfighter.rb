@@ -92,7 +92,7 @@ class Star
     @sprite = Ray::Sprite.new path_of("_media/Star.png"), :at => position
     @sprite.sheet_size = [10, 1]
     @sprite.origin = (@sprite.image.size / @sprite.sheet_size) / 2
-    @animation = sprite_animation(:from => [0, 0], :to => [9.5, 0],
+    @animation = sprite_animation(:from => [0, 0], :to => [9, 0],
                                   :duration => 2).start(@sprite)
 
     color = Ray::Color.white

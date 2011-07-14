@@ -63,29 +63,11 @@ module Ray
 
       # @return [Float] Variation between the initial value and the last value.
       attr_reader :variation
-
-      def inspect
-        hash = {
-          :duration => duration,
-          :running => running?,
-          :attribute => attribute,
-          :target => target,
-          :progression => progression
-        }
-
-        if @initial_value
-          hash.merge! :from => @initial_value, :to => @initial_value + @variation
-        else
-          hash.merge! :of => @variation
-        end
-
-        "float_variation(#{hash})"
-      end
     end
   end
 
   module Helper
-    # @return [Ray::Animation::FloatVariation ]Same as #float_variation, but
+    # @return [Ray::Animation::FloatVariation] Same as #float_variation, but
     #   attribute is set to angle.
     def rotation(opts)
       float_variation(opts.merge(:attribute => :angle))

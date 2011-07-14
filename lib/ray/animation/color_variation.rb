@@ -97,25 +97,6 @@ module Ray
                          })
         end
       end
-
-      def inspect
-        hash = {
-          :duration => duration,
-          :running => running?,
-          :attribute => attribute,
-          :target => target,
-          :progression => progression,
-          :at => current_value
-        }
-
-        if @initial_value
-          hash.merge!(:from => initial_value, :to => last_value)
-        else
-          hash.merge!(:of => variation)
-        end
-
-        "color_variation(#{hash.inspect})"
-      end
     end
   end
 end
