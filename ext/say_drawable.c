@@ -115,7 +115,7 @@ void say_drawable_set_render_proc(say_drawable *drawable, say_render_proc proc) 
 }
 
 void say_drawable_fill_buffer(say_drawable *drawable, void *vertices) {
-  if (drawable->fill_proc)
+  if (drawable->fill_proc && drawable->vertex_count != 0)
     drawable->fill_proc(drawable->data, vertices);
 }
 
@@ -128,6 +128,14 @@ void say_drawable_fill_own_buffer(say_drawable *drawable) {
     if (say_buffer_slice_get_size(drawable->slice) != drawable->vertex_count) {
       say_buffer_slice_recreate(drawable->slice, drawable->vertex_count);
     }
+
+    /*
+     * If there are no vertices, we won't bother filling the buffer. However, we
+     * will execute the above code to mark the potential vertices we previously
+     * had as unused anymore.
+     */
+    if (drawable->vertex_count == 0)
+      return;
 
     if (drawable->fill_proc) {
       drawable->fill_proc(drawable->data,
@@ -175,7 +183,8 @@ void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
                             drawable->use_texture);
     }
 
-    say_buffer_slice_bind(drawable->slice);
+    if (drawable->vertex_count != 0)
+      say_buffer_slice_bind(drawable->slice);
 
     drawable->render_proc(drawable->data,
                           say_buffer_slice_get_loc(drawable->slice),
