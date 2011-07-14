@@ -83,7 +83,7 @@ void say_view_set_center(say_view *view, say_vector2 center) {
 }
 
 void say_view_set_viewport(say_view *view, say_rect viewport) {
-  if (say_rect_eq(view->rect, viewport))
+  if (say_rect_eq(view->viewport, viewport))
     return;
 
   view->viewport = viewport;
