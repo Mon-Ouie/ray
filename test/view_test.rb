@@ -29,11 +29,18 @@ context "a view" do
     asserts(:size).equals   Ray::Vector2[30, 40]
   end
 
+  context "after unzooming" do
+    hookup { topic.unzoom_by [2, 2] }
+
+    asserts(:center).equals Ray::Vector2[25, 40]
+    asserts(:size).equals   Ray::Vector2[60, 80]
+  end
+
   context "after zooming" do
     hookup { topic.zoom_by [2, 2] }
 
     asserts(:center).equals Ray::Vector2[25, 40]
-    asserts(:size).equals   Ray::Vector2[60, 80]
+    asserts(:size).equals   Ray::Vector2[15, 20]
   end
 
   context "after changing the viewport" do
