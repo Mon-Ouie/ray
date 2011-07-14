@@ -29,29 +29,6 @@ context "a target" do
 
     asserts(:default_view).equals Ray::View.new([320, 240], [640, 480])
   end
-
-  context "cleared and updated" do
-    hookup do
-      topic.clear Ray::Color.green
-      topic.update
-    end
-
-    asserts(:[], 10, 30).equals Ray::Color.green
-
-    context "and converted to an image" do
-      setup { topic.to_image }
-
-      asserts(:size).equals Ray::Vector2[640, 480]
-      asserts(:[], 0, 0).equals Ray::Color.green
-    end
-
-    context "converted to an image created from a part of it" do
-      setup { topic.rect [10, 20, 30, 40] }
-
-      asserts(:size).equals Ray::Vector2[30, 40]
-      asserts(:[], 0, 0).equals Ray::Color.green
-    end
-  end
 end
 
 run_tests if __FILE__ == $0
