@@ -4,6 +4,23 @@ module Ray
       other.is_a?(Ray::View) && self.matrix == other.matrix
     end
 
+    # Increases zoom (making object appear bigger). The center of the view and
+    # its viewport aren't affected by this.
+    #
+    # @param [Float, Ray::Vector2] value Zoom coefficient
+    # @see unzoom_by
+    def zoom_by(value)
+      self.size /= value
+    end
+
+    # Decreases zoom (making object appear smaller).
+    #
+    # @param [Float, Ray::Vector2] value Zoom coefficient
+    # @see zoom_by
+    def unzoom_by(value)
+      self.size *= value
+    end
+
     # @return [Ray::Rect] Rect representing the part of the world that can be
     #   seen through this view.
     def rect

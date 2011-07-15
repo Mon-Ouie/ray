@@ -265,7 +265,7 @@ static void say_text_draw(say_text *text, size_t first, say_shader *shader) {
     return;
 
   /*
-   * Following condition is true when the font image has been resized because of 
+   * Following condition is true when the font image has been resized because of
    * new characters that have been loaded.
    */
   say_vector2 img_size = say_image_get_size(img);
@@ -362,6 +362,9 @@ say_font *say_text_get_font(say_text *text) {
 }
 
 void say_text_set_font(say_text *text, say_font *font) {
+  if (text->font == font)
+    return;
+
   text->font = font;
   say_drawable_set_changed(text->drawable);
   text->rect_updated = 0;
@@ -372,6 +375,9 @@ size_t say_text_get_size(say_text *text) {
 }
 
 void say_text_set_size(say_text *text, size_t size) {
+  if (text->size == size)
+    return;
+
   text->size = size;
   say_drawable_set_changed(text->drawable);
   text->rect_updated = 0;
@@ -382,6 +388,9 @@ uint8_t say_text_get_style(say_text *text) {
 }
 
 void say_text_set_style(say_text *text, size_t style) {
+  if (text->style == style)
+    return;
+
   text->style = style;
   say_drawable_set_changed(text->drawable);
   text->rect_updated = 0;
@@ -393,6 +402,9 @@ say_color say_text_get_color(say_text *text) {
 }
 
 void say_text_set_color(say_text *text, say_color col) {
+  if (say_color_eq(col, text->color))
+    return;
+
   text->color = col;
   say_drawable_set_changed(text->drawable);
 }

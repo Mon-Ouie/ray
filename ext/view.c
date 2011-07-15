@@ -63,16 +63,6 @@ VALUE ray_view_init_copy(VALUE self, VALUE orig) {
   return self;
 }
 
-/*
-  @overload zoom_by(vector)
-    @param [Vector2] vector Multiplies the vector size by vector
- */
-VALUE ray_view_zoom_by(VALUE self, VALUE val) {
-  rb_check_frozen(self);
-  say_view_zoom_by(ray_rb2view(self), ray_convert_to_vector2(val));
-  return self;
-}
-
 static
 VALUE ray_view_size(VALUE self) {
   return ray_vector2_to_rb(say_view_get_size(ray_rb2view(self)));
@@ -126,8 +116,6 @@ void Init_ray_view() {
   rb_define_alloc_func(ray_cView, ray_view_alloc);
   rb_define_method(ray_cView, "initialize", ray_view_init, -1);
   rb_define_method(ray_cView, "initialize_copy", ray_view_init_copy, 1);
-
-  rb_define_method(ray_cView, "zoom_by", ray_view_zoom_by, 1);
 
   rb_define_method(ray_cView, "size", ray_view_size, 0);
   rb_define_method(ray_cView, "size=", ray_view_set_size, 1);

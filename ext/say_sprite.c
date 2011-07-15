@@ -146,6 +146,9 @@ say_color say_sprite_get_color(say_sprite *sprite) {
 }
 
 void say_sprite_set_color(say_sprite *sprite, say_color color) {
+  if (say_color_eq(color, sprite->color))
+    return;
+
   sprite->color = color;
   say_drawable_set_changed(sprite->drawable);
 }
@@ -165,16 +168,25 @@ say_rect say_sprite_get_rect(say_sprite *sprite) {
 }
 
 void say_sprite_set_rect(say_sprite *sprite, say_rect rect) {
+  if (say_rect_eq(sprite->rect, rect))
+    return;
+
   sprite->rect = rect;
   say_drawable_set_changed(sprite->drawable);
 }
 
 void say_sprite_flip_x(say_sprite *sprite, uint8_t flip_x) {
+  if (sprite->flip_x == flip_x)
+    return;
+
   sprite->flip_x = flip_x;
   say_drawable_set_changed(sprite->drawable);
 }
 
 void say_sprite_flip_y(say_sprite *sprite, uint8_t flip_y) {
+  if (sprite->flip_y == flip_y)
+    return;
+
   sprite->flip_y = flip_y;
   say_drawable_set_changed(sprite->drawable);
 }
