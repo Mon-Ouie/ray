@@ -82,8 +82,6 @@ module Ray
       @running = false
 
       @target = nil
-
-      @reversed = false
     end
 
     # Starts the animation.
