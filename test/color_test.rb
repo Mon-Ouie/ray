@@ -1,5 +1,14 @@
 require File.expand_path(File.dirname(__FILE__)) + '/helpers.rb'
 
+context Ray::Color do
+  setup { Ray::Color }
+
+  asserts(:from_hsv, 0, 1, 1).equals Ray::Color.red
+  asserts(:from_hsv, 240, 1, 1).equals Ray::Color.blue
+  asserts(:from_hsv, 300, 1, 1).equals Ray::Color.fuschia
+  asserts(:from_hsv, 30, 1, 1).equals Ray::Color.new(255, 127, 0)
+end
+
 context "a color" do
   setup { Ray::Color.new(10, 10, 10, 10) }
 

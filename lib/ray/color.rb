@@ -11,6 +11,34 @@ module Ray
       def cyan;    new(0, 255, 255);   end
       def yellow;  new(255, 255, 0);   end
       def fuschia; new(255, 0, 255);   end
+
+      # @param [Float] hue Hue, between 0 and 360
+      # @param [Float] sat Saturation, between 0 and 1
+      # @param [Float] val Value, between 0 and 1
+      #
+      # @return [Ray::Color] Color created from those parameters
+      def from_hsv(hue, sat, val)
+        hue, sat, val = hue.to_f, sat.to_f, val.to_f
+
+        if sat == 0
+          new(val * 255, val * 255, val * 255)
+        else
+          i = (hue / 60).floor % 6
+          f = (hue / 60) - i
+          l = val * (1 - sat)
+          m = val * (1 - f * sat)
+          n = val * (1 - (1 - f) * sat)
+
+          case i
+          when 0 then new(val * 255, n * 255, l * 255)
+          when 1 then new(m * 255, val * 255, l * 255)
+          when 2 then new(l * 255, val * 255, n * 255)
+          when 3 then new(l * 255, m * 255, val * 255)
+          when 4 then new(n * 255, l * 255, val * 255)
+          when 5 then new(val * 255, l * 255, m * 255)
+          end
+        end
+      end
     end
 
     def to_color
