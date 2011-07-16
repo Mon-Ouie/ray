@@ -20,6 +20,13 @@ VALUE ray_font_alloc(VALUE self) {
   return Data_Wrap_Struct(self, NULL, say_font_free, obj);
 }
 
+/* @return [Ray::Font] Default font */
+static
+VALUE ray_font_default(VALUE self) {
+  say_font *font = say_font_default();
+  return Data_Wrap_Struct(self, NULL, NULL, font);
+}
+
 /*
   @overload initialize(filename)
     @param [String] filename Name of the file to load the font from.
@@ -82,6 +89,8 @@ void Init_ray_font() {
   ray_cFont = rb_define_class_under(ray_mRay, "Font", rb_cObject);
   rb_define_alloc_func(ray_cFont, ray_font_alloc);
   rb_define_method(ray_cFont, "initialize", ray_font_init, 1);
+
+  rb_define_singleton_method(ray_cFont, "default", ray_font_default, 0);
 
   rb_define_method(ray_cFont, "kerning", ray_font_kerning, 3);
   rb_define_method(ray_cFont, "line_height", ray_font_line_height, 1);
