@@ -14,9 +14,7 @@ Ray.game "Circular motion" do
     @animation = circular_motion(:center => @sun.pos, :angle => 360,
                                  :duration => 5, :radius => 200).start(@earth)
 
-    on :animation_end, @animation do
-      @animation.start(@earth)
-    end
+    @animation.loop!
 
     on :key_press, key(:p) do
       if @animation.running?

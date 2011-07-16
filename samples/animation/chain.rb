@@ -17,17 +17,7 @@ Ray.game "Chained animations" do
     @animations << scale_variation(:of => [1, 1], :duration => 3)
     @animations << rotation(:of => 180, :duration => 3)
 
-    @reverse_animations = -@animations
-
-    on :animation_end, @animations do
-      @reverse_animations.start @text
-    end
-
-    on :animation_end, @reverse_animations do
-      @animations.start @text
-    end
-
-    @animations.start @text
+    @reverse_animations = @animations.start(@text).bounce!
 
     always do
       @animations.update

@@ -150,6 +150,34 @@ module Ray
       end
     end
 
+    # Registers an event making the animation repeat itself over and over
+    def loop!
+      on :animation_end, self do
+        start @target
+      end
+    end
+
+    # Registers an event making the animation bounce: when animation is
+    # completed, -animation is run on the same target, and when -animation is
+    # done running, animation starts again.
+    #
+    # @return [Ray::Animation] The reversed animation, which you need to update
+    #   as well.
+    def bounce!
+      reverse = -self
+      reverse.event_runner = event_runner
+
+      on :animation_end, self do
+        reverse.start @target
+      end
+
+      on :animation_end, reverse do
+        start @target
+      end
+
+      reverse
+    end
+
     # Override this method to apply changes to the target.
     def update_target
       raise NotImplementedError
