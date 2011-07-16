@@ -1,5 +1,9 @@
 #include "say.h"
 
+static say_context *say_image_target_make_context(void *data) {
+  return say_context_create();
+}
+
 static GLuint say_current_fbo = 0;
 static say_context *say_fbo_last_context = NULL;
 
@@ -73,7 +77,8 @@ void say_image_target_set_image(say_image_target *target, say_image *image) {
 
   if (target->img) {
     say_target_set_custom_data(target->target, target);
-    say_target_need_own_contxt(target->target, 0);
+    //say_target_need_own_contxt(target->target, 0);
+    say_target_set_context_proc(target->target, say_image_target_make_context);
     say_target_set_bind_hook(target->target, (say_bind_hook)say_image_target_bind);
 
     say_vector2 size = say_image_get_size(image);
