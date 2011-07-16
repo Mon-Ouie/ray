@@ -8,7 +8,7 @@ static void say_shader_make_current(GLuint program) {
 
   if (context != say_shader_last_context ||
       program != say_current_program) {
-    say_current_program = program;
+    say_current_program     = program;
     say_shader_last_context = context;
 
     glUseProgramObjectARB(program);
@@ -181,6 +181,9 @@ say_shader *say_shader_create() {
   say_matrix_free(identity);
 
   say_shader_set_current_texture(shader, SAY_TEXTURE_ATTR);
+
+  /* Weirldy, setting this avoid errors when setting uniforms */
+  say_shader_make_current(0);
 
   return shader;
 }

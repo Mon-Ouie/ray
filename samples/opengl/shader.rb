@@ -15,6 +15,9 @@ class CustomDrawable < Ray::Drawable
     self.vertex_count = 3
     @custom_shader = Ray::Shader.new(:vertex => path_of("vert.c"),
                                      :frag   => path_of("frag_gray.c"))
+
+    @custom_shader["in_ModelView"]  = Ray::Matrix.identity
+
   end
 
   def fill_vertices
@@ -24,9 +27,9 @@ class CustomDrawable < Ray::Drawable
   end
 
   def render(vertex, index)
-    @custom_shader.bind
-    @custom_shader["in_ModelView"]  = Ray::Matrix.identity
     @custom_shader["in_Projection"] = matrix
+
+    @custom_shader.bind
     draw_arrays :triangles, vertex, 3
   end
 end
