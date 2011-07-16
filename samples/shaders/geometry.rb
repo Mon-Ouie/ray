@@ -17,7 +17,7 @@ class Triangles < Ray::Drawable
     ]
   end
 
-  def render(first)
+  def render(first, index)
     Ray::GL.draw_arrays :triangles, first, 3
   end
 end

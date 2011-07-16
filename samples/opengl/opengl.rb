@@ -17,7 +17,7 @@ class CustomDrawable < Ray::Drawable
       Ray::Vertex.new([50, 50], Ray::Color.blue)]
   end
 
-  def render(vertex)
+  def render(vertex, index)
     draw_arrays :triangles, vertex, 3
   end
 end
