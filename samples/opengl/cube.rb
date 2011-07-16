@@ -19,6 +19,8 @@ class Cube < Ray::Drawable
 
   def initialize
     super Vertex
+
+    self.index_count  = 6 * 6
     self.vertex_count = 6 * 4
     rotate(0, 0, 0)
 
@@ -70,9 +72,26 @@ class Cube < Ray::Drawable
     ]
   end
 
-  def render(first)
-    @first_ary.each_index { |i| @first_ary[i] = first + i * 4 }
-    multi_draw_arrays :triangle_fan, @first_ary, @counts
+  def fill_indices(from)
+    ary = Ray::GL::IntArray.new
+
+    vertex_id = from
+    6.times do |i|
+      ary << vertex_id + 0
+      ary << vertex_id + 1
+      ary << vertex_id + 2
+      ary << vertex_id + 3
+      ary << vertex_id + 0
+      ary << vertex_id + 2
+
+      vertex_id += 4
+    end
+
+    ary
+  end
+
+  def render(first, index)
+    draw_elements :triangles, 6 * 6, index
   end
 end
 

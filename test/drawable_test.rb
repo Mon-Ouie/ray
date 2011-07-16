@@ -136,7 +136,11 @@ class CustomDrawable < Ray::Drawable
       Vertex.new([50, 50])]
   end
 
-  def render(vertex)
+  def fill_indices(from)
+    Ray::GL::IntArray.new(from + 0, from + 1, from + 2)
+  end
+
+  def render(vertex, index)
     draw_arrays :triangles, vertex, 3
   end
 end
@@ -154,12 +158,14 @@ context "a custom drawable" do
   context "drawn" do
     hookup do
       proxy(topic).fill_vertices
+      proxy(topic).fill_indices
       proxy(topic).render
       target.draw topic
     end
 
     asserts_topic.received :fill_vertices
-    asserts_topic.received :render, anything
+    denies_topic.received :fill_indices, anything
+    asserts_topic.received :render, is_a(Integer), 0
 
     denies :changed?
 
@@ -169,7 +175,7 @@ context "a custom drawable" do
       end
 
       denies_topic.received :fill_vertices => 2
-      asserts_topic.received({:render => 2}, anything)
+      asserts_topic.received({:render => 2}, is_a(Integer), 0)
 
       denies :changed?
     end
@@ -183,9 +189,25 @@ context "a custom drawable" do
         denies :changed?
 
         asserts_topic.received :fill_vertices => 2
-        asserts_topic.received({:render => 2}, anything)
+        asserts_topic.received({:render => 2}, is_a(Integer), 0)
       end
     end
+  end
+
+  context "with indices" do
+    hookup do
+      proxy(topic).fill_indices
+      topic.index_count = 3
+
+      target.draw topic
+    end
+
+    asserts_topic.received :fill_indices, is_a(Integer)
+  end
+
+  context "with more indices than it gives" do
+    hookup { topic.index_count = 5 }
+    asserts("drawing it") { target.draw topic }.raises_kind_of RuntimeError
   end
 
   context "after enabling texturing" do

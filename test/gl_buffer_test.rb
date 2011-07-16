@@ -2,7 +2,7 @@ require File.expand_path("helpers.rb", File.dirname(__FILE__))
 
 MagicVertex = Ray::GL::Vertex.make [[:foo, "bar", :float]]
 
-context "a buffer renderer" do
+context "a buffer" do
   setup { Ray::GL::Buffer.new :static, Ray::Vertex }
 
   asserts(:size).equals 256

@@ -22,7 +22,7 @@ class CustomSprite < Ray::Drawable
     ]
   end
 
-  def render(first)
+  def render(first, index)
     @img.bind
     Ray::GL.draw_arrays :triangle_fan, first, 4
   end

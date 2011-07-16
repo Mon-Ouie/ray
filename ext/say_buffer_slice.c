@@ -207,12 +207,6 @@ void say_buffer_slice_recreate(say_buffer_slice *slice, size_t size) {
 
     slice->loc = say_global_buffer_reserve(slice->vtype, size, &slice->buf_id);
   }
-  else if (size == 0) {
-    say_global_buffer_delete_at(say_global_buffer_at(slice->vtype,
-                                                     slice->buf_id),
-                                slice->loc);
-    slice->loc = 0;
-  }
   else {
     say_global_buffer_reduce_size(say_global_buffer_at(slice->vtype,
                                                        slice->buf_id),

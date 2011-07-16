@@ -3,14 +3,17 @@
 
 #include "say_drawable.h"
 #include "say_buffer.h"
+#include "say_index_buffer.h"
 
 typedef struct {
-  say_buffer *buffer;
-  say_array  *drawables;
+  say_buffer       *buffer;
+  say_index_buffer *index_buffer;
+  say_array        *drawables;
 
   size_t vtype;
 
   size_t current_vertex;
+  size_t current_index;
 
   say_matrix *matrix;
 } say_buffer_renderer;

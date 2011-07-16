@@ -62,7 +62,7 @@ class Model < Ray::Drawable
     @vertices
   end
 
-  def render(first)
+  def render(first, index)
     draw_arrays :triangles, first, @vertices.size
   end
 end

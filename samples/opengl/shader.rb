@@ -23,7 +23,7 @@ class CustomDrawable < Ray::Drawable
       Ray::Vertex.new([0.5, 0.5], Ray::Color.blue)]
   end
 
-  def render(vertex)
+  def render(vertex, index)
     @custom_shader.bind
     @custom_shader["in_ModelView"]  = Ray::Matrix.identity
     @custom_shader["in_Projection"] = matrix

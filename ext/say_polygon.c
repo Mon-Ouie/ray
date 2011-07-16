@@ -14,8 +14,10 @@ static float say_vector2_dot(say_vector2 a, say_vector2 b) {
   return (a.x * b.x + a.y * b.y);
 }
 
-static void say_polygon_fill_vertices(say_polygon *polygon,
-                                      say_vertex *vertices) {
+static void say_polygon_fill_vertices(void *data, void *vertices_ptr) {
+  say_polygon *polygon  = (say_polygon*)data;
+  say_vertex  *vertices = (say_vertex*)vertices_ptr;
+
   if (polygon->point_count < 3)
     return;
 
@@ -111,8 +113,10 @@ static void say_polygon_fill_vertices(say_polygon *polygon,
   }
 }
 
-static void say_polygon_draw(say_polygon *polygon, size_t first,
+static void say_polygon_draw(void *data, size_t first, size_t index,
                              say_shader *shader) {
+  say_polygon *polygon = (say_polygon*)data;
+
   if (polygon->point_count < 3)
     return;
 
@@ -162,10 +166,8 @@ say_polygon *say_polygon_create(size_t size) {
 
   polygon->drawable = say_drawable_create(0);
   say_drawable_set_custom_data(polygon->drawable, polygon);
-  say_drawable_set_fill_proc(polygon->drawable,
-                             (say_fill_proc)say_polygon_fill_vertices);
-  say_drawable_set_render_proc(polygon->drawable,
-                               (say_render_proc)say_polygon_draw);
+  say_drawable_set_fill_proc(polygon->drawable, say_polygon_fill_vertices);
+  say_drawable_set_render_proc(polygon->drawable, say_polygon_draw);
 
   say_polygon_compute_size(polygon);
 

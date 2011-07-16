@@ -85,17 +85,20 @@ static void say_text_compute_vertex_count(say_text *text) {
     }
   }
 
-  text->underline_vertex = count * 6;
+  text->underline_vertex = count * 4;
 
   if (!(text->style & SAY_TEXT_UNDERLINED)) {
     line_count = 0;
   }
 
-  /* Will use GL_TRIANGLES to draw all the rects at once */
-  say_drawable_set_vertex_count(text->drawable, (count + line_count) * 6);
+  say_drawable_set_vertex_count(text->drawable, (count + line_count) * 4);
+  say_drawable_set_index_count(text->drawable, (count + line_count) * 6);
 }
 
-static void say_text_fill_vertices(say_text *text, say_vertex *vertices) {
+static void say_text_fill_vertices(void *data, void *vertices_ptr) {
+  say_text   *text     = (say_text*)data;
+  say_vertex *vertices = (say_vertex*)vertices_ptr;
+
   if (!text->font)
     return;
 
@@ -156,10 +159,7 @@ static void say_text_fill_vertices(say_text *text, say_vertex *vertices) {
       vertices[under_id + 3].tex = say_make_vector2(under_rect.x + under_rect.w,
                                                     under_rect.y);
 
-      vertices[under_id + 4] = vertices[under_id + 0];
-      vertices[under_id + 5] = vertices[under_id + 2];
-
-      under_id += 6;
+      under_id += 4;
     }
 
     if (current == L'\n') {
@@ -216,10 +216,7 @@ static void say_text_fill_vertices(say_text *text, say_vertex *vertices) {
       vertices[ver_id + 3].tex = say_make_vector2(tex_rect.x + tex_rect.w,
                                                   tex_rect.y);
 
-      vertices[ver_id + 4] = vertices[ver_id + 0];
-      vertices[ver_id + 5] = vertices[ver_id + 2];
-
-      ver_id += 6;
+      ver_id += 4;
 
       x += glyph->offset;
     }
@@ -248,14 +245,14 @@ static void say_text_fill_vertices(say_text *text, say_vertex *vertices) {
     vertices[under_id + 3].tex = say_make_vector2(under_rect.x + under_rect.w,
                                                   under_rect.y);
 
-    vertices[under_id + 4] = vertices[under_id + 0];
-    vertices[under_id + 5] = vertices[under_id + 2];
-
-    under_id += 6;
+    under_id += 4;
   }
 }
 
-static void say_text_draw(say_text *text, size_t first, say_shader *shader) {
+static void say_text_draw(void *data, size_t first, size_t index,
+                          say_shader *shader) {
+  say_text *text = (say_text*)data;
+
   if (!text->font)
     return;
 
@@ -281,8 +278,23 @@ static void say_text_draw(say_text *text, size_t first, say_shader *shader) {
   }
   else {
     say_image_bind(img);
-    glDrawArrays(GL_TRIANGLES, first,
-                 say_drawable_get_vertex_count(text->drawable));
+    glDrawElements(GL_TRIANGLES, say_drawable_get_index_count(text->drawable),
+                   GL_UNSIGNED_INT, (void*)(index * sizeof(GLuint)));
+  }
+}
+
+static void say_text_fill_indices(void *data, GLuint *indices, size_t from) {
+  say_text *text = (say_text*)data;
+
+  size_t count = say_drawable_get_index_count(text->drawable);
+  size_t v = from;
+  for (size_t i = 0; i < count; i += 6, v += 4) {
+    indices[i + 0] = v + 0;
+    indices[i + 1] = v + 1;
+    indices[i + 2] = v + 2;
+    indices[i + 3] = v + 3;
+    indices[i + 4] = v + 0;
+    indices[i + 5] = v + 2;
   }
 }
 
@@ -292,8 +304,9 @@ say_text *say_text_create() {
   text->drawable = say_drawable_create(0);
   say_drawable_set_custom_data(text->drawable, text);
   say_drawable_set_textured(text->drawable, 1);
-  say_drawable_set_fill_proc(text->drawable, (say_fill_proc)say_text_fill_vertices);
-  say_drawable_set_render_proc(text->drawable, (say_render_proc)say_text_draw);
+  say_drawable_set_fill_proc(text->drawable, say_text_fill_vertices);
+  say_drawable_set_index_fill_proc(text->drawable, say_text_fill_indices);
+  say_drawable_set_render_proc(text->drawable, say_text_draw);
 
   text->font             = say_font_default();
   text->size             = 30;

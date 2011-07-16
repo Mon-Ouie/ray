@@ -3,7 +3,7 @@ $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../ext")
 
 require 'ray'
 
-Ray.game "My Own Buffer" do
+Ray.game "My Own Index Buffer" do
   register { add_hook :quit, method(:exit!) }
 
   scene :triangle do
@@ -15,12 +15,20 @@ Ray.game "My Own Buffer" do
 
     @buffer.update
 
+    @index_buffer = Ray::GL::IndexBuffer.new :static
+
+    @index_buffer[0] = 0
+    @index_buffer[1] = 1
+    @index_buffer[2] = 2
+
+    @index_buffer.update
+
     # We need this: projection matrix isn't set if you don't use drawables
     window.shader["in_Projection"] = window.view.matrix
 
     render do |win|
       win.make_current
-      Ray::GL.draw_arrays :triangles, 0, 3
+      Ray::GL.draw_elements :triangles, 3, 0
     end
   end
 

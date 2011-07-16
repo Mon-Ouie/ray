@@ -39,7 +39,7 @@ module Sokoban
 
     def []=(x, y, value)
       @objects[y][x] = value
-      raise_event :tile_changed, self, x, y, value
+      raise_event :tile_changed, self, x, y, value if raiser_runner
     end
 
     attr_reader :character_pos
@@ -158,7 +158,7 @@ module Sokoban
       end
 
       each_with_pos do |obj, x, y|
-        raise_event :tile_changed, self, x, y, obj
+        raise_event :tile_changed, self, x, y, obj if raiser_runner
       end
 
       @character_pos = find_character_pos
@@ -168,7 +168,7 @@ module Sokoban
     def check_solved
       if !include? :crate
         @solved = true
-        raise_event(:level_solved, self)
+        raise_event(:level_solved, self) if raiser_runner
       else
         @solved = false
       end

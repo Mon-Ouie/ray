@@ -12,6 +12,8 @@
 #include "say_vertex_type.h"
 #include "say_buffer.h"
 #include "say_buffer_slice.h"
+#include "say_index_buffer.h"
+#include "say_index_buffer_slice.h"
 #include "say_drawable.h"
 #include "say_view.h"
 #include "say_buffer_renderer.h"

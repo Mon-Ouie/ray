@@ -7,7 +7,7 @@ void ray_drawable_fill_proc(void *drawable_ptr, void *vertex_ptr) {
   ray_drawable *drawable = drawable_ptr;
   uint8_t      *vertices = vertex_ptr;
 
-  VALUE ary = rb_funcall(drawable->obj, RAY_METH("fill_vertices"), 0);
+  VALUE ary   = rb_funcall(drawable->obj, RAY_METH("fill_vertices"), 0);
   VALUE klass = rb_iv_get(drawable->obj, "@vertex_type_class");
 
   size_t size = say_drawable_get_vertex_count(drawable->drawable);
@@ -28,9 +28,11 @@ void ray_drawable_fill_proc(void *drawable_ptr, void *vertex_ptr) {
 }
 
 static
-void ray_drawable_render_proc(ray_drawable *drawable, size_t first,
+void ray_drawable_render_proc(void *data, size_t first, size_t index,
                               say_shader *shader) {
-  rb_funcall(drawable->obj, RAY_METH("render"), 1, INT2FIX(first));
+  ray_drawable *drawable = (ray_drawable*)data;
+  rb_funcall(drawable->obj, RAY_METH("render"), 2,
+             ULONG2NUM(first), ULONG2NUM(index));
 }
 
 ray_drawable *ray_rb2full_drawable(VALUE obj) {
@@ -50,6 +52,24 @@ ray_drawable *ray_rb2full_drawable(VALUE obj) {
   }
 
   return ptr;
+}
+
+static
+void ray_drawable_indices_fill_proc(void *data, GLuint *ptr, size_t first) {
+  ray_drawable *drawable = (ray_drawable*)data;
+  VALUE array = rb_funcall(drawable->obj, RAY_METH("fill_indices"), 1,
+                           ULONG2NUM(first));
+
+  say_array *c_array     = ray_rb2int_array(array);
+  size_t     size        = say_drawable_get_index_count(drawable->drawable);
+  size_t     actual_size = say_array_get_size(c_array);
+
+  if (say_array_get_size(c_array) < size) {
+    rb_raise(rb_eRuntimeError, "received %zu indices, expected %zu",
+             actual_size, size);
+  }
+
+  memcpy(ptr, say_array_get(ray_rb2int_array(array), 0), sizeof(GLuint) * size);
 }
 
 say_drawable *ray_rb2drawable(VALUE obj) {
@@ -106,10 +126,10 @@ VALUE ray_drawable_init(int argc, VALUE *argv, VALUE self) {
 
   obj->drawable = say_drawable_create(id);
   say_drawable_set_custom_data(obj->drawable, obj);
-  say_drawable_set_fill_proc(obj->drawable,
-                             (say_fill_proc)ray_drawable_fill_proc);
-  say_drawable_set_render_proc(obj->drawable,
-                               (say_render_proc)ray_drawable_render_proc);
+  say_drawable_set_fill_proc(obj->drawable, ray_drawable_fill_proc);
+  say_drawable_set_render_proc(obj->drawable, ray_drawable_render_proc);
+  say_drawable_set_index_fill_proc(obj->drawable,
+                                   ray_drawable_indices_fill_proc);
   say_drawable_set_changed(obj->drawable);
 
   rb_iv_set(self, "@vertex_type_class", NIL_P(arg) ?
@@ -137,13 +157,8 @@ VALUE ray_drawable_init_copy(VALUE self, VALUE orig) {
   size_t vid = say_drawable_get_vertex_type(other->drawable);
   obj->drawable = say_drawable_create(vid);
   say_drawable_set_custom_data(obj->drawable, obj);
-  say_drawable_set_fill_proc(obj->drawable,
-                             (say_fill_proc)ray_drawable_fill_proc);
-  say_drawable_set_render_proc(obj->drawable,
-                               (say_render_proc)ray_drawable_render_proc);
-  say_drawable_set_changed(obj->drawable);
-
   say_drawable_copy(obj->drawable, other->drawable);
+  say_drawable_set_changed(obj->drawable);
 
   rb_iv_set(self, "@vertex_type_class", rb_iv_get(orig, "@vertex_type_class"));
   obj->vsize = other->vsize;
@@ -341,8 +356,24 @@ static
 VALUE ray_drawable_vertex_count(VALUE self) {
   say_drawable *drawable = ray_rb2drawable(self);
   size_t count = say_drawable_get_vertex_count(drawable);
-  return INT2FIX(count);
+  return ULONG2NUM(count);
 }
+
+static
+VALUE ray_drawable_set_index_count(VALUE self, VALUE val) {
+  ray_drawable *drawable = ray_rb2full_drawable(self);
+  say_drawable_set_index_count(drawable->drawable, NUM2ULONG(val));
+  return val;
+}
+
+/* @return [Integer] Amount of indices used by this drawable */
+static
+VALUE ray_drawable_index_count(VALUE self) {
+  say_drawable *drawable = ray_rb2drawable(self);
+  size_t count = say_drawable_get_index_count(drawable);
+  return ULONG2NUM(count);
+}
+
 
 /* @return [true, flase] true if the drawable has changed, and vertices must be
  *   updated. */
@@ -402,6 +433,10 @@ void Init_ray_drawable() {
   rb_define_method(ray_cDrawable, "vertex_count=",
                    ray_drawable_set_vertex_count, 1);
   rb_define_method(ray_cDrawable, "vertex_count", ray_drawable_vertex_count, 0);
+
+  rb_define_method(ray_cDrawable, "index_count=", ray_drawable_set_index_count,
+                   1);
+  rb_define_method(ray_cDrawable, "index_count", ray_drawable_index_count, 0);
 
   rb_define_method(ray_cDrawable, "changed!", ray_drawable_set_changed, 0);
   rb_define_method(ray_cDrawable, "changed?", ray_drawable_has_changed, 0);

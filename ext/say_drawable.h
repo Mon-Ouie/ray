@@ -2,22 +2,29 @@
 #define SAY_DRAWABLE_H_
 
 #include "say_buffer_slice.h"
+#include "say_index_buffer_slice.h"
 
 #include "say_matrix.h"
 #include "say_shader.h"
 
 typedef void (*say_fill_proc)(void *data, void *vertices);
-typedef void (*say_render_proc)(void *data, size_t first, say_shader *shader);
+typedef void (*say_index_fill_proc)(void *data, GLuint *indices, size_t from);
+typedef void (*say_render_proc)(void *data, size_t first, size_t index,
+                                say_shader *shader);
 
 typedef struct {
   size_t            vertex_count;
   size_t            vtype;
   say_buffer_slice *slice;
 
+  size_t                  index_count;
+  say_index_buffer_slice *index_slice;
+
   void *data;
 
-  say_fill_proc   fill_proc;
-  say_render_proc render_proc;
+  say_fill_proc       fill_proc;
+  say_index_fill_proc index_fill_proc;
+  say_render_proc     render_proc;
 
   say_shader *shader;
   say_matrix *matrix;
@@ -46,12 +53,23 @@ size_t say_drawable_get_vertex_count(say_drawable *drawable);
 
 size_t say_drawable_get_vertex_type(say_drawable *drawable);
 
+void say_drawable_set_index_count(say_drawable *drawable, size_t size);
+size_t say_drawable_get_index_count(say_drawable *drawable);
+
 void say_drawable_set_fill_proc(say_drawable *drawable, say_fill_proc proc);
 void say_drawable_set_render_proc(say_drawable *drawable, say_render_proc proc);
+void say_drawable_set_index_fill_proc(say_drawable *drawable,
+                                        say_index_fill_proc proc);
 
 void say_drawable_fill_buffer(say_drawable *drawable, void *vertices);
 void say_drawable_fill_own_buffer(say_drawable *drawable);
-void say_drawable_draw_at(say_drawable *drawable, size_t id, say_shader *shader);
+
+void say_drawable_fill_index_buffer(say_drawable *drawable, GLuint *indices,
+                                    size_t from);
+void say_drawable_fill_own_index_buffer(say_drawable *drawable);
+
+void say_drawable_draw_at(say_drawable *drawable, size_t vertex, size_t id,
+                          say_shader *shader);
 void say_drawable_draw(say_drawable *drawable, say_shader *shader);
 
 void say_drawable_set_changed(say_drawable *drawable);

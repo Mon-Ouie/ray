@@ -179,7 +179,7 @@ VALUE ray_gl_buffer_update(int argc, VALUE *argv, VALUE self) {
 /* @return [Integer] Size of the buffer (amount of vertices it contains) */
 static
 VALUE ray_gl_buffer_size(VALUE self) {
-  return INT2FIX(say_buffer_get_size(ray_rb2buffer(self)));
+  return ULONG2NUM(say_buffer_get_size(ray_rb2buffer(self)));
 }
 
 /*

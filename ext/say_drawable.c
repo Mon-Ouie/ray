@@ -28,6 +28,9 @@ say_drawable *say_drawable_create(size_t vtype) {
   drawable->vtype        = vtype;
   drawable->slice        = NULL;
 
+  drawable->index_count = 0;
+  drawable->index_slice = NULL;
+
   drawable->data = NULL;
 
   drawable->fill_proc   = NULL;
@@ -54,10 +57,13 @@ void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
   drawable->vertex_count = other->vertex_count;
   drawable->vtype        = other->vtype;
 
+  drawable->index_count = other->index_count;
+
   drawable->data = other->data;
 
-  drawable->fill_proc   = other->fill_proc;
-  drawable->render_proc = other->render_proc;
+  drawable->fill_proc       = other->fill_proc;
+  drawable->render_proc     = other->render_proc;
+  drawable->index_fill_proc = other->index_fill_proc;
 
   drawable->shader = other->shader;
 
@@ -104,9 +110,27 @@ size_t say_drawable_get_vertex_type(say_drawable *drawable) {
   return drawable->vtype;
 }
 
+void say_drawable_set_index_count(say_drawable *drawable, size_t size) {
+if (size == drawable->index_count)
+    return;
+
+  drawable->index_count = size;
+  drawable->has_changed = 1;
+}
+
+size_t say_drawable_get_index_count(say_drawable *drawable) {
+  return drawable->index_count;
+}
+
 void say_drawable_set_fill_proc(say_drawable *drawable, say_fill_proc proc) {
   drawable->fill_proc   = proc;
   drawable->has_changed = 1;
+}
+
+void say_drawable_set_index_fill_proc(say_drawable *drawable,
+                                      say_index_fill_proc proc) {
+  drawable->index_fill_proc = proc;
+  drawable->has_changed     = 1;
 }
 
 void say_drawable_set_render_proc(say_drawable *drawable, say_render_proc proc) {
@@ -120,34 +144,64 @@ void say_drawable_fill_buffer(say_drawable *drawable, void *vertices) {
 }
 
 void say_drawable_fill_own_buffer(say_drawable *drawable) {
-  if (drawable->has_changed) {
-    if (!drawable->slice)
-      drawable->slice = say_buffer_slice_create(drawable->vtype,
-                                                drawable->vertex_count);
+  if (!drawable->slice)
+    drawable->slice = say_buffer_slice_create(drawable->vtype,
+                                              drawable->vertex_count);
 
-    if (say_buffer_slice_get_size(drawable->slice) != drawable->vertex_count) {
-      say_buffer_slice_recreate(drawable->slice, drawable->vertex_count);
-    }
-
-    /*
-     * If there are no vertices, we won't bother filling the buffer. However, we
-     * will execute the above code to mark the potential vertices we previously
-     * had as unused anymore.
-     */
-    if (drawable->vertex_count == 0)
-      return;
-
-    if (drawable->fill_proc) {
-      drawable->fill_proc(drawable->data,
-                          say_buffer_slice_get_vertex(drawable->slice, 0));
-    }
-
-    drawable->has_changed = 0;
-    say_buffer_slice_update(drawable->slice);
+  if (say_buffer_slice_get_size(drawable->slice) != drawable->vertex_count) {
+    say_buffer_slice_recreate(drawable->slice, drawable->vertex_count);
   }
+
+  /*
+   * If there are no vertices, we won't bother filling the buffer. However, we
+   * will execute the above code to mark the potential vertices we previously
+   * had as unused anymore.
+   */
+  if (drawable->vertex_count == 0)
+    return;
+
+  if (drawable->fill_proc) {
+    drawable->fill_proc(drawable->data,
+                        say_buffer_slice_get_vertex(drawable->slice, 0));
+  }
+
+  say_buffer_slice_update(drawable->slice);
 }
 
-void say_drawable_draw_at(say_drawable *drawable, size_t id,
+void say_drawable_fill_index_buffer(say_drawable *drawable, GLuint *indices,
+                                    size_t from) {
+  if (drawable->index_fill_proc && drawable->index_count != 0)
+    drawable->index_fill_proc(drawable->data, indices, from);
+}
+
+void say_drawable_fill_own_index_buffer(say_drawable *drawable) {
+  if (!drawable->index_slice)
+    drawable->index_slice = say_index_buffer_slice_create(drawable->index_count);
+
+  if (say_index_buffer_slice_get_size(drawable->index_slice) !=
+      drawable->index_count) {
+    say_index_buffer_slice_recreate(drawable->index_slice,
+                                    drawable->index_count);
+  }
+
+  if (drawable->index_count == 0)
+    return;
+
+  if (drawable->index_fill_proc) {
+    GLuint *buf = say_index_buffer_slice_get(drawable->index_slice, 0);
+
+    size_t loc = 0;
+    if (drawable->slice)
+      loc = say_buffer_slice_get_loc(drawable->slice);
+
+    drawable->index_fill_proc(drawable->data, buf, loc);
+  }
+
+  say_index_buffer_slice_update(drawable->index_slice);
+}
+
+void say_drawable_draw_at(say_drawable *drawable,
+                          size_t vertex_id, size_t id,
                           say_shader *shader) {
   if (!drawable->matrix_updated)
     say_drawable_update_matrix(drawable);
@@ -162,12 +216,17 @@ void say_drawable_draw_at(say_drawable *drawable, size_t id,
                             drawable->use_texture);
     }
 
-    drawable->render_proc(drawable->data, id, shader);
+    drawable->render_proc(drawable->data, vertex_id, id, shader);
   }
 }
 
 void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
-  say_drawable_fill_own_buffer(drawable);
+  if (drawable->has_changed) {
+    say_drawable_fill_own_buffer(drawable);
+    say_drawable_fill_own_index_buffer(drawable);
+
+    drawable->has_changed = false;
+  }
 
   if (!drawable->matrix_updated)
     say_drawable_update_matrix(drawable);
@@ -186,8 +245,12 @@ void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
     if (drawable->vertex_count != 0)
       say_buffer_slice_bind(drawable->slice);
 
+    if (drawable->index_count != 0)
+      say_index_buffer_slice_bind(drawable->index_slice);
+
     drawable->render_proc(drawable->data,
                           say_buffer_slice_get_loc(drawable->slice),
+                          say_index_buffer_slice_get_loc(drawable->index_slice),
                           used_shader);
   }
 }

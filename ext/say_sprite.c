@@ -32,7 +32,10 @@ static void say_sprite_fill_rect(say_sprite *sprite, say_vertex *vertices,
   vertices[3].tex = say_make_vector2(first_x, last_y);
 }
 
-static void say_sprite_fill_vertices(say_sprite *sprite, say_vertex *vertices) {
+static void say_sprite_fill_vertices(void *data, void *vertices_ptr) {
+  say_sprite *sprite   = (say_sprite*)data;
+  say_vertex *vertices = (say_vertex*)vertices_ptr;
+
   if (!sprite->image)
     return;
 
@@ -64,7 +67,10 @@ static void say_sprite_fill_vertices(say_sprite *sprite, say_vertex *vertices) {
   }
 }
 
-static void say_sprite_draw(say_sprite *sprite, size_t first, say_shader *shader) {
+static void say_sprite_draw(void *data, size_t first, size_t index,
+                            say_shader *shader) {
+  say_sprite *sprite = (say_sprite*)data;
+
   if (!sprite->image)
     return;
 
@@ -83,10 +89,8 @@ say_sprite *say_sprite_create() {
   say_drawable_set_custom_data(sprite->drawable, sprite);
   say_drawable_set_vertex_count(sprite->drawable, 4);
   say_drawable_set_textured(sprite->drawable, 1);
-  say_drawable_set_fill_proc(sprite->drawable,
-                             (say_fill_proc)say_sprite_fill_vertices);
-  say_drawable_set_render_proc(sprite->drawable,
-                               (say_render_proc)say_sprite_draw);
+  say_drawable_set_fill_proc(sprite->drawable, say_sprite_fill_vertices);
+  say_drawable_set_render_proc(sprite->drawable, say_sprite_draw);
 
   sprite->image = NULL;
 

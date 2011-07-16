@@ -3,6 +3,7 @@
 void say_clean_up() {
   say_audio_context_clean_up();
   say_buffer_slice_clean_up();
+  say_index_buffer_slice_clean_up();
   say_error_clean_up();
   say_font_clean_up();
 

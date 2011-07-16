@@ -131,7 +131,10 @@ Ray. In fact, ``Ray::Drawable`` can simply be used for OpenGL rendering:
         ]
       end
 
-      def render(first)
+      # The index parameter is there in case you'd want to use
+      # draw_elements. You can fill indices by defining a fill_indices method
+      # and setting index_count.
+      def render(first, index)
         @image.bind
 
         # Some low level OpenGL calls are available
