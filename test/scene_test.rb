@@ -151,4 +151,18 @@ context "an instance of a scene subclass" do
   end
 end
 
+class RandomScene < Ray::Scene
+end
+
+context "a game with a random scene bound" do
+  setup do
+    game = a_small_game
+    proxy(game).scene
+    RandomScene.bind game
+    game
+  end
+
+  asserts_topic.received :scene, :random_scene, RandomScene
+end
+
 run_tests if __FILE__ == $0

@@ -72,15 +72,25 @@ module Ray
     class << self
       # Registers a scene to a game object, used for subclasses.
       def bind(game)
-        game.scene(scene_name, self)
+        game.scene(@scene_name || snake_cased_name, self)
       end
 
       # @overload scene_name
       #   @return [Symbol] the name of the scene
       # @overload scene_name(value)
-      #   Sets the name of the scene
-      def scene_name(val = nil)
-        @scene_name = val || @scene_name
+      #   Sets the name of the scene. Defaulted to the snake cased name of the
+      #   scene.
+      def scene_name(val)
+        @scene_name = val
+      end
+
+      private
+      def snake_cased_name
+        if name
+          last_part = name.split("::").last
+          last_part[0] = last_part[0, 1].downcase
+          last_part.gsub(/[A-Z]/) { |letter| "_#{letter.downcase}" }.to_sym
+        end
       end
     end
 
