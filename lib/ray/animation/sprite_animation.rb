@@ -32,8 +32,8 @@ module Ray
       def update_target
         progress = progression
 
-        x_prog = ((progress / 100) * @x_steps).floor
-        y_prog = ((progress / 100) * @y_steps).floor
+        x_prog = (progress * @x_steps).floor
+        y_prog = (progress * @y_steps).floor
 
         x_prog = @x_steps - 1 if x_prog == @x_steps
         y_prog = @y_steps - 1 if y_prog == @y_steps

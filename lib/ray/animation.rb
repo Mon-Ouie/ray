@@ -43,8 +43,8 @@ module Ray
   #
   #     # update has been called
   #     def update_target
-  #       # progression is a float between 0 and 100.
-  #       target.x += (@some_param * progression / 100)
+  #       # progression is a float between 0 and 1.
+  #       target.x += @some_param * progression
   #     end
   #
   #     # the animation has just ended.
@@ -196,15 +196,15 @@ module Ray
     def resume_animation
     end
 
-    # @return [Float, nil] The progression of the animation, between 0 and 100.
+    # @return [Float, nil] The progression of the animation, between 0 and 1.
     #   Nil if the animation isn't running.
     def progression
       if running?
         if @duration.zero?
-          100.0
+          1.0
         else
-          ret = 100 * (Time.now - @start_time) / duration
-          ret > 100 ? 100.0 : ret
+          ret = (Time.now - @start_time) / duration
+          ret > 1 ? 1.0 : ret
         end
       end
     end

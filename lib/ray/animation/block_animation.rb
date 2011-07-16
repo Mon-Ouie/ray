@@ -10,10 +10,10 @@ module Ray
       register_for :block_animation
 
       # @option opts [#call] :block Object which will be called with the target
-      #   and a progression between 0 and 100.
+      #   and a progression between 0 and 1.
       # @option opts [#call] :proc Same as :block.
       # @option opts [true, false] :reversed (false) True to make the
-      #   progression decrease from 100 to 0.
+      #   progression decrease from 1 to 0.
       # @option opts [Float] :duration Duration in seconds.
       def setup(opts)
         @block    = opts[:block] || opts[:proc]
@@ -23,7 +23,7 @@ module Ray
       end
 
       def update_target
-        @block.call(target, @reversed ? 100 - progression : progression)
+        @block.call(target, @reversed ? 1 - progression : progression)
       end
 
       # @return [BlockAnimation] Reversed animation.

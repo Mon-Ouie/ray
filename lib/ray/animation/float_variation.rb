@@ -34,7 +34,7 @@ module Ray
       end
 
       def update_target
-        increase = (progression / 100) * @variation
+        increase = progression * @variation
         target.send("#{@attribute}=", @current_value + increase)
       end
 

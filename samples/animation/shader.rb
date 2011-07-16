@@ -49,7 +49,7 @@ Ray.game "Change color" do
     @sprite = sprite @img
 
     @animation = block_animation :duration => 5, :block => proc { |target, progression|
-      target[:progression] = progression / 100
+      target[:progression] = progression
     }
 
     @animation.start window.shader

@@ -30,7 +30,7 @@ module Ray
       end
 
       def update_target
-        angle = @from_angle + (progression / 100) * (@from_angle - @to_angle)
+        angle = @from_angle + progression * (@from_angle - @to_angle)
 
         x = @center.x + (Math.cos(angle) * @radius)
         y = @center.y - (Math.sin(angle) * @radius)
