@@ -8,7 +8,8 @@ to be easy and fun to use (à la Shoes), and still flexible and powerful.
 Tutorial & Installation
 =======================
 
-See [on this page](http://mon-ouie.github.com/projects/ray.html).
+See [on this page](http://mon-ouie.github.com/projects/ray.html). Also notice
+there's an IRC channel on freenode: #ray.
 
 Features
 ========
