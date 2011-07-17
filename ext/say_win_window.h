@@ -17,12 +17,12 @@
 #ifndef VK_OEM_PERIOD
 # define VK_OEM_PERIOD 0xBE
 #endif
- 
+
 static DEVMODE say_win_get_mode() {
   DEVMODE mode;
   mode.dmSize = sizeof(DEVMODE);
   EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &mode);
-  
+
   return mode;
 }
 
@@ -44,15 +44,15 @@ static bool say_win_has_unicode() {
   if (!computed) {
     OSVERSIONINFO version;
     memset(&version, 0, sizeof(version));
-    
+
     if (GetVersionEx(&version))
       result = version.dwPlatformId == VER_PLATFORM_WIN32_NT;
     else
       result = false;
-    
+
     computed = true;
   }
-  
+
   return result;
 }
 
@@ -175,79 +175,75 @@ static say_key say_win_get_key(WPARAM key, LPARAM flags) {
     case VK_END:        return SAY_KEY_END;
     case VK_HOME:       return SAY_KEY_HOME;
     case VK_INSERT:     return SAY_KEY_INSERT;
-    case VK_DELETE:     return SAY_KEY_DELETE; 
+    case VK_DELETE:     return SAY_KEY_DELETE;
     case VK_ADD:        return SAY_KEY_PLUS;
     case VK_SUBTRACT:   return SAY_KEY_MINUS;
     case VK_MULTIPLY:   return SAY_KEY_ASTERISK;
     case VK_DIVIDE:     return SAY_KEY_SLASH;
     case VK_PAUSE:      return SAY_KEY_PAUSE;
 
-    default: return SAY_KEY_UNKNOWN; 
+    default: return SAY_KEY_UNKNOWN;
   }
 }
 
 static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wparam,
                                      LPARAM lparam) {
   if (!win->win) return;
-  
+
   switch (msg) {
     case WM_SETCURSOR: {
       if (LOWORD(lparam) == HTCLIENT)
         SetCursor(win->cursor);
       break;
     }
-    
+
     case WM_CLOSE: {
       say_event ev;
       ev.type = SAY_EVENT_QUIT;
       say_array_push(win->events, &ev);
       break;
     }
-    
+
     case WM_SIZE: {
       if (wparam != SIZE_MINIMIZED) {
         RECT rect;
         GetClientRect(win->win, &rect);
         size_t w = rect.right  - rect.left;
         size_t h = rect.bottom - rect.top;
-        
+
         say_event ev;
         ev.type = SAY_EVENT_RESIZE;
         ev.ev.resize.size = say_make_vector2(w, h);
         say_array_push(win->events, &ev);
       }
-      
+
       break;
     }
-    
+
     case WM_SETFOCUS: {
       say_event ev;
       ev.type = SAY_EVENT_FOCUS_GAIN;
       say_array_push(win->events, &ev);
       break;
     }
-    
+
     case WM_KILLFOCUS: {
       say_event ev;
       ev.type = SAY_EVENT_FOCUS_LOSS;
       say_array_push(win->events, &ev);
       break;
     }
-    
+
     case WM_CHAR: {
       say_event ev;
       ev.type = SAY_EVENT_TEXT_ENTERED;
-      ev.ev.text.text = (uint32_t)wparam;
+      ev.ev.text.text = (uint32t_)wparam;
 
-      if (wparam != '\r' &&
-          wparam != '\n' &&
-          wparam != '\b' &&
-          wparam != '\e') {
-        say_array_push(win->events, &ev);
-      }
+      say_array_push(win->events, &ev);
+
       break;
     }
-    
+
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN: {
       if ((HIWORD(lparam) & KF_REPEAT) == 0) {
@@ -367,14 +363,14 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       say_event ev;
       ev.type = SAY_EVENT_MOUSE_MOTION;
       ev.ev.motion.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
-  
+
       say_array_push(win->events, &ev);
       break;
     }
 
     case WM_MOUSELEAVE: {
       win->cursor_inside = false;
-      
+
       say_event ev;
       ev.type = SAY_EVENT_MOUSE_LEFT;
       say_array_push(win->events, &ev);
@@ -419,7 +415,7 @@ static void say_win_register_class() {
     klass.hbrBackground = 0;
     klass.lpszMenuName  = NULL;
     klass.lpszClassName = L"ray";
-    
+
     RegisterClassW(&klass);
   }
   else {
@@ -434,7 +430,7 @@ static void say_win_register_class() {
     klass.hbrBackground = 0;
     klass.lpszMenuName  = NULL;
     klass.lpszClassName = "ray";
-    
+
     RegisterClassA(&klass);
   }
 }
@@ -465,12 +461,12 @@ bool say_win_window_start_fullscreen(say_win_window *win, size_t w, size_t h) {
 
 say_imp_window say_imp_window_create() {
   say_win_window *win = malloc(sizeof(say_win_window));
-  
+
   win->win    = 0;
   win->icon   = 0;
   win->cursor = LoadCursor(NULL, IDC_ARROW);;
-  
-  win->events = say_array_create(sizeof(say_event), NULL, NULL);  
+
+  win->events = say_array_create(sizeof(say_event), NULL, NULL);
 
   return win;
 }
@@ -491,7 +487,7 @@ bool say_imp_window_open(say_imp_window win, const char *title,
   if (say_window_count == 0) {
     say_win_register_class();
   }
-  
+
   say_window_count++;
 
   HDC dc = GetDC(NULL);
@@ -512,7 +508,7 @@ bool say_imp_window_open(say_imp_window win, const char *title,
         win_style |= WS_THICKFRAME | WS_MAXIMIZEBOX;
       }
     }
-    
+
     RECT rect = {0, 0, w, h};
     AdjustWindowRect(&rect, win_style, false);
     real_w = rect.right  - rect.left;
@@ -549,12 +545,12 @@ void say_imp_window_close(say_imp_window win) {
     DestroyIcon(win->icon);
     win->icon = 0;
   }
-  
+
   if (!win->win)
     return;
 
   DestroyWindow(win->win);
-  
+
   if (!--say_window_count) {
     if (say_win_has_unicode())
       UnregisterClassW(L"ray", GetModuleHandle(NULL));
@@ -578,7 +574,7 @@ bool say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
     say_error_set("window isn't open");
     return false;
   }
-  
+
   if (win->icon) {
     DestroyIcon(win->icon);
     win->icon = 0;
@@ -608,7 +604,7 @@ bool say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
     say_error_set("could not create icon");
     return false;
   }
-  
+
   SendMessage(win->win, WM_SETICON, ICON_BIG,   (LPARAM)win->icon);
   SendMessage(win->win, WM_SETICON, ICON_SMALL, (LPARAM)win->icon);
 
@@ -630,14 +626,14 @@ bool say_imp_window_resize(say_imp_window win, size_t w, size_t h) {
   size_t real_w = rect.right  - rect.left;
   size_t real_h = rect.bottom - rect.top;
 
-  SetWindowPos(win->win, NULL, 0, 0, real_w, real_h, SWP_NOMOVE | SWP_NOZORDER);  
+  SetWindowPos(win->win, NULL, 0, 0, real_w, real_h, SWP_NOMOVE | SWP_NOZORDER);
 
   return true;
 }
 
 bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev,
                                struct say_input *input) {
-                                
+
   if (say_array_get_size(win->events) == 0) {
     MSG message;
     while (PeekMessage(&message, win->win, 0, 0, PM_REMOVE)) {
