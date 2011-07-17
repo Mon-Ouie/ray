@@ -94,55 +94,6 @@ class ReceivedMacro < Riot::AssertionMacro
   end
 end
 
-module Riot
-  class RaisesKindOfMacro < AssertionMacro
-    register :raises_kind_of
-    expects_exception!
-
-    def evaluate(actual_exception, expected_class, expected_message=nil)
-      actual_message = actual_exception && actual_exception.message
-
-      if !actual_exception
-        fail new_message.expected_to_raise_kind_of(expected_class).but.raised_nothing
-      elsif !actual_exception.is_a?(expected_class)
-        fail new_message.expected_to_raise_kind_of(expected_class).
-          not(actual_exception.class)
-      elsif expected_message && !(actual_message.to_s =~ %r[#{expected_message}])
-        fail expected_message(expected_message).for_message.not(actual_message)
-      else
-        message = new_message.raises_kind_of(expected_class)
-        pass(expected_message ? message.with_message(expected_message) : message)
-      end
-    end
-
-    def devaluate(actual_exception, expected_class, expected_message=nil)
-      actual_message = actual_exception && actual_exception.message
-
-      if !actual_exception
-        pass new_message.raises_kind_of(expected_class)
-      elsif !actual_exception.is_a?(expected_class)
-        if expected_message && !(actual_message.to_s =~ %r[#{expected_message}])
-          pass new_message.raises_kind_of(expected_class).
-            with_message(expected_message)
-        else
-          pass new_message.raises_kind_of(expected_class)
-        end
-      else
-        message = new_message.expected_to_not_raise_kind_of(expected_class)
-
-        if expected_message
-          fail message.with_message(expected_message).but.
-            raised(actual_exception.class).
-            with_message(actual_exception.message)
-        else
-          fail message
-        end
-      end
-    end
-  end unless defined? RaisesKindOfMacro
-end
-
-
 class Riot::Context
   include RR::Adapters::RRMethods
 end

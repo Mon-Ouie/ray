@@ -4,7 +4,6 @@ pkg/
 *.rbc
 *.gem
 *.o
-*.gemspec
 *.log
 *.so
 *.bundle

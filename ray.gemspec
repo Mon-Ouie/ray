@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+
+Gem::Specification.new do |s|
+  s.name = "ray"
+
+  s.version = "0.1.0"
+
+  s.summary     = "A library to write games (or to play with) in Ruby"
+  s.description = "Written to play with Ruby"
+  s.homepage    = "http://github.com/Mon-Ouie/ray"
+
+  s.email   = "mon.ouie@gmail.com"
+  s.authors = ["Mon ouïe"]
+
+  s.files |= Dir["lib/**/*.rb"]
+  s.files |= Dir["ext/**/*.{c,h}"]
+  s.files |= Dir["ext/vendor/**/*"]
+  s.files |= Dir["*.md"]
+  s.files << ".gemtest" << "Rakefile"
+
+  s.extensions = ["ext/extconf.rb"]
+
+  s.require_paths = %w[lib ext]
+
+  s.add_development_dependency "yard"
+  s.add_development_dependency "riot"
+  s.add_development_dependency "rr"
+end
