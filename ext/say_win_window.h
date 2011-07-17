@@ -237,7 +237,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
     case WM_CHAR: {
       say_event ev;
       ev.type = SAY_EVENT_TEXT_ENTERED;
-      ev.ev.text.text = (uint32t_)wparam;
+      ev.ev.text.text = (uint32_t)wparam;
 
       say_array_push(win->events, &ev);
 
