@@ -194,15 +194,38 @@ context "a custom drawable" do
     end
   end
 
-  context "with indices" do
+  context "drawn with indices" do
     hookup do
       proxy(topic).fill_indices
+      proxy(topic).render
+
       topic.index_count = 3
 
       target.draw topic
     end
 
     asserts_topic.received :fill_indices, is_a(Integer)
+    asserts_topic.received :render, is_a(Integer), is_a(Integer)
+
+    context "but no vertices" do
+      hookup do
+        topic.vertex_count = 0
+        target.draw topic
+      end
+
+      asserts_topic.received({:render => 2}, is_a(Integer), is_a(Integer))
+    end
+  end
+
+  context "drawn without vertices" do
+    hookup do
+      topic.vertex_count = 0
+
+      proxy(topic).render
+      target.draw topic
+    end
+
+    asserts_topic.received :render, 0, 0
   end
 
   context "with more indices than it gives" do
