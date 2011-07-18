@@ -30,7 +30,12 @@ module Ray
 
     # @return [true, false] True if the receiver collides with the rect.
     def collide?(rect)
-      !outside?(rect) || !rect.outside?(self)
+      rect = rect.to_rect
+
+      rect.x < x + width &&
+        x < rect.x + rect.width &&
+        rect.y < y + height &&
+        y < rect.y + rect.height
     end
 
     # @return [true, false] True if the receiver contians this point
