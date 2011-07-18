@@ -114,6 +114,10 @@ context "a rect" do
     Ray::Rect.new(5, 10, 20, 20).collide?(topic) &&
       Ray::Rect.new(11, 16, 40, 50).collide?(topic)
   end
+
+  asserts "collides with a rect it is inside of" do
+    topic.collide? Ray::Rect[11, 16, 1, 1]
+  end
 end
 
 run_tests if __FILE__ == $0
