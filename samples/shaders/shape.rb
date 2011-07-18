@@ -19,16 +19,16 @@ Ray::Game.new("Shaders test") do
     @shape.shader = Ray::Shader.new :frag => StringIO.new(<<-SHADER)
       #version 110
 
-      uniform vec3 ratio[2];
+      uniform vec3 ratio;
       varying vec4 var_Color;
 
       void main() {
-        float gray   = dot(var_Color.rgb, ratio[0]);
+        float gray   = dot(var_Color.rgb, ratio);
         gl_FragColor = vec4(gray, gray, gray, 1.0);
       }
     SHADER
 
-    @shape.shader[:ratio] = [0.299, 0.587, 0.114]
+    @shape.shader["ratio.ratio"] = [0.299, 0.587, 0.114]
 
     render do |win|
       win.draw @shape
