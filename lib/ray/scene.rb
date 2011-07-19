@@ -155,10 +155,10 @@ module Ray
     def run_tick(check_events = true)
       collect_events if check_events
 
-      @scene_always_block.call if @scene_always_block
-      listener_runner.run
-
       @scene_animations.update
+      @scene_always_block.call if @scene_always_block
+
+      listener_runner.run
 
       @scene_window.clear Ray::Color.none
       render @scene_window
