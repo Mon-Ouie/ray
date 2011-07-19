@@ -24,11 +24,14 @@ context "a text" do
     asserts(:string).equals "héllo"
 
     context "copied" do
-      setup { topic.dup }
+      setup do
+        topic.color = Ray::Color.red
+        topic.dup
+      end
 
       asserts(:style).equals Ray::Text::Normal
       asserts(:size).equals 12
-      asserts(:color).equals Ray::Color.white
+      asserts(:color).equals Ray::Color.red
 
       asserts(:encoding).matches(/utf-8/i)
       asserts(:string).equals "héllo"

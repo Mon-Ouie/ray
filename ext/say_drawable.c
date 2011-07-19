@@ -59,8 +59,6 @@ void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
 
   drawable->index_count = other->index_count;
 
-  drawable->data = other->data;
-
   drawable->fill_proc       = other->fill_proc;
   drawable->render_proc     = other->render_proc;
   drawable->index_fill_proc = other->index_fill_proc;

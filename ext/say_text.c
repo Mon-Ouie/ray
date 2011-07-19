@@ -347,6 +347,8 @@ void say_text_copy(say_text *text, say_text *src) {
   text->last_img_size = src->last_img_size;
 
   text->underline_vertex = src->underline_vertex;
+
+  say_text_compute_vertex_count(text);
 }
 
 uint32_t *say_text_get_string(say_text *text) {
