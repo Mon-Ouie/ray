@@ -40,8 +40,15 @@ context "an animation list" do
     context "after #update" do
       hookup { topic.update }
 
-      asserts :empty?
-      asserts(:to_a).equals []
+      denies :empty?
+      asserts(:to_a).equals { [@anim] }
+
+      context "and #remove_unused" do
+        hookup { topic.remove_unused }
+
+        asserts :empty?
+        asserts(:to_a).equals []
+      end
     end
   end
 
@@ -77,8 +84,15 @@ context "an animation list" do
     context "after #update" do
       hookup { topic.update }
 
-      asserts :empty?
-      asserts(:to_a).equals []
+      denies :empty?
+      asserts(:to_a).equals { [@anim] }
+
+      context "and #remove_unused" do
+        hookup { topic.remove_unused }
+
+        asserts :empty?
+        asserts(:to_a).equals []
+      end
     end
   end
 

@@ -26,10 +26,15 @@ module Ray
       self
     end
 
-    # Updates all the animations, and removes those that are finished.
+    # Updates all the animations
     def update
+      @animations.each(&:update)
+      self
+    end
+
+    # Removes animations that are no more in use
+    def remove_unused
       @animations.reject! do |anim|
-        anim.update
         !anim.running? && !anim.paused?
       end
 

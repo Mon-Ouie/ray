@@ -160,6 +160,8 @@ module Ray
 
       listener_runner.run
 
+      @scene_animations.remove_unused
+
       @scene_window.clear Ray::Color.none
       render @scene_window
       @scene_window.update
