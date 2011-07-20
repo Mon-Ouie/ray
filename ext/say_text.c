@@ -359,6 +359,7 @@ void say_text_copy(say_text *text, say_text *src) {
   text->underline_vertex = src->underline_vertex;
 
   say_text_compute_vertex_count(text);
+  say_text_update_rect(text);
 }
 
 uint32_t *say_text_get_string(say_text *text) {
