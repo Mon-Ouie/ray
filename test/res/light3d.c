@@ -15,6 +15,6 @@ void main() {
   gl_Position = vec4(in_Position, 1) * mvp;
 
   var_Color  = in_Color;
-  /* Ignoring projection, willingly */
-  var_Normal = (vec4(in_Normal, 1) * in_ModelView).xyz;
+
+  var_Normal = (vec4(in_Normal, 1) * mvp).xyz;
 }
