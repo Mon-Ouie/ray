@@ -10,6 +10,8 @@ context "a text" do
   asserts(:size).equals 12
   asserts(:color).equals Ray::Color.white
 
+  asserts(:auto_center).nil
+
   context "after changing style" do
     hookup { topic.style = [:bold, :italic] }
     asserts(:style).equals Ray::Text::Bold | Ray::Text::Italic
@@ -35,6 +37,30 @@ context "a text" do
 
       asserts(:encoding).matches(/utf-8/i)
       asserts(:string).equals "héllo"
+    end
+  end
+
+  context "with auto centering" do
+    hookup { topic.auto_center = [0.5, 1.0] }
+
+    asserts(:auto_center).equals Ray::Vector2[0.5, 1.0]
+    asserts(:origin).equals { topic.rect.size * [0.5, 1.0] }
+
+    context "changed" do
+      hookup { topic.string = "Hello dear world!" }
+      asserts(:origin).equals { topic.rect.size * [0.5, 1.0] }
+    end
+
+    context "disabled" do
+      hookup { topic.auto_center = nil }
+
+      asserts(:auto_center).nil
+      asserts(:origin).equals { topic.rect.size * [0.5, 1.0] }
+
+      context "changed" do
+        hookup { topic.string = "Hello great world!" }
+        denies(:origin).equals { topic.rect.size * [0.5, 1.0] }
+      end
     end
   end
 

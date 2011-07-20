@@ -131,6 +131,39 @@ VALUE ray_text_rect(VALUE self) {
   return ray_rect2rb(say_text_get_rect(ray_rb2text(self)));
 }
 
+/*
+ * @return [Ray::Vector2, nil] Auto-centering ratio. Nil when disabled.
+ */
+static
+VALUE ray_text_auto_center(VALUE self) {
+  say_text *text = ray_rb2text(self);
+
+  if (say_text_auto_center(text))
+    return ray_vector2_to_rb(say_text_get_auto_center_ratio(text));
+  else
+    return Qnil;
+}
+
+/*
+ * @overload auto_center=(val)
+ *   Sets the auto centering ratio. It's a vector2 containing values between 0
+ *   and 1 (typically, at least) to determine the center of the text when it is
+ *   resized. (0.5, 1), for example, would set the origin to (middle, bottom).
+ *
+ *   @param [Ray::Vector2, nil] val New auto centering ratio. If nil, disables
+ *     auto-centering.
+ */
+static
+VALUE ray_text_set_auto_center(VALUE self, VALUE center) {
+  say_text *text = ray_rb2text(self);
+
+  if (NIL_P(center))
+    say_text_disable_auto_center(text);
+  else
+    say_text_enable_auto_center(text, ray_convert_to_vector2(center));
+
+  return center;
+}
 
 void Init_ray_text() {
   ray_cText = rb_define_class_under(ray_mRay, "Text", ray_cDrawable);
@@ -154,6 +187,9 @@ void Init_ray_text() {
   rb_define_method(ray_cText, "color=", ray_text_set_color, 1);
 
   rb_define_method(ray_cText, "rect", ray_text_rect, 0);
+
+  rb_define_method(ray_cText, "auto_center", ray_text_auto_center, 0);
+  rb_define_method(ray_cText, "auto_center=", ray_text_set_auto_center, 1);
 
   rb_define_const(ray_cText, "Normal", INT2FIX(SAY_TEXT_NORMAL));
   rb_define_const(ray_cText, "Bold", INT2FIX(SAY_TEXT_BOLD));

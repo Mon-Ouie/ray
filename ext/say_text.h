@@ -13,17 +13,20 @@ typedef struct {
   say_drawable *drawable;
 
   say_font *font;
-  size_t size;
+  size_t    size;
 
   uint32_t *string;
-  size_t str_length;
+  size_t    str_length;
 
   uint8_t style;
 
   say_color color;
 
   say_vector2 rect_size;
-  uint8_t rect_updated;
+  uint8_t     rect_updated;
+
+  bool        auto_center;
+  say_vector2 center;
 
   say_vector2 last_img_size;
 
@@ -52,5 +55,11 @@ say_color say_text_get_color(say_text *text);
 void say_text_set_color(say_text *text, say_color col);
 
 say_rect say_text_get_rect(say_text *text);
+
+bool        say_text_auto_center(say_text *text);
+say_vector2 say_text_get_auto_center_ratio(say_text *text);
+void        say_text_enable_auto_center(say_text *text, say_vector2 center);
+void        say_text_disable_auto_center(say_text *text);
+
 
 #endif /* SAY_TEXT_H_ */

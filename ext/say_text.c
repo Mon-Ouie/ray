@@ -69,6 +69,12 @@ static void say_text_update_rect(say_text *text) {
   text->rect_size.y = height;
 
   text->rect_updated = 1;
+
+  if (text->auto_center) {
+    say_vector2 center = say_make_vector2(text->rect_size.x * text->center.x,
+                                          text->rect_size.y * text->center.y);
+    say_drawable_set_origin(text->drawable, center);
+  }
 }
 
 static void say_text_compute_vertex_count(say_text *text) {
@@ -317,6 +323,7 @@ say_text *say_text_create() {
   text->rect_size        = say_make_vector2(0, 0);
   text->rect_updated     = 1;
   text->underline_vertex = 0;
+  text->auto_center      = false;
 
   return text;
 }
@@ -344,6 +351,9 @@ void say_text_copy(say_text *text, say_text *src) {
   text->rect_size    = src->rect_size;
   text->rect_updated = src->rect_updated;
 
+  text->auto_center = src->auto_center;
+  text->center      = src->center;
+
   text->last_img_size = src->last_img_size;
 
   text->underline_vertex = src->underline_vertex;
@@ -370,6 +380,9 @@ void say_text_set_string(say_text *text, uint32_t *string, size_t length) {
   text->rect_updated = 0;
 
   say_text_compute_vertex_count(text);
+
+  if (text->auto_center)
+    say_text_update_rect(text);
 }
 
 say_font *say_text_get_font(say_text *text) {
@@ -396,6 +409,9 @@ void say_text_set_size(say_text *text, size_t size) {
   text->size = size;
   say_drawable_set_changed(text->drawable);
   text->rect_updated = 0;
+
+  if (text->auto_center)
+    say_text_update_rect(text);
 }
 
 uint8_t say_text_get_style(say_text *text) {
@@ -440,4 +456,23 @@ say_rect say_text_get_rect(say_text *text) {
   };
 
   return rect;
+}
+
+bool say_text_auto_center(say_text *text) {
+  return text->auto_center;
+}
+
+say_vector2 say_text_get_auto_center_ratio(say_text *text) {
+  return text->center;
+}
+
+void say_text_enable_auto_center(say_text *text, say_vector2 center) {
+  text->auto_center = true;
+  text->center      = center;
+
+  say_text_update_rect(text);
+}
+
+void say_text_disable_auto_center(say_text *text) {
+  text->auto_center = false;
 }
