@@ -39,11 +39,7 @@ task :test do
   test_file = File.expand_path("test/run_all.rb", File.dirname(__FILE__))
 
   begin
-    if defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby"
-      ruby "-X+O", test_file
-    else
-      ruby test_file
-    end
+    ruby test_file
   rescue
     exit 1
   end

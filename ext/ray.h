@@ -63,6 +63,18 @@ extern VALUE ray_cMusic;
 
 #define RAY_ARRAY_AT(ary, i) (rb_funcall(ary, RAY_METH("[]"), 1, INT2FIX(i)))
 
+#if defined(JRUBY) && defined(_DARWIN_C_SOURCE)
+# include <dispatch/dispatch.h>
+
+# define RAY_MAIN dispatch_sync(dispatch_get_main_queue(), ^
+# define RAY_MAIN_END );
+# define RAY_BLOCK __block
+#else
+# define RAY_MAIN if (1)
+# define RAY_MAIN_END
+# define RAY_BLOCK
+#endif
+
 void Init_ray_ext();
 void Init_ray_vector();
 void Init_ray_rect();
