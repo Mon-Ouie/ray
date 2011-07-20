@@ -10,6 +10,7 @@ context "a drawable" do
   asserts(:angle).equals 0
   asserts(:shader).nil
   asserts(:shader_attributes).nil
+  asserts(:matrix_proc).nil
 
   context "after changing origin" do
     hookup { topic.origin = Ray::Vector2[10, 20] }
@@ -115,6 +116,35 @@ context "a drawable" do
 
         asserts(:transform, [10, 30]).almost_equals(Ray::Vector3[15, -20, 9],
                                                     1e-6)
+      end
+    end
+
+    context "and a custom matrix proc" do
+      matrix_proc =  proc { Ray::Matrix.identity }
+
+      hookup do
+        proxy(matrix_proc).call
+
+        topic.matrix_proc = matrix_proc
+        topic.matrix # calls proc
+      end
+
+      asserts(:matrix).equals Ray::Matrix.new
+      asserts(:matrix_proc).equals matrix_proc
+      asserts(:matrix_proc).received(:call) { topic }
+
+      context "when matrix is accessed twice" do
+        hookup { topic.matrix }
+        denies(:matrix_proc).received(:call => 2) { topic }
+      end
+
+      context "when matrix is accessed after a change" do
+        hookup do
+          topic.matrix_changed!
+          topic.matrix
+        end
+
+        asserts(:matrix_proc).received(:call => 2) { topic }
       end
     end
   end

@@ -3,6 +3,19 @@
 VALUE ray_cDrawable = Qnil;
 
 static
+void ray_drawable_actual_matrix_proc(void *data, say_matrix *matrix) {
+  say_drawable *drawable = ((ray_drawable*)data)->drawable;
+
+  VALUE rb_obj = (VALUE)say_drawable_get_other_data(drawable);
+  VALUE proc   = rb_iv_get(rb_obj, "@matrix_proc");
+
+  VALUE rb_matrix = rb_funcall(proc, RAY_METH("call"), 1, rb_obj);
+
+  memcpy(matrix->content, ray_rb2matrix(rb_matrix)->content,
+         sizeof(say_matrix));
+}
+
+static
 void ray_drawable_fill_proc(void *drawable_ptr, void *vertex_ptr) {
   ray_drawable *drawable = drawable_ptr;
   uint8_t      *vertices = vertex_ptr;
@@ -308,6 +321,45 @@ VALUE ray_drawable_set_angle(VALUE self, VALUE val) {
 }
 
 /*
+ * @return [Proc, nil] Proc used to generate matrices, if any.
+ */
+static
+VALUE ray_drawable_matrix_proc(VALUE self) {
+  return rb_iv_get(self, "@matrix_proc");
+}
+
+/*
+ * @overload matrix_proc=(val)
+ *   Sets the proc used to generate matrices. When set to nil, disables
+ *   custom proc. The proc is called with the drawable to generate a matrix
+ *   for, and should return that matrix.
+ *
+ *   @param [Proc, nil] val
+ */
+static
+VALUE ray_drawable_set_matrix_proc(VALUE self, VALUE val) {
+  say_drawable *drawable = ray_rb2drawable(self);
+
+  if (NIL_P(val))
+    say_drawable_set_matrix_proc(drawable, NULL);
+  else
+    say_drawable_set_matrix_proc(drawable, ray_drawable_actual_matrix_proc);
+
+  rb_iv_set(self, "@matrix_proc", val);
+  return val;
+}
+
+/*
+ * Marks the drawable's matrix as changed. This is meant to be called when you
+ * want your matrix proc to be called the next time the matrix is accessed.
+ */
+static
+VALUE ray_drawable_matrix_changed(VALUE self) {
+  say_drawable_set_matrix_changed(ray_rb2drawable(self));
+  return self;
+}
+
+/*
   @return [Ray::Matrix] The transformation matrix used by this object.
 */
 static
@@ -446,6 +498,12 @@ void Init_ray_drawable() {
 
   rb_define_method(ray_cDrawable, "angle", ray_drawable_angle, 0);
   rb_define_method(ray_cDrawable, "angle=", ray_drawable_set_angle, 1);
+
+  rb_define_method(ray_cDrawable, "matrix_proc", ray_drawable_matrix_proc, 0);
+  rb_define_method(ray_cDrawable, "matrix_proc=", ray_drawable_set_matrix_proc,
+                   1);
+
+  rb_define_method(ray_cDrawable, "matrix_changed!", ray_drawable_matrix_changed, 0);
 
   rb_define_method(ray_cDrawable, "matrix", ray_drawable_matrix, 0);
   rb_define_method(ray_cDrawable, "matrix=", ray_drawable_set_matrix, 1);

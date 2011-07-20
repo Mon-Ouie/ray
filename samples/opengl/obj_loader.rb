@@ -45,17 +45,18 @@ class Model < Ray::Drawable
     end
 
     self.vertex_count = @vertices.size
-    rotate(0, 0, 0)
+    self.matrix_proc = proc do # always called with self
+      mat = Ray::Matrix.translation [0, 0, -4]
+
+      mat.rotate(@x, [1, 0, 0])
+      mat.rotate(@y, [0, 1, 0])
+      mat.rotate(@z, [0, 0, 1])
+    end
   end
 
   def rotate(x, y, z)
-    mat = Ray::Matrix.translation [0, 0, -4]
-
-    mat.rotate(x, [1, 0, 0])
-    mat.rotate(y, [0, 1, 0])
-    mat.rotate(z, [0, 0, 1])
-
-    self.matrix = mat
+    @x, @y, @z = x, y, z
+    matrix_changed!
   end
 
   def fill_vertices

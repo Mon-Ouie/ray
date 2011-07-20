@@ -4,21 +4,26 @@ static void say_drawable_update_matrix(say_drawable *drawable) {
   if (drawable->custom_matrix)
     return;
 
-  say_matrix_reset(drawable->matrix);
+  if (drawable->matrix_proc) {
+    drawable->matrix_proc(drawable->data, drawable->matrix);
+  }
+  else {
+    say_matrix_reset(drawable->matrix);
 
-  say_matrix_translate_by(drawable->matrix,
-                          drawable->pos.x,
-                          drawable->pos.y,
-                          drawable->z_order);
-  say_matrix_rotate(drawable->matrix, drawable->angle, 0, 0, 1);
-  say_matrix_scale_by(drawable->matrix, drawable->scale.x, drawable->scale.y,
+    say_matrix_translate_by(drawable->matrix,
+                            drawable->pos.x,
+                            drawable->pos.y,
+                            drawable->z_order);
+    say_matrix_rotate(drawable->matrix, drawable->angle, 0, 0, 1);
+    say_matrix_scale_by(drawable->matrix, drawable->scale.x, drawable->scale.y,
                       1);
-  say_matrix_translate_by(drawable->matrix,
-                          -drawable->origin.x,
-                          -drawable->origin.y,
-                          0);
+    say_matrix_translate_by(drawable->matrix,
+                            -drawable->origin.x,
+                            -drawable->origin.y,
+                            0);
+  }
 
-  drawable->matrix_updated = 1;
+  drawable->matrix_updated = true;
 }
 
 say_drawable *say_drawable_create(size_t vtype) {
@@ -33,9 +38,11 @@ say_drawable *say_drawable_create(size_t vtype) {
 
   drawable->data = NULL;
 
-  drawable->fill_proc   = NULL;
-  drawable->render_proc = NULL;
-  drawable->shader_proc = NULL;
+  drawable->matrix_proc     = NULL;
+  drawable->index_fill_proc = NULL;
+  drawable->fill_proc       = NULL;
+  drawable->render_proc     = NULL;
+  drawable->shader_proc     = NULL;
 
   drawable->shader = NULL;
   drawable->matrix = say_matrix_identity();
@@ -60,6 +67,7 @@ void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
 
   drawable->index_count = other->index_count;
 
+  drawable->matrix_proc     = other->matrix_proc;
   drawable->fill_proc       = other->fill_proc;
   drawable->shader_proc     = other->shader_proc;
   drawable->render_proc     = other->render_proc;
@@ -128,6 +136,11 @@ if (size == drawable->index_count)
 
 size_t say_drawable_get_index_count(say_drawable *drawable) {
   return drawable->index_count;
+}
+
+void say_drawable_set_matrix_proc(say_drawable *drawable, say_matrix_proc proc) {
+  drawable->matrix_proc    = proc;
+  drawable->matrix_updated = false;
 }
 
 void say_drawable_set_fill_proc(say_drawable *drawable, say_fill_proc proc) {
@@ -281,6 +294,10 @@ void say_drawable_set_changed(say_drawable *drawable) {
 
 uint8_t say_drawable_has_changed(say_drawable *drawable) {
   return drawable->has_changed;
+}
+
+void say_drawable_set_matrix_changed(say_drawable *drawable) {
+  drawable->matrix_updated = false;
 }
 
 void say_drawable_set_textured(say_drawable *drawable, uint8_t val) {

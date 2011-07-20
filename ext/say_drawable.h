@@ -7,6 +7,7 @@
 #include "say_matrix.h"
 #include "say_shader.h"
 
+typedef void (*say_matrix_proc)(void *data, say_matrix *matrix);
 typedef void (*say_fill_proc)(void *data, void *vertices);
 typedef void (*say_index_fill_proc)(void *data, GLuint *indices, size_t from);
 typedef void (*say_render_proc)(void *data, size_t first, size_t index);
@@ -23,6 +24,7 @@ typedef struct {
   void *data;
   void *other_data;
 
+  say_matrix_proc     matrix_proc;
   say_fill_proc       fill_proc;
   say_index_fill_proc index_fill_proc;
   say_render_proc     render_proc;
@@ -60,6 +62,7 @@ size_t say_drawable_get_vertex_type(say_drawable *drawable);
 void say_drawable_set_index_count(say_drawable *drawable, size_t size);
 size_t say_drawable_get_index_count(say_drawable *drawable);
 
+void say_drawable_set_matrix_proc(say_drawable *drawable, say_matrix_proc proc);
 void say_drawable_set_fill_proc(say_drawable *drawable, say_fill_proc proc);
 void say_drawable_set_render_proc(say_drawable *drawable, say_render_proc proc);
 void say_drawable_set_shader_proc(say_drawable *drawable, say_shader_proc proc);
@@ -79,6 +82,7 @@ void say_drawable_draw(say_drawable *drawable, say_shader *shader);
 
 void say_drawable_set_changed(say_drawable *drawable);
 uint8_t say_drawable_has_changed(say_drawable *drawable);
+void say_drawable_set_matrix_changed(say_drawable *drawable);
 
 void say_drawable_set_textured(say_drawable *drawable, uint8_t val);
 uint8_t say_drawable_is_textured(say_drawable *drawable);
