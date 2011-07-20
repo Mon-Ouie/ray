@@ -55,7 +55,9 @@ VALUE ray_window_open(int argc, VALUE *argv, VALUE self) {
   RAY_BLOCK bool failed = false;
 
   RAY_MAIN {
+#ifdef SAY_OSX
     say_osx_flip_pool();
+#endif
     if (!say_window_open(window, c_size.x, c_size.y,
                          StringValuePtr(title), flags)) {
       failed = true;
