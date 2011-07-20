@@ -17,13 +17,19 @@ say_text *ray_rb2text(VALUE obj) {
 static
 VALUE ray_text_alloc(VALUE self) {
   say_text *text = say_text_create();
-  return Data_Wrap_Struct(self, NULL, say_text_free, text);
+  VALUE rb = Data_Wrap_Struct(self, NULL, say_text_free, text);
+
+  say_drawable_set_shader_proc(text->drawable, ray_drawable_shader_proc);
+  say_drawable_set_other_data(text->drawable, (void*)rb);
+
+  return rb;
 }
 
 static
 VALUE ray_text_init_copy(VALUE self, VALUE orig) {
   say_text_copy(ray_rb2text(self), ray_rb2text(orig));
   rb_iv_set(self, "@font", rb_iv_get(orig, "@font"));
+  ray_drawable_copy_attr(self, orig);
   return self;
 }
 

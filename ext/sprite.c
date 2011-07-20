@@ -16,11 +16,17 @@ say_sprite *ray_rb2sprite(VALUE obj) {
 
 VALUE ray_sprite_alloc(VALUE self) {
   say_sprite *sprite = say_sprite_create();
-  return Data_Wrap_Struct(self, NULL, say_sprite_free, sprite);
+  VALUE rb = Data_Wrap_Struct(self, NULL, say_sprite_free, sprite);
+
+  say_drawable_set_shader_proc(sprite->drawable, ray_drawable_shader_proc);
+  say_drawable_set_other_data(sprite->drawable, (void*)rb);
+
+  return rb;
 }
 
 VALUE ray_sprite_init_copy(VALUE self, VALUE orig) {
   rb_iv_set(self, "@image", rb_iv_get(orig, "@image"));
+  ray_drawable_copy_attr(self, orig);
   say_sprite_copy(ray_rb2sprite(self), ray_rb2sprite(orig));
   return self;
 }

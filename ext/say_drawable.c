@@ -35,6 +35,7 @@ say_drawable *say_drawable_create(size_t vtype) {
 
   drawable->fill_proc   = NULL;
   drawable->render_proc = NULL;
+  drawable->shader_proc = NULL;
 
   drawable->shader = NULL;
   drawable->matrix = say_matrix_identity();
@@ -60,6 +61,7 @@ void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
   drawable->index_count = other->index_count;
 
   drawable->fill_proc       = other->fill_proc;
+  drawable->shader_proc     = other->shader_proc;
   drawable->render_proc     = other->render_proc;
   drawable->index_fill_proc = other->index_fill_proc;
 
@@ -90,6 +92,14 @@ void say_drawable_set_custom_data(say_drawable *drawable, void *data) {
 
   drawable->data        = data;
   drawable->has_changed = 1;
+}
+
+void say_drawable_set_other_data(say_drawable *drawable, void *data) {
+  drawable->other_data = data;
+}
+
+void *say_drawable_get_other_data(say_drawable *drawable) {
+  return drawable->other_data;
 }
 
 void say_drawable_set_vertex_count(say_drawable *drawable, size_t size) {
@@ -133,7 +143,10 @@ void say_drawable_set_index_fill_proc(say_drawable *drawable,
 
 void say_drawable_set_render_proc(say_drawable *drawable, say_render_proc proc) {
   drawable->render_proc = proc;
-  drawable->has_changed = 1;
+}
+
+void say_drawable_set_shader_proc(say_drawable *drawable, say_shader_proc proc) {
+  drawable->shader_proc = proc;
 }
 
 void say_drawable_fill_buffer(say_drawable *drawable, void *vertices) {
@@ -214,7 +227,10 @@ void say_drawable_draw_at(say_drawable *drawable,
                             drawable->use_texture);
     }
 
-    drawable->render_proc(drawable->data, vertex_id, id, shader);
+    if (drawable->shader_proc)
+      drawable->shader_proc(drawable->data, shader);
+
+    drawable->render_proc(drawable->data, vertex_id, id);
   }
 }
 
@@ -240,16 +256,22 @@ void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
                             drawable->use_texture);
     }
 
-    if (drawable->vertex_count != 0)
+    size_t loc = 0, index_loc = 0;
+
+    if (drawable->vertex_count != 0) {
       say_buffer_slice_bind(drawable->slice);
+      loc = say_buffer_slice_get_loc(drawable->slice);
+    }
 
-    if (drawable->index_count != 0)
+    if (drawable->index_count != 0) {
       say_index_buffer_slice_bind(drawable->index_slice);
+      index_loc = say_index_buffer_slice_get_loc(drawable->index_slice);
+    }
 
-    drawable->render_proc(drawable->data,
-                          say_buffer_slice_get_loc(drawable->slice),
-                          say_index_buffer_slice_get_loc(drawable->index_slice),
-                          used_shader);
+    if (drawable->shader_proc)
+      drawable->shader_proc(drawable->data, shader);
+
+    drawable->render_proc(drawable->data, loc, index_loc);
   }
 }
 

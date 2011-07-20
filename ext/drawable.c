@@ -27,9 +27,22 @@ void ray_drawable_fill_proc(void *drawable_ptr, void *vertex_ptr) {
   }
 }
 
+void ray_drawable_shader_proc(void *data, say_shader *shader) {
+  /* Works because the offset will be the same anyway */
+  say_drawable *drawable = ((ray_drawable*)data)->drawable;
+
+  VALUE rb_obj = (VALUE)say_drawable_get_other_data(drawable);
+  VALUE hash   = rb_iv_get(rb_obj, "@shader_attributes");
+
+  if (!NIL_P(hash)) {
+    /* Create a ruby shader object to call merge */
+    VALUE rb_shader = ray_shader2rb(shader, Qnil);
+    rb_funcall(rb_shader, RAY_METH("merge"), 1, hash);
+  }
+}
+
 static
-void ray_drawable_render_proc(void *data, size_t first, size_t index,
-                              say_shader *shader) {
+void ray_drawable_render_proc(void *data, size_t first, size_t index) {
   ray_drawable *drawable = (ray_drawable*)data;
   rb_funcall(drawable->obj, RAY_METH("render"), 2,
              ULONG2NUM(first), ULONG2NUM(index));
@@ -126,7 +139,9 @@ VALUE ray_drawable_init(int argc, VALUE *argv, VALUE self) {
 
   obj->drawable = say_drawable_create(id);
   say_drawable_set_custom_data(obj->drawable, obj);
+  say_drawable_set_other_data(obj->drawable, (void*)self);
   say_drawable_set_fill_proc(obj->drawable, ray_drawable_fill_proc);
+  say_drawable_set_shader_proc(obj->drawable, ray_drawable_shader_proc);
   say_drawable_set_render_proc(obj->drawable, ray_drawable_render_proc);
   say_drawable_set_index_fill_proc(obj->drawable,
                                    ray_drawable_indices_fill_proc);
@@ -138,6 +153,12 @@ VALUE ray_drawable_init(int argc, VALUE *argv, VALUE self) {
   obj->vsize = say_vertex_type_get_size(say_get_vertex_type(id));
 
   return self;
+}
+
+void ray_drawable_copy_attr(VALUE self, VALUE orig) {
+  VALUE attr = rb_iv_get(orig, "@shader_attributes");
+  if (!NIL_P(attr))
+    rb_iv_set(self, "@shader_attributes", rb_obj_dup(attr));
 }
 
 static
@@ -157,11 +178,14 @@ VALUE ray_drawable_init_copy(VALUE self, VALUE orig) {
   size_t vid = say_drawable_get_vertex_type(other->drawable);
   obj->drawable = say_drawable_create(vid);
   say_drawable_set_custom_data(obj->drawable, obj);
+  say_drawable_set_other_data(obj->drawable, (void*)self);
   say_drawable_copy(obj->drawable, other->drawable);
   say_drawable_set_changed(obj->drawable);
 
   rb_iv_set(self, "@vertex_type_class", rb_iv_get(orig, "@vertex_type_class"));
   obj->vsize = other->vsize;
+
+  ray_drawable_copy_attr(self, orig);
 
   return self;
 }

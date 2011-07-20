@@ -17,12 +17,18 @@ say_polygon *ray_rb2polygon(VALUE obj) {
 static
 VALUE ray_polygon_alloc(VALUE self) {
   say_polygon *obj = say_polygon_create(0);
-  return Data_Wrap_Struct(self, NULL, say_polygon_free, obj);
+  VALUE rb = Data_Wrap_Struct(self, NULL, say_polygon_free, obj);
+
+  say_drawable_set_shader_proc(obj->drawable, ray_drawable_shader_proc);
+  say_drawable_set_other_data(obj->drawable, (void*)rb);
+
+  return rb;
 }
 
 static
 VALUE ray_polygon_init_copy(VALUE self, VALUE other) {
   say_polygon_copy(ray_rb2polygon(self), ray_rb2polygon(other));
+  ray_drawable_copy_attr(self, other);
   return self;
 }
 
@@ -62,7 +68,12 @@ VALUE ray_polygon_line(int argc, VALUE *argv, VALUE self) {
                                        NIL_P(color) ?
                                        say_make_color(255, 255, 255, 255) :
                                        ray_rb2col(color));
-  return Data_Wrap_Struct(self, NULL, say_polygon_free, line);
+  VALUE rb = Data_Wrap_Struct(self, NULL, say_polygon_free, line);
+
+  say_drawable_set_shader_proc(line->drawable, ray_drawable_shader_proc);
+  say_drawable_set_other_data(line->drawable, (void*)rb);
+
+  return rb;
 }
 
 /*
@@ -90,6 +101,9 @@ VALUE ray_polygon_rectangle(int argc, VALUE *argv, VALUE self) {
   VALUE ret = Data_Wrap_Struct(self, NULL, say_polygon_free, poly);
 
   ray_polygon_make_outline(poly, outline_width, outline);
+
+  say_drawable_set_shader_proc(poly->drawable, ray_drawable_shader_proc);
+  say_drawable_set_other_data(poly->drawable, (void*)ret);
 
   return ret;
 }
@@ -124,6 +138,9 @@ VALUE ray_polygon_circle(int argc, VALUE *argv, VALUE self) {
 
   ray_polygon_make_outline(poly, rb_outline_width, rb_outline);
 
+  say_drawable_set_shader_proc(poly->drawable, ray_drawable_shader_proc);
+  say_drawable_set_other_data(poly->drawable, (void*)ret);
+
   return ret;
 }
 
@@ -157,7 +174,12 @@ VALUE ray_polygon_ellipse(int argc, VALUE *argv, VALUE self) {
 
   ray_polygon_make_outline(poly, rb_outline_width, rb_outline);
 
-  return Data_Wrap_Struct(self, NULL, say_polygon_free, poly);
+  VALUE rb = Data_Wrap_Struct(self, NULL, say_polygon_free, poly);
+
+  say_drawable_set_shader_proc(poly->drawable, ray_drawable_shader_proc);
+  say_drawable_set_other_data(poly->drawable, (void*)rb);
+
+  return rb;
 }
 
 /*

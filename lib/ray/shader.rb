@@ -42,8 +42,11 @@ module Ray
       self
     end
 
-    # @param [String, Symbol] attr Name of the parameter to set
-    # @param
+    # @param [String, Symbol] attr Name of the parameter to set. Can be a
+    #   variable name or a way to identify an element from a struct or an array
+    #   (e.g. array[3] or some_struct.field).
+    #
+    # @param [Object] value Value to set it to.
     def []=(attr, value)
       attr = attr.to_sym
       @locations[attr] ||= locate(attr)
@@ -77,6 +80,12 @@ module Ray
       else # numeric-stuff
         set_numeric loc, value
       end
+    end
+
+    # @param [Hash] attr Hash containing the parameter names as keys and the
+    #   values to set them to.
+    def merge(hash)
+      hash.each { |key, val| self[key] = val }
     end
   end
 end

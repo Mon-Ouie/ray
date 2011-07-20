@@ -32,6 +32,10 @@ module Ray
       self.scale = [scale_x, val]
     end
 
+    # @return [Hash, nil] Attributes passed to the shader when the object is
+    #   drawn.
+    attr_accessor :shader_attributes
+
     alias zoom  scale
     alias zoom= scale=
 

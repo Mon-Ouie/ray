@@ -140,6 +140,9 @@ say_font *ray_rb2font(VALUE obj);
 VALUE ray_shader2rb(say_shader *shader, VALUE owner);
 say_shader *ray_rb2shader(VALUE obj);
 
+void ray_drawable_copy_attr(VALUE self, VALUE orig);
+void ray_drawable_shader_proc(void *data, say_shader *shader);
+
 say_drawable *ray_rb2drawable(VALUE obj);
 say_polygon *ray_rb2polygon(VALUE obj);
 say_sprite *ray_rb2sprite(VALUE obj);

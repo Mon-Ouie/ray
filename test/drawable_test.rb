@@ -9,6 +9,7 @@ context "a drawable" do
   asserts(:z).equals 0
   asserts(:angle).equals 0
   asserts(:shader).nil
+  asserts(:shader_attributes).nil
 
   context "after changing origin" do
     hookup { topic.origin = Ray::Vector2[10, 20] }
@@ -61,12 +62,16 @@ context "a drawable" do
   end
 
   context "with several transformations" do
+    attr = {:foo => 3}
+
     hookup do
       topic.origin = [30, 40]
       topic.pos    = [10, 20]
       topic.angle  = 90
       topic.scale  = [2, 0.5]
       topic.z      = 9
+
+      topic.shader_attributes = attr
     end
 
     # (10, 30)   => (-20, -10) (origin)
@@ -88,6 +93,11 @@ context "a drawable" do
       asserts(:angle).equals 90
       asserts(:scale).equals Ray::Vector2[2, 0.5]
       asserts(:z).equals 9
+
+      asserts(:shader_attributes).equals attr
+      asserts("shader_attributes are copied") do
+        !(topic.shader_attributes.equal? attr)
+      end
     end
 
     context "and a custom matrix" do

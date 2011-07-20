@@ -255,8 +255,7 @@ static void say_text_fill_vertices(void *data, void *vertices_ptr) {
   }
 }
 
-static void say_text_draw(void *data, size_t first, size_t index,
-                          say_shader *shader) {
+static void say_text_draw(void *data, size_t first, size_t index) {
   say_text *text = (say_text*)data;
 
   if (!text->font)

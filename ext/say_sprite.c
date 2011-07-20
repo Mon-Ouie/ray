@@ -67,8 +67,7 @@ static void say_sprite_fill_vertices(void *data, void *vertices_ptr) {
   }
 }
 
-static void say_sprite_draw(void *data, size_t first, size_t index,
-                            say_shader *shader) {
+static void say_sprite_draw(void *data, size_t first, size_t index) {
   say_sprite *sprite = (say_sprite*)data;
 
   if (!sprite->image)

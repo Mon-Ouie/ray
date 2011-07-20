@@ -113,8 +113,7 @@ static void say_polygon_fill_vertices(void *data, void *vertices_ptr) {
   }
 }
 
-static void say_polygon_draw(void *data, size_t first, size_t index,
-                             say_shader *shader) {
+static void say_polygon_draw(void *data, size_t first, size_t index) {
   say_polygon *polygon = (say_polygon*)data;
 
   if (polygon->point_count < 3)
