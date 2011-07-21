@@ -89,7 +89,7 @@ static const char *say_default_vertex_shader =
   "}\n";
 
 static const char *say_new_default_frag_shader =
-  "#version 140\n"
+  "#version 130\n"
   "\n"
   "uniform sampler2D in_Texture;\n"
   "uniform bool in_TextureEnabled;\n"
@@ -107,7 +107,7 @@ static const char *say_new_default_frag_shader =
   "}\n";
 
 static const char *say_new_default_vertex_shader =
-  "#version 140\n"
+  "#version 130\n"
   "\n"
   "in vec2 in_Vertex;\n"
   "in vec4 in_Color;\n"
