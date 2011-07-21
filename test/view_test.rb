@@ -58,4 +58,12 @@ context "a view" do
   end
 end
 
+context "a clipping view" do
+  setup { Ray::View.clip([1280, 240, 320, 960], [640, 480]) }
+
+  asserts(:center).equals Ray::Vector2[1280 + 320 / 2, 240 + 960 / 2]
+  asserts(:size).equals Ray::Vector2[320, 960]
+  asserts(:viewport).equals Ray::Rect[2, 0.5, 0.5, 2]
+end
+
 run_tests if __FILE__ == $0

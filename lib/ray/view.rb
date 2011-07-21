@@ -1,5 +1,21 @@
 module Ray
   class View
+    # @param [Ray::Rect] rect Rect to show, in pixels.
+    # @param [Ray::Vector2] target_size Size of the complete target, in pixels.
+    #
+    # @return [Ray::View] A view that allows to clip rendering to a given region
+    #   of the target, without scaling.
+    def self.clip(rect, target_size)
+      rect, target_size = rect.to_rect, target_size.to_vector2
+
+      viewport = Ray::Rect[rect.x / target_size.w,
+                           rect.y / target_size.h,
+                           rect.w / target_size.w,
+                           rect.h / target_size.y]
+
+     Ray::View.new(rect.center, rect.size, viewport)
+    end
+
     def ==(other)
       other.is_a?(Ray::View) && self.matrix == other.matrix
     end
