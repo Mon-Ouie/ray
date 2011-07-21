@@ -28,7 +28,7 @@ Ray::Game.new("Shaders test") do
       }
     SHADER
 
-    @shape.shader["ratio.ratio"] = [0.299, 0.587, 0.114]
+    @shape.shader[:ratio] = [0.299, 0.587, 0.114]
 
     render do |win|
       win.draw @shape
