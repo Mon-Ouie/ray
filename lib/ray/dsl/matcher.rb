@@ -1,4 +1,9 @@
 module Ray
+  class NoKeyError < StandardError
+    def initialize(key)
+      super "key #{key} doesn't exist"
+    end
+  end
   # This is the module including all of your matchers as private methods,
   # allowing you to use them when you call on.
   module Matchers
@@ -179,6 +184,7 @@ module Ray
 
   class Key
     def initialize(name)
+      raise NoKeyError, name unless Keys[name]
       @symbol = name.to_sym
     end
 
@@ -201,11 +207,12 @@ module Ray
 
   class KeyMod
     def initialize(name)
+      raise NoKeyError, name unless Mod[name]
       @symbol = name.to_sym
     end
 
     def to_a
-      MOD[@symbol]
+      Mod[@symbol]
     end
 
     def to_sym
