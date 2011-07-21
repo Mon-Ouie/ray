@@ -62,10 +62,9 @@
 }
 
 - (void)dealloc {
-  NSAutoreleasePool *pool = [NSAutoreleasePool new];
+  say_osx_flip_pool();
   [context release];
   [super dealloc];
-  [pool drain];
 }
 
 @end

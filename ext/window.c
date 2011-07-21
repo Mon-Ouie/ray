@@ -52,20 +52,16 @@ VALUE ray_window_open(int argc, VALUE *argv, VALUE self) {
 
   say_vector2 c_size = ray_convert_to_vector2(size);
 
-  RAY_BLOCK bool failed = false;
+  bool failed = false;
 
-  RAY_MAIN {
 #ifdef SAY_OSX
-    say_osx_flip_pool();
+  say_osx_flip_pool();
 #endif
-    if (!say_window_open(window, c_size.x, c_size.y,
-                         StringValuePtr(title), flags)) {
-      failed = true;
-    }
-  } RAY_MAIN_END;
 
-  if (failed)
+  if (!say_window_open(window, c_size.x, c_size.y,
+                       StringValuePtr(title), flags)) {
     rb_raise(rb_eRuntimeError, "%s", say_error_get_last());
+  }
 
   return self;
 }

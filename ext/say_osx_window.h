@@ -67,10 +67,10 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
                 width:(size_t)w
                height:(size_t)h
                 style:(uint8_t)style {
-  if ([NSThread currentThread] != [NSThread mainThread]) {
-    say_error_set("can't create window outside main thread");
-    return NO;
-  }
+  //if ([NSThread currentThread] != [NSThread mainThread]) {
+  //  say_error_set("can't create window outside main thread");
+  //  return NO;
+  //}
 
   say_osx_setup_process();
 
