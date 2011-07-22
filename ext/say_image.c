@@ -29,11 +29,12 @@ static void say_image_update_buffer(say_image *img) {
   if (img->buffer_updated)
     return;
 
-  say_image_bind(img);
+  say_texture_make_current(img->texture);
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                 img->pixels);
 
-  img->buffer_updated = true;
+  img->buffer_updated  = true;
+  img->texture_updated = true;
 }
 
 say_image *say_image_create() {
