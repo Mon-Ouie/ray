@@ -61,6 +61,8 @@ require 'ray/helper'
 require 'ray/animation'
 require 'ray/animation_list'
 
+require 'ray/effect'
+
 require 'ray/scene_list'
 require 'ray/scene'
 

@@ -25,6 +25,18 @@ static void say_texture_will_delete(GLuint texture) {
     say_current_texture = 0;
 }
 
+static void say_image_update_buffer(say_image *img) {
+  if (img->buffer_updated)
+    return;
+
+  say_texture_make_current(img->texture);
+  glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                img->pixels);
+
+  img->buffer_updated  = true;
+  img->texture_updated = true;
+}
+
 say_image *say_image_create() {
   say_context_ensure();
 
@@ -34,13 +46,14 @@ say_image *say_image_create() {
   glGenTextures(1, &(img->texture));
 
   img->pixels          = NULL;
-  img->texture_updated = 1;
+  img->texture_updated = true;
+  img->buffer_updated  = true;
 
   img->width  = 0;
   img->height = 0;
 
-  img->smooth = 1;
-  say_image_set_smooth(img, 0);
+  img->smooth = true;
+  say_image_set_smooth(img, false);
 
   return img;
 }
@@ -120,7 +133,8 @@ bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
   img->width  = w;
   img->height = h;
 
-  img->texture_updated = 0;
+  img->texture_updated = false;
+  img->buffer_updated  = true;
 
   return true;
 }
@@ -138,6 +152,7 @@ bool say_image_write_bmp(say_image *img, const char *filename) {
   if (!say_image_assert_non_empty(img))
     return false;
 
+  say_image_update_buffer(img);
   stbi_write_bmp(filename, img->width, img->height, 4, img->pixels);
 
   return true;
@@ -147,6 +162,7 @@ bool say_image_write_png(say_image *img, const char *filename) {
   if (!say_image_assert_non_empty(img))
     return false;
 
+  say_image_update_buffer(img);
   stbi_write_png(filename, img->width, img->height, 4, img->pixels, 0);
 
   return true;
@@ -156,6 +172,7 @@ bool say_image_write_tga(say_image *img, const char *filename) {
   if (!say_image_assert_non_empty(img))
     return false;
 
+  say_image_update_buffer(img);
   stbi_write_tga(filename, img->width, img->height, 4, img->pixels);
 
   return true;
@@ -192,6 +209,8 @@ say_vector2 say_image_get_size(say_image *img) {
 }
 
 bool say_image_resize(say_image *img, size_t w, size_t h) {
+  say_image_update_buffer(img);
+
   size_t old_w = img->width, old_h = img->height;
 
   say_color *cpy = malloc(sizeof(say_color) * img->width * img->height);
@@ -218,11 +237,11 @@ bool say_image_resize(say_image *img, size_t w, size_t h) {
   return true;
 }
 
-uint8_t say_image_is_smooth(say_image *img) {
+bool say_image_is_smooth(say_image *img) {
   return img->smooth;
 }
 
-void say_image_set_smooth(say_image *img, uint8_t val) {
+void say_image_set_smooth(say_image *img, bool val) {
   if (img->smooth != val) {
     img->smooth = val;
 
@@ -245,16 +264,24 @@ say_rect say_image_get_tex_rect(say_image *img, say_rect rect) {
 }
 
 say_color *say_image_get_buffer(say_image *img) {
+  say_image_update_buffer(img);
   return img->pixels;
 }
 
+void say_image_mark_out_of_date(say_image *img) {
+  img->buffer_updated = false;
+}
+
 say_color say_image_get(say_image *img, size_t x, size_t y) {
+  say_image_update_buffer(img);
   return img->pixels[y * img->width + x];
 }
 
 void say_image_set(say_image *img, size_t x, size_t y, say_color color) {
+  say_image_update_buffer(img);
+
   img->pixels[y * img->width + x] = color;
-  img->texture_updated = 0;
+  img->texture_updated = false;
 }
 
 void say_image_bind(say_image *img) {
@@ -275,7 +302,7 @@ void say_image_update_texture(say_image *img) {
                   img->width, img->height,
                   GL_RGBA, GL_UNSIGNED_BYTE, img->pixels);
 
-  img->texture_updated = 1;
+  img->texture_updated = true;
 }
 
 void say_image_unbind() {

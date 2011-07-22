@@ -111,9 +111,9 @@ static void say_context_create_initial() {
   /* Identify GLSL version to be used */
   const GLubyte *str = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-  /* if GLSL 1.40 and GL_EXT_gpu_shader4 are supported */
+  /* if GLSL 1.30 and GL_EXT_gpu_shader4 are supported */
   if (__GLEW_EXT_gpu_shader4) {
-    if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'4')) {
+    if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'3')) {
       say_shader_enable_new_glsl();
     }
   }

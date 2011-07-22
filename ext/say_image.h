@@ -7,11 +7,12 @@ typedef struct say_image {
   GLuint texture;
 
   say_color *pixels;
-  uint8_t texture_updated;
+  bool texture_updated;
+  bool buffer_updated;
 
   size_t width, height;
 
-  uint8_t smooth;
+  bool smooth;
 } say_image;
 
 say_image *say_image_create();
@@ -34,8 +35,8 @@ bool say_image_write_png(say_image *img, const char *filename);
 bool say_image_write_tga(say_image *img, const char *filename);
 bool say_image_write(say_image *img, const char *filename);
 
-uint8_t say_image_is_smooth(say_image *img);
-void say_image_set_smooth(say_image *img, uint8_t val);
+bool say_image_is_smooth(say_image *img);
+void say_image_set_smooth(say_image *img, bool val);
 
 say_color say_image_get(say_image *img, size_t x, size_t y);
 void say_image_set(say_image *img, size_t x, size_t y, say_color color);
@@ -43,6 +44,8 @@ void say_image_set(say_image *img, size_t x, size_t y, say_color color);
 say_rect say_image_get_tex_rect(say_image *img, say_rect rect);
 
 say_color *say_image_get_buffer(say_image *img);
+
+void say_image_mark_out_of_date(say_image *img);
 
 void say_image_bind(say_image *img);
 void say_image_unbind();

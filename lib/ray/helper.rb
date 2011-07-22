@@ -143,6 +143,11 @@ module Ray
       Ray::Text.new(content, opts)
     end
 
+    # (see Ray::Effect::Generator#initialize)
+    def effect_generator(version = 110, &block)
+      Ray::Effect::Generator.new(version, &block)
+    end
+
     # @param [Symbol, Key, Integer] val A symbol to find the key (its name),
     #   a Key object, or one of the KEY_* constant.
     # @return [true, false] True if the user is holding key.
