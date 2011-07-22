@@ -115,10 +115,7 @@ say_image *say_image_target_get_image(say_image_target *target) {
 void say_image_target_update(say_image_target *target) {
   if (target->img) {
     say_target_update(target->target);
-
-    say_image_bind(target->img);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                  say_image_get_buffer(target->img));
+    say_image_mark_out_of_date(target->img);
   }
 }
 
