@@ -90,7 +90,7 @@ static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
   /* Not enough room here. But perhaps we can make some? */
   if (buffer_size < SAY_BUFFER_MAX_SIZE && size <= SAY_BUFFER_MAX_SIZE) {
     size_t sought_size = last->loc + last->size + size;
-    size_t right_size = say_index_buffer_get_size(ibo->buf);
+    size_t right_size  = say_index_buffer_get_size(ibo->buf);
 
     while (right_size < sought_size)
       right_size *= 2;
@@ -138,14 +138,15 @@ static size_t say_global_ibo_find(size_t size, size_t *buf_id) {
   return say_global_ibo_find_in(say_global_ibo_at(*buf_id), size);
 }
 
-static void say_global_ibo_delete_at(say_global_ibo *ibo, size_t loc) {
+static void say_global_ibo_delete_at(say_global_ibo *ibo, size_t loc,
+                                     size_t range_size) {
   if (!ibo)
     return;
 
   size_t n = 0, size = say_array_get_size(ibo->ranges);
   for (; n < size; n++) {
     say_range *range = say_array_get(ibo->ranges, n);
-    if (range->loc == loc)
+    if (range->loc == loc && range->size == range_size)
       break;
   }
 
@@ -156,10 +157,10 @@ static void say_global_ibo_delete_at(say_global_ibo *ibo, size_t loc) {
 }
 
 static void say_global_ibo_reduce_size(say_global_ibo *ibo, size_t loc,
-                                       size_t size) {
+                                       size_t old_size, size_t size) {
   for (say_range *range = say_array_get(ibo->ranges, 0); range;
        say_array_next(ibo->ranges, (void**)&range)) {
-    if (range->loc == loc) {
+    if (range->loc == loc && range->size == old_size) {
       range->size = size;
       return;
     }
@@ -180,19 +181,21 @@ say_index_buffer_slice *say_index_buffer_slice_create(size_t size) {
 }
 
 void say_index_buffer_slice_free(say_index_buffer_slice *slice) {
-  say_global_ibo_delete_at(say_global_ibo_at(slice->buf_id), slice->loc);
+  say_global_ibo_delete_at(say_global_ibo_at(slice->buf_id), slice->loc,
+                           slice->size);
   free(slice);
 }
 
 void say_index_buffer_slice_recreate(say_index_buffer_slice *slice,
                                      size_t size) {
  if (size > slice->size) {
-   say_global_ibo_delete_at(say_global_ibo_at(slice->buf_id), slice->loc);
+   say_global_ibo_delete_at(say_global_ibo_at(slice->buf_id), slice->loc,
+                            slice->size);
    slice->loc = say_global_ibo_find(size, &slice->buf_id);
   }
  else {
    say_global_ibo_reduce_size(say_global_ibo_at(slice->buf_id),
-                                 slice->loc, size);
+                              slice->loc, slice->size, size);
  }
 
   slice->size = size;

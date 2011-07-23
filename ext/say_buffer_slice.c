@@ -102,14 +102,15 @@ static size_t say_global_buffer_find(say_global_buffer *buf, size_t n) {
   return SAY_MAX_SIZE;
 }
 
-static void say_global_buffer_delete_at(say_global_buffer *buf, size_t loc) {
+static void say_global_buffer_delete_at(say_global_buffer *buf, size_t loc,
+                                        size_t range_size) {
   if (!buf)
     return;
 
   size_t n = 0, size = say_array_get_size(buf->ranges);
   for (; n < size; n++) {
     say_range *range = say_array_get(buf->ranges, n);
-    if (range->loc == loc)
+    if (range->loc == loc && range->size == range_size)
       break;
   }
 
@@ -120,10 +121,10 @@ static void say_global_buffer_delete_at(say_global_buffer *buf, size_t loc) {
 }
 
 static void say_global_buffer_reduce_size(say_global_buffer *buf, size_t loc,
-                                          size_t size) {
+                                          size_t old_size, size_t size) {
   for (say_range *range = say_array_get(buf->ranges, 0); range;
        say_array_next(buf->ranges, (void**)&range)) {
-    if (range->loc == loc) {
+    if (range->loc == loc && range->size == size) {
       range->size = size;
       return;
     }
@@ -191,7 +192,7 @@ say_buffer_slice *say_buffer_slice_create(size_t vtype, size_t size) {
 
 void say_buffer_slice_free(say_buffer_slice *slice) {
   say_global_buffer_delete_at(say_global_buffer_at(slice->vtype, slice->buf_id),
-                              slice->loc);
+                              slice->size, slice->loc);
   free(slice);
 }
 
@@ -203,14 +204,14 @@ void say_buffer_slice_recreate(say_buffer_slice *slice, size_t size) {
   if (size > slice->size) {
     say_global_buffer_delete_at(say_global_buffer_at(slice->vtype,
                                                      slice->buf_id),
-                                slice->loc);
+                                slice->loc, slice->size);
 
     slice->loc = say_global_buffer_reserve(slice->vtype, size, &slice->buf_id);
   }
   else {
     say_global_buffer_reduce_size(say_global_buffer_at(slice->vtype,
                                                        slice->buf_id),
-                                  slice->loc, size);
+                                  slice->loc, slice->size, size);
   }
 
   slice->size = size;
