@@ -192,7 +192,7 @@ say_buffer_slice *say_buffer_slice_create(size_t vtype, size_t size) {
 
 void say_buffer_slice_free(say_buffer_slice *slice) {
   say_global_buffer_delete_at(say_global_buffer_at(slice->vtype, slice->buf_id),
-                              slice->size, slice->loc);
+                              slice->loc, slice->size);
   free(slice);
 }
 
