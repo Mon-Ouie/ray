@@ -11,6 +11,11 @@ context "an index buffer" do
   context "after changing an element" do
     hookup { topic[34] = 30 }
     asserts(:[], 34).equals 30
+
+    context "and resizing the buffer" do
+      hookup { topic.resize 300 }
+      asserts(:[], 34).equals 30
+    end
   end
 end
 

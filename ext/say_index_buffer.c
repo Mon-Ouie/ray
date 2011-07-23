@@ -81,8 +81,10 @@ void say_index_buffer_resize(say_index_buffer *buf, size_t size) {
   say_context_ensure();
 
   say_array_resize(buf->buffer, size);
-  glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, size * sizeof(GLuint), NULL,
-                  buf->type);
+
+  say_index_buffer_bind(buf);
+  glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, size * sizeof(GLuint),
+                  say_array_get(buf->buffer, 0), buf->type);
 }
 
 GLuint *say_index_buffer_get(say_index_buffer *buf, size_t i) {
