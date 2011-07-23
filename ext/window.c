@@ -52,8 +52,6 @@ VALUE ray_window_open(int argc, VALUE *argv, VALUE self) {
 
   say_vector2 c_size = ray_convert_to_vector2(size);
 
-  bool failed = false;
-
 #ifdef SAY_OSX
   say_osx_flip_pool();
 #endif
