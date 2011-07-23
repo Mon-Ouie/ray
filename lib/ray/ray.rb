@@ -4,7 +4,7 @@ require 'iconv'
 # Change PATH so as to find DLLs on windows.
 if RUBY_PLATFORM =~ /mingw/
   ext_dir = File.expand_path("../../ext", File.dirname(__FILE__))
-  ENV["PATH"] = ENV["PATH"] + File::PATH_SEPARATOR + ext_dir
+  ENV["PATH"] = ext_dir + File::PATH_SEPARATOR + ENV["PATH"]
 end
 
 require 'ray_ext'
