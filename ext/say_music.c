@@ -116,7 +116,7 @@ say_music *say_music_create() {
 void say_music_free(say_music *music) {
   music->continue_running = false;
 
-  say_thread_join(music->thread);
+  /* say_thread_join(music->thread); */ /* fails on windows */
   say_thread_free(music->thread);
 
   alSourceStop(music->src->src);
