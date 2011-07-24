@@ -61,7 +61,7 @@ static say_rect say_page_find_rect(say_font_page *page, size_t width, size_t hei
   if (!found_row) {
     int row_height = height + height / 10;
 
-    if (page->current_height + row_height >= say_image_get_height(page->image)) {
+    while (page->current_height + row_height >= say_image_get_height(page->image)) {
       say_vector2 size = say_image_get_size(page->image);
       say_image_resize(page->image, size.x * 2, size.y * 2);
     }
