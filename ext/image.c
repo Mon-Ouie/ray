@@ -241,7 +241,10 @@ VALUE ray_image_is_smooth(VALUE self) {
  *
  *   When smoothing is enabled, the color of interpolated pixels is chosen by
  *   taking the average of the four colors that are the nearest to each of
- *   them.
+ *   them (linear interpolation). When it is not enabled, the color of the
+ *   nearest point is simply used.
+ *
+ *   Smoothing is disabled by default.
  *
  *   @param [Boolean] val True to enable smoothing
  */
