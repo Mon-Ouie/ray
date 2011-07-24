@@ -210,9 +210,15 @@ module Ray
   end
 
   class Target
-    # Creates a turtle operating on the receiver.
-    # Instance evaluates the block it is given if any.
-    # @return [Ray::Turtle] The turtle it created.
+    # Creates a turtle operating on the receiver
+    #
+    # If a block is passed, it is instance-evaluated (self becoming the turtle)
+    # and the receiver gets updated automatically.
+    #
+    # @yield Optionally perform drawing in the block
+    #
+    # @return [Ray::Turtle] The turtle it created
+    # @see Ray::Turtle
     def turtle(&block)
       turtle = Ray::Turtle.new(self)
       if block
