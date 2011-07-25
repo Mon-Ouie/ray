@@ -16,7 +16,7 @@ say_audio_source *ray_rb2audio_source(VALUE obj) {
 }
 
 
-/* @return [Float] Volume of the source, between 0 and 100. */
+/* @see volume= */
 static
 VALUE ray_audio_source_volume(VALUE self) {
   say_audio_source *source = ray_rb2audio_source(self);
@@ -24,10 +24,14 @@ VALUE ray_audio_source_volume(VALUE self) {
 }
 
 /*
-  @overload volume=(vol)
-  Sets the volume of the source.
-  @param [Float] vol The new volume of the source.
-*/
+ *  @overload volume=(vol)
+ *    Sets the volume of the source
+ *
+ *    The volume is a number between 0 and 100. When it is set to 100, the
+ *    volume is maximal.
+ *
+ *    @param [Float] vol The new volume of the source
+ */
 static
 VALUE ray_audio_source_set_volume(VALUE self, VALUE value) {
   rb_check_frozen(self);
@@ -38,7 +42,7 @@ VALUE ray_audio_source_set_volume(VALUE self, VALUE value) {
   return value;
 }
 
-/* @return [Float] The pitch of the source. */
+/* @see ptich= */
 static
 VALUE ray_audio_source_pitch(VALUE self) {
   say_audio_source *source = ray_rb2audio_source(self);
@@ -46,11 +50,14 @@ VALUE ray_audio_source_pitch(VALUE self) {
 }
 
 /*
-  @overload pitch=(pitch)
-    Sets the pitch of the sound.
-    @param [Float] pitch the pitch value, which makes a sound more acute
-      or grave and also affects playing speed. Defaulted to 1.
-*/
+ * @overload pitch=(pitch)
+ *   Sets the pitch of the sound
+ *
+ *   Pitch makes the sound more acute or grave, and affcets playing speed. It is
+ *   defaulted to 1.
+ *
+ *   @param [Float] pitch The new pitch value
+ */
 static
 VALUE ray_audio_source_set_pitch(VALUE self, VALUE pitch) {
   rb_check_frozen(self);
@@ -61,7 +68,7 @@ VALUE ray_audio_source_set_pitch(VALUE self, VALUE pitch) {
   return pitch;
 }
 
-/* @return [Ray::Vector3] The position of the source. */
+/* @see pos= */
 static
 VALUE ray_audio_source_pos(VALUE self) {
   say_audio_source *source = ray_rb2audio_source(self);
@@ -69,10 +76,10 @@ VALUE ray_audio_source_pos(VALUE self) {
 }
 
 /*
-  @overload pos=(pos)
-    Sets the position of the sound.
-    @param [Ray::Vector3, #to_vector3] pos The position of the source.
-*/
+ * @overload pos=(pos)
+ *   Sets the position of the sound
+ *   @param [Ray::Vector3] pos The new position of the source
+ */
 static
 VALUE ray_audio_source_set_pos(VALUE self, VALUE pos) {
   rb_check_frozen(self);
@@ -84,9 +91,8 @@ VALUE ray_audio_source_set_pos(VALUE self, VALUE pos) {
 }
 
 /*
-  @return [true, false] True if the source position is relative to the listener,
-  as opposed to being absolute.
-*/
+ * @see relative=
+ */
 static
 VALUE ray_audio_source_is_relative(VALUE self) {
   say_audio_source *source = ray_rb2audio_source(self);
@@ -94,11 +100,13 @@ VALUE ray_audio_source_is_relative(VALUE self) {
 }
 
 /*
-  @overload relative=(rel)
-    Sets whether the sound should be relative.
-    @param [true, false] rel Whether the source position should be relative
-      to the listener's.
-*/
+ *@overload relative=(rel)
+ *  Sets whether the sound position is relative to the listener's
+ *
+ *  This is false by default, meaning the position is absolute.
+ *
+ *  @param [true, false] rel True to make the sound become relative
+ */
 static
 VALUE ray_audio_source_set_relative(VALUE self, VALUE val) {
   rb_check_frozen(self);
@@ -109,7 +117,7 @@ VALUE ray_audio_source_set_relative(VALUE self, VALUE val) {
   return val;
 }
 
-/* @return [Float] the source's minimal distance. */
+/* @see min_distance= */
 static
 VALUE ray_audio_source_min_distance(VALUE self) {
   say_audio_source *source = ray_rb2audio_source(self);
@@ -117,11 +125,14 @@ VALUE ray_audio_source_min_distance(VALUE self) {
 }
 
 /*
-  @overload min_distance=(dist)
-    Sets the sounds minimal distance.
-    @param [Float] dist the distance beyond which the source's volume will
-      decrease. Defaulted to 1.
-*/
+ * @overload min_distance=(dist)
+ *   Sets the sounds minimal distance
+ *
+ *   The minimal distance is the distance beyound which a source's volume will
+ *   start decreasing. It is defaulted to one.
+ *
+ *   @param [Float] dist The new default value
+ */
 static
 VALUE ray_audio_source_set_min_distance(VALUE self, VALUE dist) {
   rb_check_frozen(self);
@@ -132,7 +143,7 @@ VALUE ray_audio_source_set_min_distance(VALUE self, VALUE dist) {
   return dist;
 }
 
-/* @return [Float] The source's attenuation */
+/* @see attenuation= */
 static
 VALUE ray_audio_source_attenuation(VALUE self) {
   say_audio_source *source = ray_rb2audio_source(self);
@@ -140,12 +151,14 @@ VALUE ray_audio_source_attenuation(VALUE self) {
 }
 
 /*
-  @overload attenuation=(attenuation)
-    Sets the attenuation of a sound.
-    @param [Float] atenuation New attenuation factor of the sound.
-      0 will prevent the sound from being attenuated, 100 would
-      make the sound be attenuated much more quickly.
-*/
+ *  @overload attenuation=(attenuation)
+ *    Sets the attenuation of a sound
+ *
+ *    When set to 0, the sound will not be attenuated at all. 100 makes
+ *    attenuation very quick.
+ *
+ *    @param [Float] atenuation New attenuation factor of the sound
+ */
 static
 VALUE ray_audio_source_set_attenuation(VALUE self, VALUE att) {
   rb_check_frozen(self);
@@ -153,7 +166,13 @@ VALUE ray_audio_source_set_attenuation(VALUE self, VALUE att) {
   return att;
 }
 
-/* @return [Symbol] Playing status. One of playing, paused, stopped. */
+/*
+ * Playing status
+ *
+ * The status can be +:playing+, +:paused+, or +:stopped+.
+ *
+ * @return [Symbol] Playing status
+ */
 static
 VALUE ray_audio_source_status(VALUE self) {
   switch (say_audio_source_get_status(ray_rb2audio_source(self))) {
@@ -165,6 +184,14 @@ VALUE ray_audio_source_status(VALUE self) {
   return Qnil; /* should never happen */
 }
 
+/*
+ * Document-class: Ray::AudioSource
+ *
+ * Audio sources are objects able to produce sound, either by directly passing
+ * them to a buffer or by streaming audio data.
+ *
+ * This class holds generic methods to manipulate a source.
+ */
 void Init_ray_audio_source() {
   ray_cAudioSource = rb_define_class_under(ray_mRay, "AudioSource", rb_cObject);
 
@@ -174,6 +201,7 @@ void Init_ray_audio_source() {
   rb_define_method(ray_cAudioSource, "pitch", ray_audio_source_pitch, 0);
   rb_define_method(ray_cAudioSource, "pitch=", ray_audio_source_set_pitch, 1);
 
+  /* @group Spatialization */
   rb_define_method(ray_cAudioSource, "pos", ray_audio_source_pos, 0);
   rb_define_method(ray_cAudioSource, "pos=",
                    ray_audio_source_set_pos, 1);
@@ -192,6 +220,7 @@ void Init_ray_audio_source() {
                    ray_audio_source_attenuation, 0);
   rb_define_method(ray_cAudioSource, "attenuation=",
                    ray_audio_source_set_attenuation, 1);
+  /* @endgroup */
 
   rb_define_method(ray_cAudioSource, "status", ray_audio_source_status, 0);
 }
