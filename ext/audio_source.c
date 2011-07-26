@@ -15,7 +15,6 @@ say_audio_source *ray_rb2audio_source(VALUE obj) {
   return NULL;
 }
 
-
 /* @see volume= */
 static
 VALUE ray_audio_source_volume(VALUE self) {
