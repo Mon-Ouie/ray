@@ -54,7 +54,7 @@ module Ray
     # Modifies each pixel of the image in-place
     #
     # @yield [pixel]
-    # @yieldparam [Ray::Color] pixel Color of the pixel
+    # @yieldparam (see #each)
     #
     # @yieldreturn [Ray::Color] New color of the pixel
     def map!
@@ -73,11 +73,9 @@ module Ray
     # block
     #
     # @yield [pixel, x, y]
-    # @yieldparam [Ray::Color] pixel Color of the pixel
-    # @yieldparam [Integer] x X position of the pixel
-    # @yieldparam [Integer] y Y position of the pixel
+    # @yieldparam (see #each_with_pos)
     #
-    # @yieldreturn [Ray::Color] New color of the pixel
+    # @yieldreturn (see #mapV)
     def map_with_pos!
       return Enumerator.new(self, :map_with_pos!) unless block_given?
 
@@ -93,8 +91,8 @@ module Ray
     # Creates a new image using a block
     #
     # @yield [pixel]
-    # @yieldparam [Ray::Color] pixel Color of the pixel
-    # @yieldreturn [Ray::Color] Color for each pixel
+    # @yieldparam (see #map!)
+    # @yieldreturn (see #map!)
     #
     # @return [Ray::Image] New image created according to a block
     def map(&block)
@@ -105,11 +103,9 @@ module Ray
     # to it
     #
     # @yield [pixel, x, y]
-    # @yieldparam [Ray::Color] pixel Color of the pixel
-    # @yieldparam [Integer] x X position of the pixel
-    # @yieldparam [Integer] y Y position of the pixel
+    # @yieldparam (see #map_with_pos!)
     #
-    # @return (see map)
+    # @return (see #map)
     def map_with_pos(&block)
       dup.map_with_pos!(&block)
     end
