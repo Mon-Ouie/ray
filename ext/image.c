@@ -86,6 +86,7 @@ VALUE ray_image_write_bmp(VALUE self, VALUE filename) {
 /*
  * @overload write_png(filename)
  *   Saves the image as a PNG.
+ *   @raise [RuntimeError] This method will not work on Windows.
  */
 static
 VALUE ray_image_write_png(VALUE self, VALUE filename) {

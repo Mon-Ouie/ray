@@ -140,6 +140,7 @@ bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
 }
 
 static bool say_image_assert_non_empty(say_image *img) {
+  printf("asserting not empty\n");
   if (img->width == 0 || img->height == 0) {
     say_error_set("can't save empty image");
     return false;
@@ -161,6 +162,11 @@ bool say_image_write_bmp(say_image *img, const char *filename) {
 bool say_image_write_png(say_image *img, const char *filename) {
   if (!say_image_assert_non_empty(img))
     return false;
+
+#ifdef SAY_WIN
+  say_error_set("can't save image as a PNG on windows");
+  return false;
+#endif
 
   say_image_update_buffer(img);
   stbi_write_png(filename, img->width, img->height, 4, img->pixels, 0);

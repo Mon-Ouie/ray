@@ -79,7 +79,7 @@ context "an image copy" do
   asserts(:[], 1, 1).equals Ray::Color.white
 
   context "saved and loaded again" do
-    path = path_of("test_save.png")
+    path = path_of("test_save.tga")
 
     setup do
       topic.write path
