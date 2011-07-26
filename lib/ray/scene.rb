@@ -111,7 +111,7 @@ module Ray
 
     def register_events
       if @scene_register_block
-        instance_exec(@scene_arguments,  &@scene_register_block)
+        instance_exec(*@scene_arguments,  &@scene_register_block)
       else
         register
       end

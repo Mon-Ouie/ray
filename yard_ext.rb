@@ -57,6 +57,87 @@ class CustomCParser < YARD::Parser::CParser
       object.docstring = parse_comments(object, comment) if comment
     end
   end
+
+  MethodRegexp = %r{rb_define_
+                       (
+                          singleton_method |
+                          method           |
+                          module_function  |
+                          private_method
+                       )
+                       \s*\(\s*([\w\.]+),
+                         \s*"([^"]+)\",
+                         \s*(?:RUBY_METHOD_FUNC\(|VALUEFUNC\()?(\w+)\)?,
+                         \s*(-?\w+)\s*\)
+                       (?:;\s*/[*/]\s+in\s+(\w+?\.[cy]))?
+                     }xm
+
+  def parse_methods
+    id = 0
+    while next_id = @content.index(MethodRegexp, id)
+      id = next_id + 1
+
+      type, var_name, name, func_name, param_count, source_file = $~.captures
+
+      next if var_name == "ruby_top_self"
+      next if var_name == "nstr"
+      next if var_name == "envtbl"
+
+      end_group   = @content.rindex(/@endgroup/, id)
+      begin_group = @content.rindex(/@group (.*?)(?:\s*\*\/)?$/, id)
+
+      if (begin_group and not end_group) or
+          (begin_group and end_group and begin_group > end_group)
+        group = $1
+      else
+        group = nil
+      end
+
+      var_name = "rb_cObject" if var_name == "rb_mKernel"
+      handle_method(type, var_name, name, func_name, source_file, group)
+    end
+
+    # Damn that warning about shadowing, or rather the fact variables defined in
+    # a loop are preserved.
+    @content.scan(%r{rb_define_global_function\s*\(
+                               \s*"([^"]+)\",
+                               \s*(?:RUBY_METHOD_FUNC\(|VALUEFUNC\()?(\w+)\)?,
+                               \s*(-?\w+)\s*\)
+                 (?:;\s*/[*/]\s+in\s+(\w+?\.[cy]))?
+                 }xm) do |name, func_name, param_count, source_file|
+      handle_method("method", "rb_mKernel", name, func_name, source_file)
+    end
+  end
+
+  def handle_method(scope, var_name, name, func_name, source_file = nil,
+                    group = nil)
+
+    # Don't consider module functions as class methods to be consistent with how
+    # they are interpreted by the Ruby parser.
+    scope = (scope == "singleton_method") ? :class : :instance
+
+    namespace = @namespaces[var_name] || P(remove_var_prefix(var_name))
+    ensure_loaded!(namespace)
+    obj = CodeObjects::MethodObject.new(namespace, name, scope)
+    obj.add_file(@file)
+    obj.parameters = []
+    obj.docstring.add_tag(YARD::Tags::Tag.new(:return, '', 'Boolean')) if name =~ /\?$/
+    obj.source_type = :c
+    obj.group = group
+
+    namespace.groups << group if group and not namespace.groups.include?(group)
+
+    content = nil
+    begin
+      content = File.read(source_file) if source_file
+    rescue Errno::ENOENT
+      path = "#{namespace}#{scope == :instance ? '#' : '.'}#{name}"
+      log.warn "Missing source file `#{source_file}' when parsing #{path}"
+    ensure
+      content ||= @content
+    end
+    find_method_body(obj, func_name, content)
+  end
 end
 
 YARD::Parser::SourceParser.register_parser_type(:c, CustomCParser,
