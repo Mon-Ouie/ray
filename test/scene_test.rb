@@ -12,6 +12,8 @@ context "a scene" do
     @game.registered_scene :test
   end
 
+  asserts(:name).equals :test
+
   asserts(:event_runner).equals { @game.event_runner }
   asserts(:animations).kind_of Ray::AnimationList
   asserts(:frames_per_second).equals 60
@@ -131,6 +133,7 @@ context "an instance of a scene subclass" do
   end
 
   asserts_topic.kind_of MyScene
+  asserts(:name).equals :my_scene
 
   context "run once" do
     hookup do

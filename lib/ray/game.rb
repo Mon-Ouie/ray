@@ -136,6 +136,7 @@ module Ray
       scene.game         = self
       scene.event_runner = event_runner
       scene.window       = @game_window
+      scene.name         = name
     end
 
     # @return [Ray::Scene] scene register for a given name

@@ -245,6 +245,17 @@ module Ray
 
     alias :pop_scene :exit!
 
+    # Sets the name of the scene
+    # @param [String] val New name of the scene
+    def name=(val)
+      @scene_name = val
+    end
+
+    # @see name=
+    def name
+      @scene_name
+    end
+
     def game
       @scene_game
     end
