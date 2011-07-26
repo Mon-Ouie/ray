@@ -140,7 +140,6 @@ bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
 }
 
 static bool say_image_assert_non_empty(say_image *img) {
-  printf("asserting not empty\n");
   if (img->width == 0 || img->height == 0) {
     say_error_set("can't save empty image");
     return false;
