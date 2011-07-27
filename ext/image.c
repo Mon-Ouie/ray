@@ -120,7 +120,7 @@ VALUE ray_image_write_tga(VALUE self, VALUE filename) {
 
 /*
  * @overload write(filename)
- *   Saves the image in any format
+ *   Saves the image in any format supported by Ray
  *
  *   This will try to guess the format based on the filename extension
  *   (regardless of the case). If Ray can't guess the filename, the image will
