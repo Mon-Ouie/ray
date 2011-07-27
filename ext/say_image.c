@@ -192,10 +192,10 @@ bool say_image_write(say_image *img, const char *filename) {
     const char *ext = (filename + len - 4);
     if (strcmp(ext, ".png") == 0 || strcmp(ext, ".PNG") == 0)
       return say_image_write_png(img, filename);
-    else if (strcmp(ext, ".tga") == 0 || strcmp(ext, ".TGA") == 0)
-      return say_image_write_tga(img, filename);
+    else if (strcmp(ext, ".bmp") == 0 || strcmp(ext, ".BMP") == 0)
+      return say_image_write_bmp(img, filename);
     else
-      say_image_write_bmp(img, filename);
+      say_image_write_tga(img, filename);
   }
 
   return true;

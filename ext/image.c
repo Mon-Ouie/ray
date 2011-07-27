@@ -124,7 +124,7 @@ VALUE ray_image_write_tga(VALUE self, VALUE filename) {
  *
  *   This will try to guess the format based on the filename extension
  *   (regardless of the case). If Ray can't guess the filename, the image will
- *   be saved anyway using BMP.
+ *   be saved anyway using TGA.
  */
 static
 VALUE ray_image_write(VALUE self, VALUE filename) {
