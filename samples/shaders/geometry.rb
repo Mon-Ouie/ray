@@ -24,7 +24,7 @@ class Sprites < Ray::Drawable
 
       pos = [320 + Math.cos(angle) * radius, 240 + Math.sin(angle) * radius]
       Ray::Vertex.new(pos,
-                      Ray::Color.new(rand(255), rand(255), rand(255)))
+                      Ray::Color.new(rand(256), rand(256), rand(256)))
     end
   end
 
