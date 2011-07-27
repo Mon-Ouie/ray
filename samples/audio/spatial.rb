@@ -9,7 +9,7 @@ require 'ray'
 
 SPEED = 5
 
-Ray.game "Spacial sounds" do
+Ray.game "Spatialization" do
   register do
     add_hook :quit, method(:exit!)
   end
