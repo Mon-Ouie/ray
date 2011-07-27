@@ -77,7 +77,8 @@ VALUE ray_image_init_copy(VALUE self, VALUE other) {
 
 /*
  * @overload write_bmp(filename)
- *   Saves the image as a BMP
+ *   Saves the image as a BMP. Notice BMP output ignores alpha channel. Use PNG
+ *   or TGA output when possible.
  */
 static
 VALUE ray_image_write_bmp(VALUE self, VALUE filename) {
