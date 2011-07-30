@@ -120,9 +120,29 @@ module Ray
       @game_scenes.push(scene_name, *args)
     end
 
-    # Pops the last scene.
+    # Pops the last scene
     def pop_scene
       @game_scenes.pop
+    end
+
+    # Pops scenes while a condition is true
+    #
+    # @yield [scene] To determine if a scene must be popped.
+    # @yieldparam [Ray::Scene] scene The scene that will be popped
+    # @yieldreturn [Boolean] True to pop the next scene
+    def pop_scene_while
+      while yield scenes.current
+        scenes.current.pop_scene # ensure exit is set to false
+      end
+    end
+
+    # Pops scenes until a condition is met
+    #
+    # @yield (see #pop_scene_while)
+    # @yieldparam scene (see #pop_scene_while)
+    # @yieldreturn [Boolean] False to pop the next scene
+    def pop_scene_until
+      pop_scene_while { |o| !yield(o) }
     end
 
     # Registers a new scene with a given name. the block will be passed

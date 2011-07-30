@@ -204,6 +204,16 @@ module Ray
       game.pop_scene
     end
 
+    # (see Ray::Game#pop_scene_while)
+    def pop_scene_while(&block)
+      game.pop_scene_while(&block)
+    end
+
+    # (see Ray::Game#pop_scene_until)
+    def pop_scene_until(&block)
+      game.pop_scene_until(&block)
+    end
+
     # Registers a block to be excuted as often as possible.
     def always(&block)
       @scene_always_block = block

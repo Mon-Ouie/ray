@@ -60,6 +60,24 @@ context "a game" do
     end
   end
 
+  context "with several scenes" do
+    hookup { topic.scenes << :scene_0 << :scene_1 << :scene_2 }
+
+    asserts :running?
+    asserts("current_scene") { topic.scenes.current }.equals {
+      topic.registered_scene(:scene_2)
+    }
+
+    context "after removing a few scenes" do
+      hookup { topic.pop_scene_while { |scene| scene.name != :scene_0 } }
+
+      asserts :running?
+      asserts("current_scene") { topic.scenes.current }.equals {
+        topic.registered_scene(:scene_0)
+      }
+    end
+  end
+
   context "after changing event_runner" do
     hookup do
       topic.event_runner = @runner = Ray::DSL::EventRunner.new
