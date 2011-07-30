@@ -108,10 +108,3 @@ class Array
     Ray::Rect.new(*self)
   end
 end
-
-class Hash
-  # @return [Ray::Rect] Converts a hash into a rect.
-  def to_rect
-    Ray::Rect.new(self)
-  end
-end

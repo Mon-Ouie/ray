@@ -39,59 +39,21 @@ VALUE ray_alloc_rect(VALUE self) {
 }
 
 /*
-  @overload initialize(x, y)
-    Creates a new rect with size set to 0, 0.
-
-  @overload initialize(x, y, w, h)
-    Creates a new rect with the specified size.
-
-  @overload initialize(hash)
-    Creates a new rect according to the keys specified in hash.
-
-    @option hash [Float] :x
-    @option hash [Float] :y
-    @option hash [Float] (0) :width
-    @option hash [Float] (0) :height required if width is set
-
-    @option hash [Float] (0) :w alias for :width
-    @option hash [Float] (0) :h alias for :height
-*/
+ * @overload initialize(x, y)
+ *   Creates a new rect with size set to (0, 0).
+ *
+ * @overload initialize(x, y, w, h)
+ *   Creates a new rect with the specified size.
+ */
 static
 VALUE ray_init_rect(int argc, VALUE *argv, VALUE self) {
-  VALUE x_or_hash, y, w, h;
-  rb_scan_args(argc, argv, "13", &x_or_hash, &y, &w, &h);
-
-  int type = TYPE(x_or_hash);
-  if (type == T_HASH) {
-    if (!NIL_P(y)) {
-      rb_raise(rb_eArgError, "wrong number of arguments (%d for 1)",
-               argc);
-    }
-
-    VALUE hash = x_or_hash;
-
-    x_or_hash = rb_hash_aref(hash, RAY_SYM("x"));
-    y = rb_hash_aref(hash, RAY_SYM("y"));
-
-    w = rb_hash_aref(hash, RAY_SYM("width"));
-    h = rb_hash_aref(hash, RAY_SYM("height"));
-
-    if (NIL_P(w)) w = rb_hash_aref(hash, RAY_SYM("w"));
-    if (NIL_P(h)) h = rb_hash_aref(hash, RAY_SYM("h"));
-
-    if (NIL_P(y)) {
-      rb_raise(rb_eArgError, "missing option :y");
-    }
-
-    if (!NIL_P(w) && NIL_P(h)) {
-      rb_raise(rb_eArgError, "missing option :height");
-    }
-  }
+  VALUE x, y, w, h;
+  rb_scan_args(argc, argv, "22", &x, &y, &w, &h);
 
   say_rect *rect;
   Data_Get_Struct(self, say_rect, rect);
 
-  rect->x = NUM2DBL(x_or_hash);
+  rect->x = NUM2DBL(x);
   rect->y = NUM2DBL(y);
 
   if (!NIL_P(w)) {
