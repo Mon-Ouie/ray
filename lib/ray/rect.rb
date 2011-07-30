@@ -21,11 +21,7 @@ module Ray
 
     # @return [true, false] True if the receiver is outside the rect.
     def outside?(rect)
-      rect = rect.to_rect
-      !rect.contain?(top_left) &&
-        !rect.contain?(bottom_left) &&
-        !rect.contain?(top_right) &&
-        !rect.contain?(bottom_right)
+      !collide?(rect)
     end
 
     # @return [true, false] True if the receiver collides with the rect.
