@@ -248,6 +248,7 @@ say_polygon *say_polygon_ellipse(say_vector2 center, float rx, float ry,
 
   say_drawable_set_scale(ellipse->drawable, say_make_vector2(1, ry / rx));
   say_drawable_set_origin(ellipse->drawable, center);
+  say_drawable_set_pos(ellipse->drawable, center);
 
   return ellipse;
 }
