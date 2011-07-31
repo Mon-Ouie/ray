@@ -123,13 +123,15 @@ void say_view_set_matrix(say_view *view, say_matrix *matrix) {
   if (matrix) {
     view->custom_matrix = 1;
     say_matrix_set_content(view->matrix, matrix->content);
+
+    view->matrix_updated = 1;
   }
   else {
     say_matrix_reset(view->matrix);
-    view->custom_matrix = 0;
+    view->custom_matrix  = 0;
+    view->matrix_updated = 0;
   }
 
-  view->matrix_updated = 1;
   view->has_changed = 1;
 }
 

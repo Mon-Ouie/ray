@@ -51,10 +51,14 @@ context "a view" do
   context "with a custom matrix" do
     hookup do
       topic.matrix = Ray::Matrix.scale([2, 3, 4])
-      topic.zoom_by [2, 3]
     end
 
     asserts(:matrix).equals Ray::Matrix.scale([2, 3, 4])
+
+    context "disabled" do
+      hookup { topic.matrix = nil }
+      asserts(:matrix).equals Ray::Matrix.orthogonal(10, 40, 60, 20, -1, 1)
+    end
   end
 end
 

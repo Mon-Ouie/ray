@@ -107,7 +107,12 @@ VALUE ray_view_matrix(VALUE self) {
 static
 VALUE ray_view_set_matrix(VALUE self, VALUE val) {
   rb_check_frozen(self);
-  say_view_set_matrix(ray_rb2view(self), ray_rb2matrix(val));
+
+  if (NIL_P(val))
+    say_view_set_matrix(ray_rb2view(self), NULL);
+  else
+    say_view_set_matrix(ray_rb2view(self), ray_rb2matrix(val));
+
   return val;
 }
 
