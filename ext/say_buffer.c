@@ -37,6 +37,8 @@ static void say_vao_make_current(GLuint vao) {
     say_vao_last_context = context;
 
     glBindVertexArray(vao);
+
+    say_index_buffer_rebind();
   }
 }
 
@@ -72,6 +74,8 @@ static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
   if (say_vao_last_context == pair->context && say_current_vao == pair->vao) {
     say_current_vao = 0;
     glDeleteVertexArrays(1, &pair->vao);
+
+    say_index_buffer_rebind();
   }
 
   free(pair);
@@ -221,8 +225,10 @@ void *say_buffer_get_vertex(say_buffer *buf, size_t id) {
 void say_buffer_bind(say_buffer *buf) {
   say_context_ensure();
 
-  if (say_has_vao())
+  if (say_has_vao()) {
     say_vao_make_current(say_buffer_get_vao(buf));
+    say_vbo_make_current(buf->vbo); /* Don't ask why this matters */
+  }
   else
     say_buffer_make_current(buf);
 }

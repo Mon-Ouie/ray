@@ -53,9 +53,14 @@ void say_index_buffer_bind(say_index_buffer *buf) {
   say_ibo_make_current(buf->ibo);
 }
 
-void say_index_buffer_unbind(say_index_buffer *buf) {
+void say_index_buffer_unbind() {
   say_context_ensure();
   say_ibo_make_current(0);
+}
+
+void say_index_buffer_rebind() {
+  if (say_ibo_last_context == say_context_current())
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, say_current_ibo);
 }
 
 void say_index_buffer_update_part(say_index_buffer *buf, size_t index,

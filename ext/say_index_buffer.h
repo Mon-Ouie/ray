@@ -16,6 +16,7 @@ void say_index_buffer_free(say_index_buffer *buf);
 
 void say_index_buffer_bind(say_index_buffer *buf);
 void say_index_buffer_unbind();
+void say_index_buffer_rebind();
 
 void say_index_buffer_update_part(say_index_buffer *buf, size_t index,
                                   size_t size);
