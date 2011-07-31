@@ -66,7 +66,7 @@ vertex
 #version 150
 
 layout(points) in;
-layout(triangle_strip, max_vertices = 6) out;
+layout(triangle_strip, max_vertices = 4) out;
 
 in vec4 geom_Color[];
 in vec2 geom_TexCoord[];
@@ -90,13 +90,6 @@ void emit_vertex(vertex v) {
   var_Color    = v.color;
   var_TexCoord = v.tex_coord;
   EmitVertex();
-}
-
-void emit_triangle(vertex a, vertex b, vertex c) {
-  emit_vertex(a);
-  emit_vertex(b);
-  emit_vertex(c);
-  EndPrimitive();
 }
 
 void main() {
@@ -124,8 +117,9 @@ void main() {
   vertices[3].tex_coord = vec2(1, 0);
   vertices[3].color     = color;
 
-  emit_triangle(vertices[0], vertices[1], vertices[2]);
-  emit_triangle(vertices[1], vertices[2], vertices[3]);
+  for (int i = 0; i < 4; i++)
+    emit_vertex(vertices[i]);
+  EndPrimitive();
 }
 geometry
 
