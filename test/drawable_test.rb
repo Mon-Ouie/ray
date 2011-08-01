@@ -11,6 +11,12 @@ context "a drawable" do
   asserts(:shader).nil
   asserts(:shader_attributes).nil
   asserts(:matrix_proc).nil
+  asserts(:blend_mode).equals :alpha
+
+  context "after changing blend mode" do
+    hookup { topic.blend_mode = :add }
+    asserts(:blend_mode).equals :add
+  end
 
   context "after changing origin" do
     hookup { topic.origin = Ray::Vector2[10, 20] }

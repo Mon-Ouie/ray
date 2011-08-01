@@ -26,6 +26,37 @@ static void say_drawable_update_matrix(say_drawable *drawable) {
   drawable->matrix_updated = true;
 }
 
+static say_context *say_blend_last_context = NULL;
+static say_blend_mode say_last_blend = SAY_BLEND_NO;
+
+static void say_drawable_enable_blend_mode(say_blend_mode mode) {
+  say_context *context = say_context_current();
+
+  if (mode != say_last_blend || context != say_blend_last_context) {
+    if (context != say_blend_last_context)
+      say_last_blend = SAY_BLEND_NO;
+
+    if (mode == SAY_BLEND_NO)
+      glDisable(GL_BLEND);
+    else if (say_last_blend == SAY_BLEND_NO)
+      glEnable(GL_BLEND);
+
+    switch (mode) {
+    case SAY_BLEND_NO:
+      break;
+    case SAY_BLEND_ALPHA:
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      break;
+    case SAY_BLEND_ADD:
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+      break;
+    case SAY_BLEND_MULTIPLY:
+      glBlendFunc(GL_DST_COLOR, GL_ZERO);
+      break;
+    }
+  }
+}
+
 say_drawable *say_drawable_create(size_t vtype) {
   say_drawable *drawable = (say_drawable*)malloc(sizeof(say_drawable));
 
@@ -58,6 +89,8 @@ say_drawable *say_drawable_create(size_t vtype) {
   drawable->angle   = 0;
   drawable->z_order = 0;
 
+  drawable->blend_mode = SAY_BLEND_ALPHA;
+
   return drawable;
 }
 
@@ -80,6 +113,8 @@ void say_drawable_copy(say_drawable *drawable, say_drawable *other) {
   drawable->pos     = other->pos;
   drawable->z_order = other->z_order;
   drawable->angle   = other->angle;
+
+  drawable->blend_mode = other->blend_mode;
 
   drawable->use_texture = other->use_texture;
 
@@ -227,6 +262,8 @@ void say_drawable_fill_own_index_buffer(say_drawable *drawable) {
 void say_drawable_draw_at(say_drawable *drawable,
                           size_t vertex_id, size_t id,
                           say_shader *shader) {
+  say_drawable_enable_blend_mode(drawable->blend_mode);
+
   if (!drawable->matrix_updated)
     say_drawable_update_matrix(drawable);
 
@@ -248,6 +285,8 @@ void say_drawable_draw_at(say_drawable *drawable,
 }
 
 void say_drawable_draw(say_drawable *drawable, say_shader *shader) {
+  say_drawable_enable_blend_mode(drawable->blend_mode);
+
   if (drawable->has_changed) {
     say_drawable_fill_own_buffer(drawable);
     say_drawable_fill_own_index_buffer(drawable);
@@ -384,4 +423,13 @@ say_vector3 say_drawable_transform(say_drawable *drawable, say_vector3 point) {
     say_drawable_update_matrix(drawable);
 
   return say_matrix_transform(drawable->matrix, point);
+}
+
+
+say_blend_mode say_drawable_get_blend_mode(say_drawable *drawable) {
+  return drawable->blend_mode;
+}
+
+void say_drawable_set_blend_mode(say_drawable *drawable, say_blend_mode mode) {
+  drawable->blend_mode = mode;
 }

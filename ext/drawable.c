@@ -478,6 +478,44 @@ VALUE ray_drawable_set_textured(VALUE self, VALUE val) {
   return self;
 }
 
+/*
+ * @overload blend_mode=(mode)
+ *   Sets blend mode
+ *
+ *   Ray supports 3 differents blend mode: :add, :multiply, and :alpha (also the
+ *   default). Blending can also be disabled using :none.
+ *
+ *   @param [Symbol] mode New blend mode
+ */
+static
+VALUE ray_drawable_set_blend_mode(VALUE self, VALUE mode) {
+  say_blend_mode c_mode = SAY_BLEND_NO;
+  if (mode == RAY_SYM("alpha"))
+    c_mode = SAY_BLEND_ALPHA;
+  else if (mode == RAY_SYM("add"))
+    c_mode = SAY_BLEND_ADD;
+  else if (mode == RAY_SYM("multiply"))
+    c_mode = SAY_BLEND_MULTIPLY;
+
+  say_drawable_set_blend_mode(ray_rb2drawable(self), c_mode);
+  return mode;
+}
+
+/* @see blend_mode= */
+static
+VALUE ray_drawable_blend_mode(VALUE self) {
+  say_blend_mode mode = say_drawable_get_blend_mode(ray_rb2drawable(self));
+
+  switch (mode) {
+  case SAY_BLEND_NO: return RAY_SYM("none");
+  case SAY_BLEND_ALPHA: return RAY_SYM("alpha");
+  case SAY_BLEND_ADD: return RAY_SYM("add");
+  case SAY_BLEND_MULTIPLY: return RAY_SYM("multiply");
+  }
+
+  return Qnil; /* should never happen */
+}
+
 void Init_ray_drawable() {
   ray_cDrawable = rb_define_class_under(ray_mRay, "Drawable", rb_cObject);
   rb_define_alloc_func(ray_cDrawable, ray_drawable_alloc);
@@ -525,4 +563,8 @@ void Init_ray_drawable() {
 
   rb_define_method(ray_cDrawable, "textured=", ray_drawable_set_textured, 1);
   rb_define_method(ray_cDrawable, "textured?", ray_drawable_is_textured, 0);
+
+  rb_define_method(ray_cDrawable, "blend_mode=", ray_drawable_set_blend_mode,
+                   1);
+  rb_define_method(ray_cDrawable, "blend_mode", ray_drawable_blend_mode, 0);
 }

@@ -13,6 +13,13 @@ typedef void (*say_index_fill_proc)(void *data, GLuint *indices, size_t from);
 typedef void (*say_render_proc)(void *data, size_t first, size_t index);
 typedef void (*say_shader_proc)(void *data, say_shader *shader);
 
+typedef enum {
+  SAY_BLEND_NO,
+  SAY_BLEND_ALPHA,
+  SAY_BLEND_ADD,
+  SAY_BLEND_MULTIPLY
+} say_blend_mode;
+
 typedef struct {
   size_t            vertex_count;
   size_t            vtype;
@@ -43,6 +50,8 @@ typedef struct {
   bool matrix_updated;
   bool custom_matrix;
   bool has_changed;
+
+  say_blend_mode blend_mode;
 } say_drawable;
 
 say_drawable *say_drawable_create(size_t vtype);
@@ -105,5 +114,8 @@ float say_drawable_get_angle(say_drawable *drawable);
 say_matrix *say_drawable_get_matrix(say_drawable *drawable);
 void say_drawable_set_matrix(say_drawable *drawable, say_matrix *matrix);
 say_vector3 say_drawable_transform(say_drawable *drawable, say_vector3 point);
+
+say_blend_mode say_drawable_get_blend_mode(say_drawable *drawable);
+void say_drawable_set_blend_mode(say_drawable *drawable, say_blend_mode mode);
 
 #endif
