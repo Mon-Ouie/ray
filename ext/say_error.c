@@ -11,7 +11,7 @@ const char *say_error_get_last() {
 
 void say_error_set(const char *message) {
   if (!say_last_error)
-    say_last_error = say_thread_variable_create(free);
+    say_last_error = say_thread_variable_create();
 
   void *old = say_thread_variable_get(say_last_error);
   if (old)
@@ -21,7 +21,12 @@ void say_error_set(const char *message) {
 }
 
 void say_error_clean_up() {
-  if (say_last_error)
+  if (say_last_error) {
+    void *error = say_thread_variable_get(say_last_error);
+    if (error) free(error);
+
     say_thread_variable_free(say_last_error);
+  }
+
   say_last_error = NULL;
 }

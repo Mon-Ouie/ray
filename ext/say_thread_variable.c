@@ -1,10 +1,10 @@
 #include "say.h"
 
 #ifdef SAY_WIN
-say_thread_variable *say_thread_variable_create(say_destructor destructor) {
+say_thread_variable *say_thread_variable_create() {
   say_thread_variable *var = malloc(sizeof(say_thread_variable));
   var->key = TlsAlloc();
-  
+
   return var;
 }
 
@@ -21,10 +21,10 @@ void *say_thread_variable_get(say_thread_variable *var) {
   return TlsGetValue(var->key);
 }
 #else
-say_thread_variable *say_thread_variable_create(say_destructor destructor) {
+say_thread_variable *say_thread_variable_create() {
   say_thread_variable *var = malloc(sizeof(say_thread_variable));
 
-  pthread_key_create(&(var->key), destructor);
+  pthread_key_create(&(var->key), NULL);
 
   return var;
 }

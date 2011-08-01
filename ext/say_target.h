@@ -10,6 +10,8 @@ typedef say_context *(*say_context_proc)(void *data);
 typedef void (*say_bind_hook)(void *data);
 
 typedef struct {
+  say_array *all_contexts;
+
   say_thread_variable *context;
   say_context_proc context_proc;
   say_bind_hook bind_hook;

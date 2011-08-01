@@ -3,7 +3,7 @@
 void say_osx_flip_pool() {
   static say_thread_variable *var = NULL;
   if (!var) {
-    var = say_thread_variable_create(NULL);
+    var = say_thread_variable_create();
   }
 
   NSAutoreleasePool *pool = say_thread_variable_get(var);

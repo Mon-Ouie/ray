@@ -7,6 +7,8 @@ say_imp_context say_imp_context_create() {
 say_imp_context say_imp_context_create_shared(say_imp_context shared) {
   say_x11_context *context = malloc(sizeof(say_x11_context));
 
+  context->should_free_window = true;
+
   context->dis = XOpenDisplay(NULL);
 
   int screen = DefaultScreen(context->dis);
@@ -44,7 +46,6 @@ say_imp_context say_imp_context_create_shared(say_imp_context shared) {
                                InputOutput,
                                vi->visual,
                                CWBorderPixel|CWColormap, &swa);
-
   XFree(vi);
 
   GLXContext glx_shared = shared ? shared->context : NULL;
@@ -90,7 +91,6 @@ void say_imp_context_make_current(say_imp_context context) {
 }
 
 void say_imp_context_update(say_imp_context context) {
-  if (context->win)
-    glXSwapBuffers(context->dis, context->win);
+  glXSwapBuffers(context->dis, context->win);
 }
 

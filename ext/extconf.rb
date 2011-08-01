@@ -1,6 +1,6 @@
 require 'mkmf'
 
-$CFLAGS  << " -Wextra -Wall -Wno-unused-parameter -std=gnu99"
+$CFLAGS  << " -Wextra -Wall -Wno-unused-parameter -std=gnu99 -g"
 
 unless RUBY_PLATFORM =~ /mingw/
   $CFLAGS  << " " << `freetype-config --cflags`.chomp

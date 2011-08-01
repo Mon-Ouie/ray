@@ -25,7 +25,7 @@ typedef struct {
 } say_thread;
 #endif
 
-say_thread_variable *say_thread_variable_create(say_destructor destructor);
+say_thread_variable *say_thread_variable_create();
 void say_thread_variable_free(say_thread_variable *var);
 
 void say_thread_variable_set(say_thread_variable *var, void *val);

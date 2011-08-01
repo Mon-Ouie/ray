@@ -20,7 +20,11 @@ static void say_target_update_states(say_target *target) {
 say_target *say_target_create() {
   say_target *target = (say_target*)malloc(sizeof(say_target));
 
-  target->context  = say_thread_variable_create((say_destructor)say_context_free);
+  target->all_contexts = say_array_create(sizeof(say_context*),
+                                          say_context_free_el,
+                                          NULL);
+
+  target->context  = say_thread_variable_create();
   target->renderer = say_renderer_create();
   target->view     = say_view_create();
 
@@ -40,13 +44,21 @@ void say_target_free(say_target *target) {
 
   say_thread_variable_free(target->context);
 
+  say_array_free(target->all_contexts);
+
   free(target);
 }
 
 void say_target_set_context_proc(say_target *target, say_context_proc proc) {
   if (target->own_context_needed) {
     say_thread_variable_free(target->context);
-    target->context = say_thread_variable_create((say_destructor)say_context_free);
+    say_array_free(target->all_contexts);
+
+    target->all_contexts = say_array_create(sizeof(say_context*),
+                                            say_context_free_el,
+                                            NULL);
+
+    target->context = say_thread_variable_create();
   }
 
   target->context_proc = proc;

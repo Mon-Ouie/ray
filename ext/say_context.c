@@ -17,6 +17,8 @@ static say_context *say_shared_context = NULL;
 static say_thread_variable *say_current_context = NULL;
 static say_thread_variable *say_ensured_context = NULL;
 
+static say_array *say_all_ensured_contexts = NULL;
+
 static void say_context_create_initial();
 static void say_context_setup(say_context *context);
 static void say_context_setup_states(say_context *context);
@@ -24,18 +26,26 @@ static void say_context_glew_init();
 
 static uint32_t say_context_count = 0;
 
+void say_context_free_el(void *context) {
+  say_context_free(*(say_context**)context);
+}
+
 say_context *say_context_current() {
   if (!say_current_context) {
-    say_current_context = say_thread_variable_create(NULL);
+    say_current_context = say_thread_variable_create();
   }
 
   return (say_context*)say_thread_variable_get(say_current_context);
 }
 
 void say_context_ensure() {
-  if (!say_ensured_context) {
-    say_ensured_context =
-      say_thread_variable_create((say_destructor)say_context_free);
+  if (!say_ensured_context)
+    say_ensured_context = say_thread_variable_create();
+
+  if (!say_all_ensured_contexts) {
+    say_all_ensured_contexts = say_array_create(sizeof(say_context*),
+                                                say_context_free_el,
+                                                NULL);
   }
 
   if (!say_context_current()) {
@@ -44,6 +54,7 @@ void say_context_ensure() {
     if (!context) {
       context = say_context_create();
       say_thread_variable_set(say_ensured_context, context);
+      say_array_push(say_all_ensured_contexts, &context);
     }
 
     say_context_make_current(context);
@@ -147,8 +158,12 @@ void say_context_clean_up() {
   if (say_ensured_context)
     say_thread_variable_free(say_ensured_context);
 
-  say_current_context = NULL;
-  say_ensured_context = NULL;
+  if (say_all_ensured_contexts)
+    say_array_free(say_all_ensured_contexts);
+
+  say_current_context      = NULL;
+  say_ensured_context      = NULL;
+  say_all_ensured_contexts = NULL;
 }
 
 static void say_context_glew_init() {

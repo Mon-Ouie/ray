@@ -10,6 +10,8 @@ typedef struct {
   say_imp_context context;
 } say_context;
 
+void say_context_free_el(void *context);
+
 void say_context_ensure();
 
 say_context *say_context_current();
