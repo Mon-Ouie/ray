@@ -84,14 +84,30 @@ bool say_image_load_raw(say_image *img, size_t w, size_t h, say_color *pixels) {
   say_color *temp_line = malloc(mem_size);
   say_color *buffer    = img->pixels;
 
-  for (size_t i = 0; i <= h / 2; i++) {
+  /*
+   * h = 4
+   * 0 <-> 3
+   * 1 <-> 2
+   * 2 <-> 1
+   */
+
+  for (size_t i = 0; i < h / 2.0; i++) {
     memcpy(temp_line, &buffer[w * i], mem_size);
-    memcpy(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
+    memmove(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
     memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
   }
 
   free(temp_line);
 
+  return true;
+}
+
+bool say_image_load_flipped_raw(say_image *img, size_t w, size_t h,
+                                say_color *pixels) {
+  if (!say_image_create_with_size(img, w, h))
+    return false;
+
+  memcpy(img->pixels, pixels, sizeof(say_color) * w * h);
   return true;
 }
 
@@ -174,9 +190,9 @@ static say_color *say_image_reversed_buffer(say_image *img) {
 
   say_color *temp_line = malloc(mem_size);
 
-  for (size_t i = 0; i <= h / 2; i++) {
+  for (size_t i = 0; i < h / 2.0; i++) {
     memcpy(temp_line, &buffer[w * i], mem_size);
-    memcpy(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
+    memmove(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
     memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
   }
 

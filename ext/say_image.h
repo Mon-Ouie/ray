@@ -26,6 +26,8 @@ bool say_image_resize(say_image *img, size_t w, size_t h);
 
 bool say_image_load_raw(say_image *img, size_t width, size_t height,
                         say_color *pixels);
+bool say_image_load_flipped_raw(say_image *img, size_t width, size_t height,
+                                say_color *pixels);
 bool say_image_load_file(say_image *img, const char *filename);
 bool say_image_load_from_memory(say_image *img, size_t size, const char *buffer);
 bool say_image_create_with_size(say_image *img, size_t w, size_t h);

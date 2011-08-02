@@ -68,9 +68,10 @@ static
 VALUE ray_image_init_copy(VALUE self, VALUE other) {
   say_image *orig = ray_rb2image(other);
 
-  say_image_load_raw(ray_rb2image(self),
-                     say_image_get_width(orig), say_image_get_height(orig),
-                     say_image_get_buffer(orig));
+  say_image_load_flipped_raw(ray_rb2image(self),
+                             say_image_get_width(orig),
+                             say_image_get_height(orig),
+                             say_image_get_buffer(orig));
 
   return self;
 }
