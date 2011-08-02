@@ -14,7 +14,7 @@ Ray.game "Get Pixels" do
     end
 
     on :key_press, key(:p) do
-      window.to_image.write "screenshot.png"
+      window.to_image.write "screenshot.tga"
     end
 
     @obj = Ray::Polygon.circle([50, 50], 10, Ray::Color.blue)
