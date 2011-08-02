@@ -270,14 +270,19 @@ bool say_image_resize(say_image *img, size_t w, size_t h) {
   size_t row_size = sizeof(say_color) * old_h;
 
   for (size_t y = 0; y < old_h; y++) {
-    memcpy(&img->pixels[y * img->width], &cpy[y * old_h], row_size);
-    for (size_t x = old_w; x < img->width; x++)
-      img->pixels[y * img->height + x] = say_make_color(255, 255, 255, 0);
+    memcpy(&img->pixels[(h - y - 1) * img->width],
+           &cpy[(old_h - y - 1) * old_h], row_size);
+    for (size_t x = old_w; x < img->width; x++) {
+      img->pixels[(h - y - 1) * img->height + x] =
+        say_make_color(255, 255, 255, 0);
+    }
   }
 
   for (size_t y = old_h; y < img->height; y++) {
-    for (size_t x = 0; x < img->width; x++)
-      img->pixels[y * img->height + x] = say_make_color(255, 255, 255, 0);
+    for (size_t x = 0; x < img->width; x++) {
+      img->pixels[(h - y - 1) * img->height + x] =
+        say_make_color(255, 255, 255, 0);
+    }
   }
 
   free(cpy);
