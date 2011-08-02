@@ -70,12 +70,28 @@ void say_image_free(say_image *img) {
   free(img);
 }
 
-bool say_image_load_raw(say_image *img, size_t width, size_t height,
-                        say_color *pixels) {
-  if (!say_image_create_with_size(img, width, height))
+bool say_image_load_raw(say_image *img, size_t w, size_t h, say_color *pixels) {
+  if (!say_image_create_with_size(img, w, h))
     return false;
 
-  memcpy(img->pixels, pixels, sizeof(say_color) * width * height);
+  size_t mem_size = sizeof(say_color) * w;
+
+  memcpy(img->pixels, pixels, sizeof(say_color) * w * h);
+
+  /*
+   * Vertical flip to fit OpenGL convention.
+   */
+  say_color *temp_line = malloc(mem_size);
+  say_color *buffer    = img->pixels;
+
+  for (size_t i = 0; i <= h / 2; i++) {
+    memcpy(temp_line, &buffer[w * i], mem_size);
+    memcpy(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
+    memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
+  }
+
+  free(temp_line);
+
   return true;
 }
 
@@ -148,12 +164,35 @@ static bool say_image_assert_non_empty(say_image *img) {
   return true;
 }
 
+static say_color *say_image_reversed_buffer(say_image *img) {
+  size_t w = img->width, h = img->height;
+
+  say_color *buffer = malloc(sizeof(say_color) * w * h);
+  memcpy(buffer, img->pixels, sizeof(say_color) * w * h);
+
+  size_t mem_size = sizeof(say_color) * w;
+
+  say_color *temp_line = malloc(mem_size);
+
+  for (size_t i = 0; i <= h / 2; i++) {
+    memcpy(temp_line, &buffer[w * i], mem_size);
+    memcpy(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
+    memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
+  }
+
+  free(temp_line);
+
+  return buffer;
+}
+
 bool say_image_write_bmp(say_image *img, const char *filename) {
   if (!say_image_assert_non_empty(img))
     return false;
 
   say_image_update_buffer(img);
-  stbi_write_bmp(filename, img->width, img->height, 4, img->pixels);
+  say_color *buf = say_image_reversed_buffer(img);
+  stbi_write_bmp(filename, img->width, img->height, 4, buf);
+  free(buf);
 
   return true;
 }
@@ -168,7 +207,9 @@ bool say_image_write_png(say_image *img, const char *filename) {
 #endif
 
   say_image_update_buffer(img);
-  stbi_write_png(filename, img->width, img->height, 4, img->pixels, 0);
+  say_color *buf = say_image_reversed_buffer(img);
+  stbi_write_png(filename, img->width, img->height, 4, buf, 0);
+  free(buf);
 
   return true;
 }
@@ -178,7 +219,9 @@ bool say_image_write_tga(say_image *img, const char *filename) {
     return false;
 
   say_image_update_buffer(img);
-  stbi_write_tga(filename, img->width, img->height, 4, img->pixels);
+  say_color *buf = say_image_reversed_buffer(img);
+  stbi_write_tga(filename, img->width, img->height, 4, buf);
+  free(buf);
 
   return true;
 }
@@ -264,8 +307,8 @@ say_rect say_image_get_tex_rect(say_image *img, say_rect rect) {
   if (img->width == 0 || img->height == 0)
     return say_make_rect(0, 0, 0, 0);
 
-  return say_make_rect(rect.x / img->width, rect.y / img->height,
-                       rect.w / img->width, rect.h / img->height);
+  return say_make_rect(rect.x / img->width, 1 - (rect.y / img->height),
+                       rect.w / img->width, -(rect.h / img->height));
 }
 
 say_color *say_image_get_buffer(say_image *img) {
@@ -279,13 +322,13 @@ void say_image_mark_out_of_date(say_image *img) {
 
 say_color say_image_get(say_image *img, size_t x, size_t y) {
   say_image_update_buffer(img);
-  return img->pixels[y * img->width + x];
+  return img->pixels[(img->height - y - 1) * img->width + x];
 }
 
 void say_image_set(say_image *img, size_t x, size_t y, say_color color) {
   say_image_update_buffer(img);
 
-  img->pixels[y * img->width + x] = color;
+  img->pixels[(img->height - y - 1) * img->width + x] = color;
   img->texture_updated = false;
 }
 

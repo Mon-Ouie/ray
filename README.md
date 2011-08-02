@@ -129,11 +129,13 @@ Ray. In fact, ``Ray::Drawable`` can simply be used for OpenGL rendering:
 
       # return an array of vertices
       def fill_vertices
+        rect = @img.tex_rect [0, 0, @img.w, @img.h]
+
         [
-         Ray::Vertex.new([0,      0],      Ray::Color.white, [0, 0]),
-         Ray::Vertex.new([@img.w, 0],      Ray::Color.white, [1, 0]),
-         Ray::Vertex.new([@img.w, @img.h], Ray::Color.white, [1, 1]),
-         Ray::Vertex.new([0,      @img.h], Ray::Color.white, [0, 1]),
+         Ray::Vertex.new([0,      0],      Ray::Color.white, rect.top_left),
+         Ray::Vertex.new([@img.w, 0],      Ray::Color.white, rect.top_right),
+         Ray::Vertex.new([0,      @img.h], Ray::Color.white, rect.bottom_left),
+         Ray::Vertex.new([@img.w, @img.h], Ray::Color.white, rect.bottom_right),
         ]
       end
 
@@ -144,7 +146,7 @@ Ray. In fact, ``Ray::Drawable`` can simply be used for OpenGL rendering:
         @image.bind
 
         # Some low level OpenGL calls are available
-        Ray::GL.draw_arrays :triangle_fan, first, 4
+        Ray::GL.draw_arrays :triangle_strip, first, 4
       end
     end
 

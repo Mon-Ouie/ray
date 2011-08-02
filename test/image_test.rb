@@ -47,10 +47,10 @@ context "an image created from a size" do
   asserts(:height).equals 128
   asserts(:size).equals Ray::Vector2[64, 128]
 
-  asserts(:tex_rect, [0, 0, 64, 128]).equals Ray::Rect[0, 0, 1, 1]
-  asserts(:tex_rect, [0, 0, 32, 128]).equals Ray::Rect[0, 0, 0.5, 1]
-  asserts(:tex_rect, [0, 0, 64, 64]).equals Ray::Rect[0, 0, 1, 0.5]
-  asserts(:tex_rect, [32, 32, 32, 32]).equals Ray::Rect[0.5, 0.25, 0.5, 0.25]
+  asserts(:tex_rect, [0, 0, 64, 128]).equals Ray::Rect[0, 1, 1, -1]
+  asserts(:tex_rect, [0, 0, 32, 128]).equals Ray::Rect[0, 1, 0.5, -1]
+  asserts(:tex_rect, [0, 0, 64, 64]).equals Ray::Rect[0, 1, 1, -0.5]
+  asserts(:tex_rect, [32, 32, 32, 32]).equals Ray::Rect[0.5, 0.75, 0.5, -0.25]
 
   denies :smooth?
 

@@ -215,6 +215,9 @@ VALUE ray_image_set(VALUE self, VALUE rb_x, VALUE rb_y, VALUE color) {
  *   Texture coordinates can be useful when manually generating vertices that
  *   need to be textured.
  *
+ *   The returned rect is setup so that (x,y) is the top left corner of the
+ *   image. The height of the rect may thus be negative.
+ *
  *   @param [Rect] rect Rect in pixel coordinates
  *   @return [Rect] Rect in texture coordinates
  */

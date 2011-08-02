@@ -102,19 +102,19 @@ void main() {
   vertex vertices[4];
 
   vertices[0].pos       = position + vec4(-width, -height, 0, 0);
-  vertices[0].tex_coord = vec2(0, 1);
+  vertices[0].tex_coord = vec2(0, 0);
   vertices[0].color     = color;
 
   vertices[1].pos       = position + vec4(-width, +height, 0, 0);
-  vertices[1].tex_coord = vec2(0, 0);
+  vertices[1].tex_coord = vec2(0, 1);
   vertices[1].color     = color;
 
   vertices[2].pos       = position + vec4(+width, -height, 0, 0);
-  vertices[2].tex_coord = vec2(1, 1);
+  vertices[2].tex_coord = vec2(1, 0);
   vertices[2].color     = color;
 
   vertices[3].pos       = position + vec4(+width, +height, 0, 0);
-  vertices[3].tex_coord = vec2(1, 0);
+  vertices[3].tex_coord = vec2(1, 1);
   vertices[3].color     = color;
 
   for (int i = 0; i < 4; i++)

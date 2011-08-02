@@ -4,22 +4,12 @@ static void say_view_update_matrix(say_view *view) {
   if (!view->custom_matrix) {
     say_matrix_reset(view->matrix);
 
-    if (view->flip_y) {
-      say_matrix_set_ortho(view->matrix,
-                           view->center.x - view->size.x / 2,
-                           view->center.x + view->size.x / 2,
-                           view->center.y + view->size.y / 2,
-                           view->center.y - view->size.y / 2,
-                           -1, 1);
-    }
-    else {
-      say_matrix_set_ortho(view->matrix,
-                           view->center.x - view->size.x / 2,
-                           view->center.x + view->size.x / 2,
-                           view->center.y - view->size.y / 2,
-                           view->center.y + view->size.y / 2,
-                           -1, 1);
-    }
+    say_matrix_set_ortho(view->matrix,
+                         view->center.x - view->size.x / 2,
+                         view->center.x + view->size.x / 2,
+                         view->center.y + view->size.y / 2,
+                         view->center.y - view->size.y / 2,
+                         -1, 1);
   }
 
   view->matrix_updated = 1;
@@ -36,8 +26,6 @@ say_view *say_view_create() {
   view->center = say_make_vector2(0, 0);
 
   view->viewport = say_make_rect(0, 0, 1, 1);
-
-  view->flip_y = 1;
 
   return view;
 }
@@ -100,17 +88,6 @@ say_vector2 say_view_get_center(say_view *view) {
 
 say_rect say_view_get_viewport(say_view *view) {
   return view->viewport;
-}
-
-
-void say_view_flip_y(say_view *view, uint8_t val) {
-  view->flip_y = val;
-  view->matrix_updated = 0;
-  view->has_changed = 1;
-}
-
-uint8_t say_view_is_y_flipped(say_view *view) {
-  return view->flip_y;
 }
 
 say_matrix *say_view_get_matrix(say_view *view) {

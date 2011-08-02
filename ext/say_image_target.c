@@ -77,7 +77,6 @@ void say_image_target_set_image(say_image_target *target, say_image *image) {
 
   if (target->img) {
     say_target_set_custom_data(target->target, target);
-    //say_target_need_own_contxt(target->target, 0);
     say_target_set_context_proc(target->target, say_image_target_make_context);
     say_target_set_bind_hook(target->target, (say_bind_hook)say_image_target_bind);
 
@@ -87,7 +86,6 @@ void say_image_target_set_image(say_image_target *target, say_image *image) {
     say_view_set_size(target->target->view, size);
     say_view_set_center(target->target->view, say_make_vector2(size.x / 2.0,
                                                                size.y / 2.0));
-    say_view_flip_y(target->target->view, 0);
 
     say_fbo_make_current(target->fbo);
 
