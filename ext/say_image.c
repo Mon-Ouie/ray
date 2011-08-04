@@ -30,6 +30,7 @@ static void say_image_update_buffer(say_image *img) {
     return;
 
   say_texture_make_current(img->texture);
+  say_pixel_bus_unbind_pack();
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                 img->pixels);
 
@@ -74,13 +75,15 @@ bool say_image_load_raw(say_image *img, size_t w, size_t h, say_color *pixels) {
   if (!say_image_create_with_size(img, w, h))
     return false;
 
-  size_t mem_size = sizeof(say_color) * w;
+  img->texture_updated = false;
 
   memcpy(img->pixels, pixels, sizeof(say_color) * w * h);
 
   /*
    * Vertical flip to fit OpenGL convention.
    */
+  size_t mem_size = sizeof(say_color) * w;
+
   say_color *temp_line = malloc(mem_size);
   say_color *buffer    = img->pixels;
 
@@ -100,6 +103,7 @@ bool say_image_load_flipped_raw(say_image *img, size_t w, size_t h,
   if (!say_image_create_with_size(img, w, h))
     return false;
 
+  img->texture_updated = false;
   memcpy(img->pixels, pixels, sizeof(say_color) * w * h);
   return true;
 }
@@ -142,9 +146,11 @@ bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
 
   if (img->width != w || img->height != h) {
     if (img->pixels) free(img->pixels);
+
     img->pixels = malloc(sizeof(say_color) * w * h);
 
     say_texture_make_current(img->texture);
+    say_pixel_bus_unbind_unpack();
     glGetError(); /* Ignore potential previous errors */
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -158,7 +164,7 @@ bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
   img->width  = w;
   img->height = h;
 
-  img->texture_updated = false;
+  img->texture_updated = true;
   img->buffer_updated  = true;
 
   return true;
@@ -276,6 +282,8 @@ bool say_image_resize(say_image *img, size_t w, size_t h) {
   if (!say_image_create_with_size(img, w, h))
     return false;
 
+  img->texture_updated = false;
+
   size_t row_size = sizeof(say_color) * old_h;
 
   for (size_t y = 0; y < old_h; y++) {
@@ -359,6 +367,7 @@ void say_image_update_texture(say_image *img) {
     return;
 
   say_texture_make_current(img->texture);
+  say_pixel_bus_unbind_unpack();
   glTexSubImage2D(GL_TEXTURE_2D, 0,
                   0, 0,
                   img->width, img->height,

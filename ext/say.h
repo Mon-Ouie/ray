@@ -14,6 +14,7 @@
 #include "say_buffer_slice.h"
 #include "say_index_buffer.h"
 #include "say_index_buffer_slice.h"
+#include "say_pixel_bus.h"
 #include "say_drawable.h"
 #include "say_view.h"
 #include "say_buffer_renderer.h"

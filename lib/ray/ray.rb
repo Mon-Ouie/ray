@@ -28,6 +28,7 @@ require 'ray/vertex'
 require 'ray/gl/vertex'
 require 'ray/gl/int_array'
 require 'ray/buffer_renderer'
+require 'ray/pixel_bus'
 require 'ray/shader'
 
 require 'ray/image'

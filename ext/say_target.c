@@ -218,6 +218,8 @@ say_color say_target_get(say_target *target, size_t x, size_t y) {
   if (!say_target_make_current(target))
     return say_make_color(0, 0, 0, 0);
 
+  say_pixel_bus_unbind_pack();
+
   say_color col;
   glReadPixels(x, (GLint)target->size.y - (GLint)y - 1, 1, 1, GL_RGBA,
                GL_UNSIGNED_BYTE, &col);
@@ -236,6 +238,7 @@ say_image *say_target_get_rect(say_target *target, size_t x, size_t y,
     return NULL;
   }
 
+  say_pixel_bus_unbind_pack();
   glReadPixels(x, (GLint)target->size.y - (GLint)y - (GLint)h, w, h, GL_RGBA,
                GL_UNSIGNED_BYTE, say_image_get_buffer(image));
 
