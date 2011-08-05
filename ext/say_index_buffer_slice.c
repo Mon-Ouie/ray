@@ -64,12 +64,9 @@ static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
     return say_global_ibo_insert(ibo, 0, size);
   }
 
-  if (!first)
-    return SAY_MAX_SIZE;
-
   say_range *current = first, *next = NULL;
 
-  for (size_t i = 0; i < ary_size - 1; i++) {
+  for (size_t i = 0; first && i < ary_size - 1; i++) {
     next = say_array_get(ibo->ranges, i + 1);
 
     size_t begin = current->loc + current->size;
@@ -86,13 +83,14 @@ static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
   say_range *last = say_array_get(ibo->ranges, ary_size - 1);
 
   /* There's enough room at the end of the buffer */
-  if ((last->loc + last->size + size) < say_index_buffer_get_size(ibo->buf)) {
+  if (last && (last->loc + last->size + size) <
+      say_index_buffer_get_size(ibo->buf)) {
     return say_global_ibo_insert(ibo, ary_size, size);
   }
 
   /* Not enough room here. But perhaps we can make some? */
   if (buffer_size < SAY_BUFFER_MAX_SIZE && size <= SAY_BUFFER_MAX_SIZE) {
-    size_t sought_size = last->loc + last->size + size;
+    size_t sought_size = last ? last->loc + last->size + size : size;
     size_t right_size  = say_index_buffer_get_size(ibo->buf);
 
     while (right_size < sought_size)
