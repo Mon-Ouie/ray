@@ -60,9 +60,12 @@ static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
   say_range *first    = say_array_get(ibo->ranges, 0);
 
   /* There's room at the begin of the buffer */
-  if (ary_size == 0 || first->loc >= size) {
+  if ((ary_size == 0 && buffer_size >= size) || (first && first->loc >= size)) {
     return say_global_ibo_insert(ibo, 0, size);
   }
+
+  if (!first)
+    return SAY_MAX_SIZE;
 
   say_range *current = first, *next = NULL;
 

@@ -71,9 +71,13 @@ static size_t say_global_buffer_find(say_global_buffer *buf, size_t n) {
   say_range *first    = say_array_get(buf->ranges, 0);
 
   /* There's room at the begin of the buffer */
-  if (ary_size == 0 || first->loc >= n) {
+  if ((ary_size == 0 && say_buffer_get_size(buf->buf) >= n) ||
+      (first && first->loc >= n)) {
     return say_global_buffer_add_range_before(buf, 0, n);
   }
+
+  if (!first)
+    return SAY_MAX_SIZE;
 
   say_range *current = first, *next = NULL;
 
