@@ -22,7 +22,7 @@ class Sprites < Ray::Drawable
       angle  = rand * 2 * Math::PI
       radius = Math.sqrt(rand) * Radius
 
-      pos = [320 + Math.cos(angle) * radius, 240 + Math.sin(angle) * radius]
+      pos = [Math.cos(angle) * radius, Math.sin(angle) * radius]
       Ray::Vertex.new(pos,
                       Ray::Color.new(rand(256), rand(256), rand(256)))
     end
@@ -39,8 +39,7 @@ Ray.game "Geometry shader" do
 
   scene :shader do
     @sprites = Sprites.new image(path_of("stone.png"))
-    @sprites.origin = window.size / 2
-    @sprites.pos    = window.size / 2
+    @sprites.pos = window.size / 2
 
     vertex = <<-vertex
 #version 150
