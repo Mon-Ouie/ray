@@ -1,6 +1,9 @@
 #ifndef SAY_AUDIO_H_
 #define SAY_AUDIO_H_
 
+#include "say_basic_type.h"
+#include "say_thread.h"
+
 typedef struct {
   ALuint buf;
 
