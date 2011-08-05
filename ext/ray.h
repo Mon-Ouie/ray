@@ -29,6 +29,7 @@ extern VALUE ray_cColor;
 extern VALUE ray_cVertex;
 extern VALUE ray_mGL;
 extern VALUE ray_cGLVertex;
+extern VALUE ray_cGLInstance;
 extern VALUE ray_cIntArray;
 extern VALUE ray_cGLBuffer;
 extern VALUE ray_cGLIndexBuffer;

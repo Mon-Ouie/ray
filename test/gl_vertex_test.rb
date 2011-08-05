@@ -7,7 +7,10 @@ TestVertex = Ray::GL::Vertex.make [
   [:bool,    "in_Bool",     :bool],
   [:color,   "in_Color",    :color],
   [:vector2, "in_Vector2",  :vector2],
-  [:vector3, "in_Vector3",  :vector3]
+  [:vector3, "in_Vector3",  :vector3],
+
+  [:magic, "in_Magic", :vector3, true],
+  [:foo,   "in_Foo",   :bool,    true],
 ]
 
 context "a custom vertex" do
@@ -111,6 +114,30 @@ context "a custom vertex" do
     asserts(:color).equals Ray::Color.white
     asserts(:vector2).equals Ray::Vector2[0, 0]
     asserts(:vector3).equals Ray::Vector3[0, 30, 40]
+  end
+end
+
+context "an instance block" do
+  setup { TestVertex::Instance.new([1, 2, 3]) }
+
+  asserts(:magic).equals Ray::Vector3[1, 2, 3]
+  asserts(:foo)
+  asserts(:foo?)
+
+  context "after changing magic" do
+    hookup { topic.magic = [3, 2, 1] }
+
+    asserts(:magic).equals Ray::Vector3[3, 2, 1]
+    asserts(:foo)
+    asserts(:foo?)
+  end
+
+  context "after changing foo" do
+    hookup { topic.foo = false }
+
+    asserts(:magic).equals Ray::Vector3[1, 2, 3]
+    denies(:foo)
+    denies(:foo?)
   end
 end
 

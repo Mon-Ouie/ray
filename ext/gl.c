@@ -4,15 +4,14 @@ VALUE ray_mGL = Qnil;
 static VALUE ray_gl_primitives = Qnil;
 
 /*
-  @overload draw_arrays(primitive, first, count)
-    @note Misusing this method can cause a crash.
-    @param [Symbol] primitive Primitive to draw. Must be one of the folowing:
-      points, line_strip, line_loop, lines, triangle_strip, triangle_fan,
-      triangles.
-
-    @param [Integer] first Identifier of the first vertex to draw.
-    @param [Integer] count Amount of vertices to draw.
-*/
+ * @overload draw_arrays(primitive, first, count)
+ *   @param [Symbol] primitive Primitive to draw. Must be one of the folowing:
+ *     points, line_strip, line_loop, lines, triangle_strip, triangle_fan,
+ *     triangles.
+ *
+ *   @param [Integer] first Identifier of the first vertex to draw.
+ *   @param [Integer] count Amount of vertices to draw.
+ */
 static
 VALUE ray_gl_draw_arrays(VALUE self, VALUE primitive, VALUE first,
                          VALUE count) {
@@ -38,11 +37,57 @@ VALUE ray_gl_draw_elements(VALUE self, VALUE primitive, VALUE count,
 }
 
 /*
-  @overload multi_draw_arrays(primitive, first, count)
-    @param primitive (see #draw_arrays)
-    @param [Ray::GL::IntArray] first Indices of the first vertex
-    @param [Ray::GL::IntArray] count Ammount of vertices to draw
-*/
+ * @overload draw_arrays_instanced(primitive, first, count, instance_count)
+ *   @param [Symbol] primitive (see #draw_arrays)
+ *   @param [Integer] first (see #draw_arrays)
+ *   @param [Integer] count (see #draw_arrays)
+ *   @param [Integer] instance_count Amount of instances to draw
+ */
+static
+VALUE ray_gl_draw_arrays_instanced(VALUE self, VALUE primitive, VALUE first,
+                                   VALUE count, VALUE instance_count) {
+  say_context_ensure();
+  if (glDrawArraysInstanced) {
+    glDrawArraysInstanced(NUM2INT(rb_hash_aref(ray_gl_primitives, primitive)),
+                          NUM2ULONG(first), NUM2ULONG(count),
+                          NUM2ULONG(instance_count));
+  }
+  else
+    rb_raise(rb_eRuntimeError, "GL_ARB_draw_instanced is not supported");
+
+  return Qnil;
+}
+
+/*
+ * @overload draw_elements_instanced(primitive, count, index, instance_count)
+ *   @param primitive (see #draw_arrays)
+ *   @param count     (see #draw_arrays)
+ *   @param index     (see #draw_elements)
+ *   @param instance_count (see #draw_arrays_instanced)
+ */
+static
+VALUE ray_gl_draw_elements_instanced(VALUE self, VALUE primitive, VALUE count,
+                                     VALUE index, VALUE instance_count) {
+  say_context_ensure();
+  if (glDrawElementsInstanced) {
+    glDrawElementsInstanced(NUM2INT(rb_hash_aref(ray_gl_primitives, primitive)),
+                            NUM2ULONG(count),
+                            GL_UNSIGNED_INT, (void*)NUM2ULONG(index),
+                            NUM2ULONG(instance_count));
+  }
+  else
+    rb_raise(rb_eRuntimeError, "GL_ARB_draw_instanced is not supported");
+
+  return Qnil;
+}
+
+
+/*
+ * @overload multi_draw_arrays(primitive, first, count)
+ *   @param primitive (see #draw_arrays)
+ *   @param [Ray::GL::IntArray] first Indices of the first vertex
+ *   @param [Ray::GL::IntArray] count Ammount of vertices to draw
+ */
 static
 VALUE ray_gl_multi_draw_arrays(VALUE self, VALUE primitive, VALUE rb_first,
                                VALUE rb_count) {
@@ -106,6 +151,11 @@ void Init_ray_gl() {
 
   rb_define_module_function(ray_mGL, "draw_arrays", ray_gl_draw_arrays, 3);
   rb_define_module_function(ray_mGL, "draw_elements", ray_gl_draw_elements, 3);
+
+  rb_define_module_function(ray_mGL, "draw_arrays_instanced",
+                            ray_gl_draw_arrays_instanced, 4);
+  rb_define_module_function(ray_mGL, "draw_elements_instanced",
+                            ray_gl_draw_elements_instanced, 4);
 
   rb_define_module_function(ray_mGL, "multi_draw_arrays",
                             ray_gl_multi_draw_arrays, 3);

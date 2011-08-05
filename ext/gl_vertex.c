@@ -1,6 +1,8 @@
 #include "ray.h"
 
-VALUE ray_cGLVertex = Qnil;
+VALUE ray_cGLVertex   = Qnil;
+VALUE ray_cGLInstance = Qnil;
+
 static VALUE ray_gl_vertex_types = Qnil;
 
 VALUE ray_get_vertex_class(size_t id) {
@@ -19,11 +21,67 @@ size_t ray_get_vtype(VALUE class) {
   }
 }
 
+VALUE ray_get_vertex_element(void *data, VALUE type) {
+  switch (NUM2INT(rb_hash_aref(ray_gl_vertex_types, type))) {
+  case SAY_FLOAT:
+    return rb_float_new(*(GLfloat*)data);
+  case SAY_INT:
+    return INT2FIX(*(GLint*)data);
+  case SAY_UBYTE:
+    return INT2FIX(*(GLubyte*)data);
+  case SAY_BOOL:
+    return (*(GLint*)data) ? Qtrue : Qfalse;
+
+  case SAY_COLOR:
+    return ray_col2rb(*(say_color*)data);
+  case SAY_VECTOR2:
+      return ray_vector2_to_rb(*(say_vector2*)data);
+  case SAY_VECTOR3:
+    return ray_vector3_to_rb(*(say_vector3*)data);
+  }
+
+  return Qnil;
+}
+
+void ray_set_vertex_element(void *data, VALUE type, VALUE val) {
+  switch (NUM2INT(rb_hash_aref(ray_gl_vertex_types, type))) {
+  case SAY_FLOAT:
+    *(GLfloat*)data = NUM2DBL(val);
+    break;
+  case SAY_INT:
+    *(GLint*)data = NUM2INT(val);
+    break;
+  case SAY_UBYTE:
+    *(GLubyte*)data = ray_byte_clamp(NUM2INT(val));
+    break;
+  case SAY_BOOL:
+    (*(GLint*)data) = RTEST(val);
+    break;
+
+  case SAY_COLOR:
+    *(say_color*)data = ray_rb2col(val);
+    break;
+  case SAY_VECTOR2:
+    *(say_vector2*)data = ray_convert_to_vector2(val);
+    break;
+  case SAY_VECTOR3:
+    *(say_vector3*)data = ray_convert_to_vector3(val);
+    break;
+  }
+}
+
 VALUE ray_gl_vertex_alloc(VALUE self) {
   size_t size = NUM2ULONG(rb_iv_get(self, "@vertex_type_size"));
 
   void *vertex = malloc(size);
   return Data_Wrap_Struct(self, NULL, free, vertex);
+}
+
+VALUE ray_gl_instance_alloc(VALUE self) {
+  size_t size = NUM2ULONG(rb_iv_get(self, "@vertex_instance_size"));
+
+  void *instance = malloc(size);
+  return Data_Wrap_Struct(self, NULL, free, instance);
 }
 
 static
@@ -42,11 +100,13 @@ VALUE ray_gl_vertex_make_type(VALUE self, VALUE types) {
     VALUE name = RAY_ARRAY_AT(element, 0);
     VALUE type = RAY_ARRAY_AT(element, 1);
 
+    VALUE per_instance = RAY_ARRAY_AT(element, 2);
+
     char *c_name = StringValuePtr(name);
     say_vertex_elem_type c_type = NUM2INT(rb_hash_aref(ray_gl_vertex_types,
                                                        type));
 
-    say_vertex_elem c_elem = {c_type, c_name};
+    say_vertex_elem c_elem = {c_type, c_name, RTEST(per_instance)};
     say_vertex_type_push(vtype, c_elem);
   }
 
@@ -65,31 +125,18 @@ VALUE ray_gl_vertex_size(VALUE self, VALUE vtype) {
   return INT2FIX(say_vertex_type_get_size(type));
 }
 
+static
+VALUE ray_gl_vertex_instance_size(VALUE self, VALUE vtype) {
+  say_vertex_type *type = say_get_vertex_type(NUM2ULONG(vtype));
+  return INT2FIX(say_vertex_type_get_instance_size(type));
+}
+
 VALUE ray_gl_vertex_element(VALUE self, VALUE offset, VALUE type) {
   uint8_t *data = NULL;
   Data_Get_Struct(self, uint8_t, data);
 
   data += NUM2ULONG(offset);
-
-  switch (NUM2INT(rb_hash_aref(ray_gl_vertex_types, type))) {
-  case SAY_FLOAT:
-    return rb_float_new(*(GLfloat*)data);
-  case SAY_INT:
-    return INT2FIX((*(GLint*)data));
-  case SAY_UBYTE:
-    return INT2FIX((*(GLubyte*)data));
-  case SAY_BOOL:
-    return (*(GLint*)data) ? Qtrue : Qfalse;
-
-  case SAY_COLOR:
-    return ray_col2rb(*(say_color*)data);
-  case SAY_VECTOR2:
-      return ray_vector2_to_rb(*(say_vector2*)data);
-  case SAY_VECTOR3:
-    return ray_vector3_to_rb(*(say_vector3*)data);
-  }
-
-  return Qnil;
+  return ray_get_vertex_element(data, type);
 }
 
 VALUE ray_gl_vertex_set_element(VALUE self, VALUE offset, VALUE type,
@@ -98,33 +145,9 @@ VALUE ray_gl_vertex_set_element(VALUE self, VALUE offset, VALUE type,
   Data_Get_Struct(self, uint8_t, data);
 
   data += NUM2ULONG(offset);
+  ray_set_vertex_element(data, type, val);
 
-  switch (NUM2INT(rb_hash_aref(ray_gl_vertex_types, type))) {
-  case SAY_FLOAT:
-    (*(GLfloat*)data) = NUM2DBL(val);
-    break;
-  case SAY_INT:
-    ((*(GLint*)data)) = NUM2INT(val);
-    break;
-  case SAY_UBYTE:
-    ((*(GLubyte*)data)) = ray_byte_clamp(NUM2INT(val));
-    break;
-  case SAY_BOOL:
-    (*(GLint*)data) = RTEST(val);
-    break;
-
-  case SAY_COLOR:
-    ((*(say_color*)data)) = ray_rb2col(val);
-    break;
-  case SAY_VECTOR2:
-    ((*(say_vector2*)data)) = ray_convert_to_vector2(val);
-    break;
-  case SAY_VECTOR3:
-    ((*(say_vector3*)data)) = ray_convert_to_vector3(val);
-    break;
-  }
-
-  return type;
+  return val;
 }
 
 void Init_ray_gl_vertex() {
@@ -137,6 +160,8 @@ void Init_ray_gl_vertex() {
                              ray_gl_vertex_offset_of, 2);
   rb_define_singleton_method(ray_cGLVertex, "size",
                              ray_gl_vertex_size, 1);
+  rb_define_singleton_method(ray_cGLVertex, "instance_size",
+                             ray_gl_vertex_instance_size, 1);
 
   rb_define_private_method(ray_cGLVertex, "element", ray_gl_vertex_element, 2);
   rb_define_private_method(ray_cGLVertex, "set_element",
@@ -154,4 +179,14 @@ void Init_ray_gl_vertex() {
   rb_hash_aset(ray_gl_vertex_types, RAY_SYM("vector3"), INT2FIX(SAY_VECTOR3));
 
   rb_define_const(ray_cGLVertex, "TypeMap", ray_gl_vertex_types);
+
+  ray_cGLInstance = rb_define_class_under(ray_cGLVertex, "Instance",
+                                                rb_cObject);
+  rb_define_alloc_func(ray_cGLInstance, ray_gl_instance_alloc);
+
+  rb_define_private_method(ray_cGLInstance, "element", ray_gl_vertex_element,
+                           2);
+  rb_define_private_method(ray_cGLInstance, "set_element",
+                           ray_gl_vertex_set_element, 3);
+
 }
