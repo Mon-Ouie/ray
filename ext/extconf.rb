@@ -74,6 +74,8 @@ elsif RUBY_PLATFORM =~ /mingw/
 else
   $CFLAGS << " -DSAY_X11"
 
+  have_header "GL/glxext.h"
+
   have_header "X11/extensions/Xrandr.h"
   have_library "Xrandr"
 

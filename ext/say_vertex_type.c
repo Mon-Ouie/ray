@@ -18,7 +18,8 @@ static say_array *say_vertex_type_get_all() {
 
     say_vertex_type type;
     type.elements = say_array_create(sizeof(say_vertex_elem),
-                                     (say_destructor)say_vertex_elem_free, NULL);
+                                     (say_destructor)say_vertex_elem_free,
+                                     NULL);
 
     say_vertex_elem el;
 

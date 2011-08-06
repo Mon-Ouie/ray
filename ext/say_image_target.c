@@ -15,7 +15,7 @@ void say_fbo_make_current(GLuint fbo) {
     say_current_fbo = fbo;
     say_fbo_last_context = context;
 
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
   }
 }
 
@@ -30,7 +30,7 @@ void say_rbo_make_current(GLuint rbo) {
     say_current_rbo = rbo;
     say_rbo_last_context = context;
 
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
   }
 }
 
@@ -44,7 +44,7 @@ void say_image_target_will_delete(GLuint fbo, GLuint rbo) {
 
 bool say_image_target_is_available() {
   say_context_ensure();
-  return __GLEW_EXT_framebuffer_object != 0;
+  return GLEW_EXT_framebuffer_object || GLEW_VERSION_3_0;
 }
 
 say_image_target *say_image_target_create() {
@@ -54,8 +54,8 @@ say_image_target *say_image_target_create() {
   target->target = say_target_create();
   target->img    = NULL;
 
-  glGenFramebuffersEXT(1, &(target->fbo));
-  glGenRenderbuffersEXT(1, &(target->rbo));
+  glGenFramebuffers(1, &target->fbo);
+  glGenRenderbuffers(1, &target->rbo);
 
   return target;
 }
@@ -64,8 +64,8 @@ void say_image_target_free(say_image_target *target) {
   say_context_ensure();
   say_image_target_will_delete(target->fbo, target->rbo);
 
-  glDeleteRenderbuffersEXT(1, &(target->rbo));
-  glDeleteFramebuffersEXT(1, &(target->fbo));
+  glDeleteRenderbuffers(1, &target->rbo);
+  glDeleteFramebuffers(1, &target->fbo);
 
   say_target_free(target->target);
   free(target);
@@ -87,22 +87,21 @@ void say_image_target_set_image(say_image_target *target, say_image *image) {
     say_view_set_center(target->target->view, say_make_vector2(size.x / 2.0,
                                                                size.y / 2.0));
 
-    say_fbo_make_current(target->fbo);
+    say_target_make_current(target->target);
 
     say_image_bind(image);
-    glGenerateMipmapEXT(GL_TEXTURE_2D);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
-                              GL_TEXTURE_2D, image->texture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                           GL_TEXTURE_2D, image->texture, 0);
 
     say_rbo_make_current(target->rbo);
-    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT,
-                             say_image_get_width(image),
-                             say_image_get_height(image));
+    glRenderbufferStorage(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT,
+                          say_image_get_width(image),
+                          say_image_get_height(image));
 
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-                                 GL_RENDERBUFFER_EXT, target->rbo);
-
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                              GL_RENDERBUFFER, target->rbo);
   }
 }
 

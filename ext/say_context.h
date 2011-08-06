@@ -3,12 +3,23 @@
 
 #include "say_basic_type.h"
 
+typedef struct {
+  size_t depth_size;
+  size_t stencil_size;
+
+  size_t major_version, minor_version;
+
+  bool core_profile;
+} say_context_config;
+
 struct say_window;
 
 typedef struct {
   uint32_t count;
   say_imp_context context;
 } say_context;
+
+say_context_config *say_context_get_config();
 
 void say_context_free_el(void *context);
 

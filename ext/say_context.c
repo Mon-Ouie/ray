@@ -26,6 +26,16 @@ static void say_context_glew_init();
 
 static uint32_t say_context_count = 0;
 
+say_context_config *say_context_get_config() {
+  static say_context_config conf = {
+    24, 0, /* 24 bit depth buffer, no stencil buffer */
+    2, 1, /* Anything older than 3.x doesn't matter */
+    false /* let user call deprecated features */
+  };
+
+  return &conf;
+}
+
 void say_context_free_el(void *context) {
   say_context_free(*(say_context**)context);
 }
@@ -122,8 +132,8 @@ static void say_context_create_initial() {
   /* Identify GLSL version to be used */
   const GLubyte *str = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-  /* if GLSL 1.30 and GL_EXT_gpu_shader4 are supported */
-  if (__GLEW_EXT_gpu_shader4) {
+  /* Only use new shaders if we can bind frag data */
+  if (glBindFragDataLocation) {
     if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'3')) {
       say_shader_enable_new_glsl();
     }
@@ -169,10 +179,104 @@ void say_context_clean_up() {
 static void say_context_glew_init() {
   glewInit();
 
-  if (__GLEW_APPLE_vertex_array_object &&
-      !__GLEW_ARB_vertex_array_object) {
-    glBindVertexArray    = glBindVertexArrayAPPLE;
-    glGenVertexArrays    = (PFNGLGENVERTEXARRAYSPROC)glGenVertexArraysAPPLE;
-    glDeleteVertexArrays = glDeleteVertexArraysAPPLE;
-  }
+  /**
+   * Load needed extensions.
+   *
+   * We need to replace pointers for code to work both using OpenGL core
+   * features and extensions.
+   */
+
+#define replace(old, new)                       \
+  if (!new && old)                              \
+    new = old;
+
+  /* Perform GLEW's job. */
+  glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)
+    say_get_proc("glBindVertexArray");
+  glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)
+    say_get_proc("glDeleteVertexArrays");
+  glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)
+    say_get_proc("glGenVertexArrays");
+
+  /* Vertex arrays */
+  replace(glBindVertexArrayAPPLE, glBindVertexArray);
+  replace(glDeleteVertexArraysAPPLE, glDeleteVertexArrays);
+  if (!glGenVertexArrays && glGenVertexArraysAPPLE)
+    glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)glGenVertexArraysAPPLE;
+
+  /* Shaders */
+  replace(glCreateShaderObjectARB, glCreateShader);
+  replace(glShaderSourceARB, glShaderSource);
+  replace(glCompileShaderARB, glCompileShader);
+  replace(glGetObjectParameterivARB, glGetShaderiv);
+  replace(glGetObjectParameterivARB, glGetProgramiv);
+  replace(glGetInfoLogARB, glGetShaderInfoLog);
+  replace(glGetInfoLogARB, glGetProgramInfoLog);
+  replace(glGetUniformLocationARB, glGetUniformLocation);
+  replace(glCreateProgramObjectARB, glCreateProgram)
+  replace(glAttachObjectARB, glAttachShader);
+  replace(glDetachObjectARB, glDetachShader);
+  replace(glBindFragDataLocationEXT, glBindFragDataLocation);
+  replace(glBindAttribLocationARB, glBindAttribLocation);
+  replace(glLinkProgramARB, glLinkProgram);
+  replace(glUseProgramObjectARB, glUseProgram);
+  replace(glDeleteObjectARB, glDeleteShader);
+  replace(glDeleteObjectARB, glDeleteProgram);
+  replace(glUniform1iARB, glUniform1i);
+  replace(glUniform1fARB, glUniform1f);
+  replace(glUniform2fARB, glUniform2f);
+  replace(glUniform3fARB, glUniform3f);
+  replace(glUniform1fvARB, glUniform1fv);
+  replace(glUniform2fvARB, glUniform2fv);
+  replace(glUniform3fvARB, glUniform3fv);
+  replace(glUniform4fvARB, glUniform4fv);
+  replace(glUniformMatrix4fvARB, glUniformMatrix4fv);
+
+  /* Buffers */
+  replace(glGenBuffersARB, glGenBuffers);
+  replace(glDeleteBuffersARB, glDeleteBuffersARB);
+  replace(glBindBufferARB, glBindBuffer);
+  replace(glBufferDataARB, glBufferData);
+  replace(glBufferSubDataARB, glBufferSubData);
+  replace(glGetBufferSubDataARB, glGetBufferSubData);
+
+  glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)
+    say_get_proc("glVertexAttribDivisor");
+
+  /* Vertex attribs */
+  replace(glVertexAttribPointerARB, glVertexAttribPointer);
+  replace(glEnableVertexAttribArrayARB, glEnableVertexAttribArray);
+  replace(glVertexAttribDivisorARB, glVertexAttribDivisor);
+  replace(glGetVertexAttribivARB, glGetVertexAttribiv);
+  replace(glDisableVertexAttribArrayARB, glDisableVertexAttribArray);
+
+  /* Perform GLEW's job. */
+  glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)
+    say_get_proc("glGenFramebuffers");
+  glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)
+    say_get_proc("glDeleteFramebuffers");
+  glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)
+    say_get_proc("glBindFramebuffer");
+  glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC)
+    say_get_proc("glFramebufferTexture2D");
+  glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFERPROC)
+    say_get_proc("glFramebufferRenderbuffer");
+
+  /* Framebuffer objects */
+  replace(glGenFramebuffersEXT, glGenFramebuffers);
+  replace(glDeleteFramebuffersEXT, glDeleteFramebuffers);
+  replace(glBindFramebufferEXT, glBindFramebuffer);
+  replace(glFramebufferTexture2DEXT, glFramebufferTexture2D);
+  replace(glFramebufferRenderbufferEXT, glFramebufferRenderbuffer);
+
+  /* Renderbuffer objects */
+  replace(glGenRenderbuffersEXT, glGenRenderbuffers);
+  replace(glDeleteRenderbuffersEXT, glDeleteRenderbuffers);
+  replace(glBindRenderbufferEXT, glBindRenderbuffer);
+  replace(glRenderbufferStorageEXT, glRenderbufferStorage);
+
+  /* Mipmaps */
+  replace(glGenerateMipmapEXT, glGenerateMipmap);
+
+#undef replace
 }

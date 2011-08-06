@@ -11,28 +11,27 @@ static void say_shader_make_current(GLuint program) {
     say_current_program     = program;
     say_shader_last_context = context;
 
-    glUseProgramObjectARB(program);
+    glUseProgram(program);
   }
 }
 
 static int say_shader_create_shader(GLuint shader, const char *src) {
   GLint length = strlen(src);
-  glShaderSourceARB(shader, 1, &src, &length);
+  glShaderSource(shader, 1, &src, &length);
 
-  glCompileShaderARB(shader);
+  glCompileShader(shader);
 
   GLint worked = 0;
-  glGetObjectParameterivARB(shader, GL_OBJECT_COMPILE_STATUS_ARB, &worked);
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &worked);
 
   if (worked != GL_TRUE) {
     GLint error_length = 0;
-    glGetObjectParameterivARB(shader, GL_OBJECT_INFO_LOG_LENGTH_ARB,
-                              &error_length);
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &error_length);
 
     char *error = malloc((error_length + 1) * sizeof(char));
     memset(error, '\0', (error_length + 1) * sizeof(char));
 
-    glGetInfoLogARB(shader, error_length, &error_length, error);
+    glGetShaderInfoLog(shader, error_length, &error_length, error);
     say_error_set(error);
 
     free(error);
@@ -43,14 +42,14 @@ static int say_shader_create_shader(GLuint shader, const char *src) {
 
 static void say_shader_find_locations(say_shader *shader) {
   shader->locations[SAY_PROJECTION_LOC_ID] =
-    glGetUniformLocationARB(shader->program, SAY_PROJECTION_ATTR);
+    glGetUniformLocation(shader->program, SAY_PROJECTION_ATTR);
   shader->locations[SAY_MODEL_VIEW_LOC_ID] =
-    glGetUniformLocationARB(shader->program, SAY_MODEL_VIEW_ATTR);
+    glGetUniformLocation(shader->program, SAY_MODEL_VIEW_ATTR);
 
   shader->locations[SAY_TEXTURE_LOC_ID] =
-    glGetUniformLocationARB(shader->program, SAY_TEXTURE_ATTR);
+    glGetUniformLocation(shader->program, SAY_TEXTURE_ATTR);
   shader->locations[SAY_TEXTURE_ENABLED_LOC_ID] =
-    glGetUniformLocationARB(shader->program, SAY_TEXTURE_ENABLED_ATTR);
+    glGetUniformLocation(shader->program, SAY_TEXTURE_ENABLED_ATTR);
 }
 
 static const char *say_default_frag_shader =
@@ -139,7 +138,7 @@ void say_shader_force_old() {
 
 bool say_shader_is_geometry_available() {
   say_context_ensure();
-  return __GLEW_ARB_geometry_shader4 != 0;
+  return GLEW_ARB_geometry_shader4 || GLEW_VERSION_3_2;
 }
 
 say_shader *say_shader_create() {
@@ -147,11 +146,14 @@ say_shader *say_shader_create() {
 
   say_shader *shader = (say_shader*)malloc(sizeof(say_shader));
 
-  shader->frag_shader     = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-  shader->vertex_shader   = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  shader->frag_shader     = glCreateShader(GL_FRAGMENT_SHADER);
+  shader->vertex_shader   = glCreateShader(GL_VERTEX_SHADER);
   shader->geometry_shader = 0;
 
-  if (!say_shader_use_new) {
+  bool new_shader = !say_shader_force_old ||
+    (say_context_get_config()->core_profile && glBindFragDataLocation);
+
+  if (!new_shader) {
     say_shader_compile_frag(shader, say_default_frag_shader);
     say_shader_compile_vertex(shader, say_default_vertex_shader);
   }
@@ -160,18 +162,18 @@ say_shader *say_shader_create() {
     say_shader_compile_vertex(shader, say_new_default_vertex_shader);
   }
 
-  shader->program = glCreateProgramObjectARB();
+  shader->program = glCreateProgram();
 
-  glAttachObjectARB(shader->program, shader->frag_shader);
-  glAttachObjectARB(shader->program, shader->vertex_shader);
+  glAttachShader(shader->program, shader->frag_shader);
+  glAttachShader(shader->program, shader->vertex_shader);
 
   say_shader_apply_vertex_type(shader, 0);
 
-  if (say_shader_use_new) {
-    glBindFragDataLocationEXT(shader->program, 0, SAY_FRAG_COLOR);
+  if (!new_shader) {
+    glBindFragDataLocation(shader->program, 0, SAY_FRAG_COLOR);
   }
 
-  glLinkProgramARB(shader->program);
+  glLinkProgram(shader->program);
 
   say_shader_find_locations(shader);
 
@@ -191,12 +193,12 @@ say_shader *say_shader_create() {
 void say_shader_free(say_shader *shader) {
   say_context_ensure();
 
-  glDeleteObjectARB(shader->frag_shader);
-  glDeleteObjectARB(shader->vertex_shader);
+  glDeleteShader(shader->frag_shader);
+  glDeleteShader(shader->vertex_shader);
 
   say_shader_detach_geometry(shader);
 
-  glDeleteObjectARB(shader->program);
+  glDeleteProgram(shader->program);
 
   free(shader);
 }
@@ -213,21 +215,21 @@ bool say_shader_compile_vertex(say_shader *shader, const char *src) {
 
 bool say_shader_compile_geometry(say_shader *shader, const char *src) {
   say_context_ensure();
-  if (!__GLEW_ARB_geometry_shader4) {
+  if (!(GLEW_ARB_geometry_shader4 || GLEW_VERSION_3_2)) {
     say_error_set("geometry shaders aren't available");
     return false;
   }
 
-  shader->geometry_shader = glCreateShaderObjectARB(GL_GEOMETRY_SHADER_ARB);
-  glAttachObjectARB(shader->program, shader->geometry_shader);
+  shader->geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
+  glAttachShader(shader->program, shader->geometry_shader);
   return say_shader_create_shader(shader->geometry_shader, src);
 }
 
 void say_shader_detach_geometry(say_shader *shader) {
   if (shader->geometry_shader) {
     say_context_ensure();
-    glDetachObjectARB(shader->program, shader->geometry_shader);
-    glDeleteObjectARB(shader->geometry_shader);
+    glDetachShader(shader->program, shader->geometry_shader);
+    glDeleteShader(shader->geometry_shader);
     shader->geometry_shader = 0;
   }
 }
@@ -238,8 +240,8 @@ void say_shader_apply_vertex_type(say_shader *shader, size_t vtype) {
   say_vertex_type *type = say_get_vertex_type(vtype);
 
   for (size_t i = 0; i < say_vertex_type_get_elem_count(type); i++) {
-    glBindAttribLocationARB(shader->program, i,
-                            say_vertex_type_get_name(type, i));
+    glBindAttribLocation(shader->program, i,
+                         say_vertex_type_get_name(type, i));
   }
 }
 
@@ -248,17 +250,16 @@ int say_shader_link(say_shader *shader) {
   glLinkProgram(shader->program);
 
   GLint worked = 0;
-  glGetObjectParameterivARB(shader->program, GL_OBJECT_LINK_STATUS_ARB, &worked);
+  glGetProgramiv(shader->program, GL_LINK_STATUS, &worked);
 
   if (!worked) {
     GLint error_length = 0;
-    glGetObjectParameterivARB(shader->program, GL_OBJECT_INFO_LOG_LENGTH_ARB,
-                              &error_length);
+    glGetProgramiv(shader->program, GL_INFO_LOG_LENGTH, &error_length);
 
     char *error = malloc((error_length + 1) * sizeof(char));
     memset(error, '\0', (error_length + 1) * sizeof(char));
 
-    glGetInfoLogARB(shader->program, error_length, &error_length, error);
+    glGetProgramInfoLog(shader->program, error_length, &error_length, error);
     say_error_set(error);
 
     free(error);
@@ -272,36 +273,36 @@ int say_shader_link(say_shader *shader) {
 void say_shader_set_matrix(say_shader *shader, const char *name,
                            say_matrix *matrix) {
   say_shader_bind(shader);
-  GLint location = glGetUniformLocationARB(shader->program, name);
-  glUniformMatrix4fvARB(location, 1, GL_FALSE, matrix->content);
+  GLint location = glGetUniformLocation(shader->program, name);
+  glUniformMatrix4fv(location, 1, GL_FALSE, matrix->content);
 }
 
 void say_shader_set_current_texture(say_shader *shader, const char *name) {
   say_shader_bind(shader);
-  GLint location = glGetUniformLocationARB(shader->program, name);
-  glUniform1iARB(location, 0);
+  GLint location = glGetUniformLocation(shader->program, name);
+  glUniform1i(location, 0);
 }
 
 void say_shader_set_int(say_shader *shader, const char *name, int val) {
   say_shader_bind(shader);
-  GLint location = glGetUniformLocationARB(shader->program, name);
-  glUniform1iARB(location, val);
+  GLint location = glGetUniformLocation(shader->program, name);
+  glUniform1i(location, val);
 }
 
 void say_shader_set_matrix_id(say_shader *shader, say_attr_loc_id id,
                               say_matrix *matrix) {
   say_shader_bind(shader);
-  glUniformMatrix4fvARB(shader->locations[id], 1, GL_FALSE, matrix->content);
+  glUniformMatrix4fv(shader->locations[id], 1, GL_FALSE, matrix->content);
 }
 
 void say_shader_set_current_texture_id(say_shader *shader, say_attr_loc_id id) {
   say_shader_bind(shader);
-  glUniform1iARB(shader->locations[id], 0);
+  glUniform1i(shader->locations[id], 0);
 }
 
 void say_shader_set_int_id(say_shader *shader, say_attr_loc_id id, int val) {
   say_shader_bind(shader);
-  glUniform1iARB(shader->locations[id], val);
+  glUniform1i(shader->locations[id], val);
 }
 
 void say_shader_bind(say_shader *shader) {
@@ -310,33 +311,33 @@ void say_shader_bind(say_shader *shader) {
 }
 
 int say_shader_locate(say_shader *shader, const char *name) {
-  return glGetUniformLocationARB(shader->program, name);
+  return glGetUniformLocation(shader->program, name);
 }
 
 void say_shader_set_vector2_loc(say_shader *shader, int loc, say_vector2 val) {
   say_shader_bind(shader);
-  glUniform2fARB(loc, val.x, val.y);
+  glUniform2f(loc, val.x, val.y);
 }
 
 void say_shader_set_vector3_loc(say_shader *shader, int loc, say_vector3 val) {
   say_shader_bind(shader);
-  glUniform3fARB(loc, val.x, val.y, val.z);
+  glUniform3f(loc, val.x, val.y, val.z);
 }
 
 void say_shader_set_color_loc(say_shader *shader, int loc, say_color val) {
   say_shader_bind(shader);
   float arg[4] = {val.r / 255.0, val.g / 255.0, val.b / 255.0, val.a / 255.0};
-  glUniform4fvARB(loc, 1, arg);
+  glUniform4fv(loc, 1, arg);
 }
 
 void say_shader_set_matrix_loc(say_shader *shader, int loc, say_matrix *val) {
   say_shader_bind(shader);
-  glUniformMatrix4fvARB(loc, 1, GL_FALSE, val->content);
+  glUniformMatrix4fv(loc, 1, GL_FALSE, val->content);
 }
 
 void say_shader_set_float_loc(say_shader *shader, int loc, float val) {
   say_shader_bind(shader);
-  glUniform1fARB(loc, val);
+  glUniform1f(loc, val);
 }
 
 void say_shader_set_floats_loc(say_shader *shader, int loc, size_t count,
@@ -345,31 +346,31 @@ void say_shader_set_floats_loc(say_shader *shader, int loc, size_t count,
 
   switch (count) {
   case 1:
-    glUniform1fvARB(loc, 1, val);
+    glUniform1fv(loc, 1, val);
     break;
   case 2:
-    glUniform2fvARB(loc, 1, val);
+    glUniform2fv(loc, 1, val);
     break;
   case 3:
-    glUniform3fvARB(loc, 1, val);
+    glUniform3fv(loc, 1, val);
     break;
   case 4:
-    glUniform4fvARB(loc, 1, val);
+    glUniform4fv(loc, 1, val);
     break;
   }
 }
 
 void say_shader_set_image_loc(say_shader *shader, int loc, say_image *val) {
   say_shader_bind(shader);
-  glUniform1iARB(loc, val->texture);
+  glUniform1i(loc, val->texture);
 }
 
 void say_shader_set_current_texture_loc(say_shader *shader, int loc) {
   say_shader_bind(shader);
-  glUniform1iARB(loc, 0);
+  glUniform1i(loc, 0);
 }
 
 void say_shader_set_bool_loc(say_shader *shader, int loc, uint8_t val) {
   say_shader_bind(shader);
-  glUniform1iARB(loc, val);
+  glUniform1i(loc, val);
 }

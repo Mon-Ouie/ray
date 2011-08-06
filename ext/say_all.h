@@ -72,6 +72,9 @@ void say_error_set(const char *message);
 
 void say_error_clean_up();
 
+/* Get OpenGL proc */
+void *say_get_proc(const char *name);
+
 #define SAY_PI 3.14159265358979323846
 
 #endif

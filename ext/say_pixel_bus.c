@@ -10,7 +10,7 @@ static void say_pack_pbo_make_current(GLuint pbo) {
     say_pack_pbo              = pbo;
     say_pack_pbo_last_context = context;
 
-    glBindBufferARB(GL_PIXEL_PACK_BUFFER_ARB, pbo);
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
   }
 }
 
@@ -24,7 +24,7 @@ static void say_unpack_pbo_make_current(GLuint pbo) {
     say_unpack_pbo              = pbo;
     say_unpack_pbo_last_context = context;
 
-    glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, pbo);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
   }
 }
 
@@ -35,7 +35,8 @@ static void say_pbo_will_delete(GLuint pbo) {
 
 bool say_pixel_bus_is_available() {
   say_context_ensure();
-  return __GLEW_ARB_pixel_buffer_object || __GLEW_EXT_pixel_buffer_object;
+  return GLEW_ARB_pixel_buffer_object ||
+    GLEW_VERSION_2_1;
 }
 
 say_pixel_bus *say_pixel_bus_create(GLenum mode) {
@@ -43,14 +44,14 @@ say_pixel_bus *say_pixel_bus_create(GLenum mode) {
 
   say_pixel_bus *bus = malloc(sizeof(say_pixel_bus));
 
-  glGenBuffersARB(1, &bus->pbo);
+  glGenBuffers(1, &bus->pbo);
 
   bus->size = 1024;
   bus->mode = mode;
 
   say_pixel_bus_bind_pack(bus);
-  glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, 1024 * sizeof(say_color), NULL,
-                  mode);
+  glBufferData(GL_PIXEL_PACK_BUFFER, 1024 * sizeof(say_color), NULL,
+               mode);
 
   return bus;
 }
@@ -58,7 +59,7 @@ say_pixel_bus *say_pixel_bus_create(GLenum mode) {
 void say_pixel_bus_free(say_pixel_bus *bus) {
   say_context_ensure();
   say_pbo_will_delete(bus->pbo);
-  glDeleteBuffersARB(1, &bus->pbo);
+  glDeleteBuffers(1, &bus->pbo);
   free(bus);
 }
 
@@ -133,10 +134,10 @@ void say_pixel_bus_resize(say_pixel_bus *bus, size_t new_size) {
   say_pixel_bus_bind_pack(bus);
 
   void *buffer = malloc(sizeof(say_color) * new_size);
-  glGetBufferSubDataARB(GL_PIXEL_PACK_BUFFER_ARB, 0, new_size, buffer);
+  glGetBufferSubData(GL_PIXEL_PACK_BUFFER, 0, new_size, buffer);
 
-  glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, new_size * sizeof(say_color),
-                  buffer, bus->mode);
+  glBufferData(GL_PIXEL_PACK_BUFFER, new_size * sizeof(say_color),
+               buffer, bus->mode);
 
   free(buffer);
 
@@ -147,8 +148,8 @@ void say_pixel_bus_resize_fast(say_pixel_bus *bus, size_t new_size) {
   if (bus->size == new_size) return;
 
   say_pixel_bus_bind_pack(bus);
-  glBufferDataARB(GL_PIXEL_PACK_BUFFER_ARB, new_size * sizeof(say_color), NULL,
-                  bus->mode);
+  glBufferData(GL_PIXEL_PACK_BUFFER, new_size * sizeof(say_color), NULL,
+               bus->mode);
 
   bus->size = new_size;
 }

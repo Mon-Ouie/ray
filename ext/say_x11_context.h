@@ -1,7 +1,55 @@
 #include "say.h"
 
+#ifdef HAVE_GL_GLXEXT_H
+# include <GL/glxext.h>
+#else
+# define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
+# define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
+# define GLX_CONTEXT_PROFILE_MASK_ARB  0x9126
+
+# define GLX_CONTEXT_CORE_PROFILE_BIT_ARB          0x00000001
+# define GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
+#endif
+
+typedef GLXContext (*say_glx_create_context)(Display *dpy,
+                                             GLXFBConfig config,
+                                             GLXContext share_context,
+                                             Bool direct,
+                                             const int *attrib_list);
+
+static say_glx_create_context glXCreateContextAttribs = NULL;
+
 say_imp_context say_imp_context_create() {
-  return  say_imp_context_create_shared(NULL);
+  return say_imp_context_create_shared(NULL);
+}
+
+static GLXContext say_x11_do_create_context(Display     *dis,
+                                            GLXFBConfig  conf,
+                                            GLXContext   share) {
+  glXCreateContextAttribs = (say_glx_create_context)
+    glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
+
+  say_context_config *say_conf = say_context_get_config();
+  size_t major = say_conf->major_version, minor = say_conf->minor_version;
+
+  if (major >= 3 && glXCreateContextAttribs) {
+    GLint attribs[] = {
+      GLX_CONTEXT_MAJOR_VERSION_ARB, major,
+      GLX_CONTEXT_MINOR_VERSION_ARB, minor,
+      GLX_CONTEXT_PROFILE_MASK_ARB, say_conf->core_profile ?
+      GLX_CONTEXT_CORE_PROFILE_BIT_ARB :
+      GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+      None
+    };
+
+    GLXContext ctxt = glXCreateContextAttribs(dis, conf, share, true,
+                                              attribs);
+
+    if (ctxt)
+      return ctxt;
+  }
+
+  return glXCreateNewContext(dis, conf, GLX_RGBA_TYPE, share, True);
 }
 
 say_imp_context say_imp_context_create_shared(say_imp_context shared) {
@@ -13,12 +61,14 @@ say_imp_context say_imp_context_create_shared(say_imp_context shared) {
 
   int screen = DefaultScreen(context->dis);
 
-  static int visual_attribs[] = {
+  say_context_config *say_conf = say_context_get_config();
+  int visual_attribs[] = {
     GLX_RED_SIZE,     8,
     GLX_GREEN_SIZE,   8,
     GLX_BLUE_SIZE,    8,
     GLX_ALPHA_SIZE,   8,
-    GLX_DEPTH_SIZE,   24,
+    GLX_DEPTH_SIZE,   say_conf->depth_size,
+    GLX_STENCIL_SIZE, say_conf->stencil_size,
     GLX_DOUBLEBUFFER, True,
     None
   };
@@ -49,8 +99,8 @@ say_imp_context say_imp_context_create_shared(say_imp_context shared) {
   XFree(vi);
 
   GLXContext glx_shared = shared ? shared->context : NULL;
-  context->context = glXCreateNewContext(context->dis, config, GLX_RGBA_TYPE,
-                                         glx_shared, True);
+  context->context = say_x11_do_create_context(context->dis, config,
+                                               glx_shared);
 
   return context;
 }
@@ -64,8 +114,8 @@ say_imp_context  say_imp_context_create_for_window(say_imp_context shared,
 
   context->should_free_window = 0;
 
-  context->context = glXCreateNewContext(window->dis, window->config,
-                                         GLX_RGBA_TYPE, shared->context, True);
+  context->context = say_x11_do_create_context(window->dis, window->config,
+                                               shared->context);
 
   return context;
 }

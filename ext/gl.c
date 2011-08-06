@@ -131,6 +131,71 @@ VALUE ray_gl_multi_draw_elements(VALUE self, VALUE primitive, VALUE rb_count,
   return Qnil;
 }
 
+/* @return [Integer] Size of the depth buffer, in bits */
+static
+VALUE ray_gl_depth_size(VALUE self) {
+  return ULONG2NUM(say_context_get_config()->depth_size);
+}
+
+/* @return [Integer] Size of the stencil buffer, in bits */
+static
+VALUE ray_gl_stencil_size(VALUE self) {
+  return ULONG2NUM(say_context_get_config()->stencil_size);
+}
+
+/* @return [Integer] Major version number. Ignored if less than 3. */
+static
+VALUE ray_gl_major_version(VALUE self) {
+  return ULONG2NUM(say_context_get_config()->major_version);
+}
+
+/* @return [Integer] Minor version number */
+static
+VALUE ray_gl_minor_version(VALUE self) {
+  return ULONG2NUM(say_context_get_config()->minor_version);
+}
+
+/* @return [Bollean] True when a core OpenGL profile must be used */
+static
+VALUE ray_gl_core_profile(VALUE self) {
+  return say_context_get_config()->core_profile ? Qtrue : Qfalse;
+}
+
+/* @see depth_size */
+static
+VALUE ray_gl_set_depth_size(VALUE self, VALUE val) {
+  say_context_get_config()->depth_size = NUM2ULONG(val);
+  return val;
+}
+
+/* @see stencil_size */
+static
+VALUE ray_gl_set_stencil_size(VALUE self, VALUE val) {
+  say_context_get_config()->stencil_size = NUM2ULONG(val);
+  return val;
+}
+
+/* @see major_version */
+static
+VALUE ray_gl_set_major_version(VALUE self, VALUE val) {
+  say_context_get_config()->major_version = NUM2ULONG(val);
+  return val;
+}
+
+/* @see minor_version */
+static
+VALUE ray_gl_set_minor_version(VALUE self, VALUE val) {
+  say_context_get_config()->minor_version = NUM2ULONG(val);
+  return val;
+}
+
+/* @see core_profile? */
+static
+VALUE ray_gl_set_core_profile(VALUE self, VALUE val) {
+  say_context_get_config()->core_profile = RTEST(val);
+  return val;
+}
+
 void Init_ray_gl() {
   ray_mGL = rb_define_module_under(ray_mRay, "GL");
 
@@ -148,6 +213,24 @@ void Init_ray_gl() {
 
   /* @return [Hash] Available primitives. */
   rb_define_const(ray_mGL, "Primitives", ray_gl_primitives);
+
+  rb_define_module_function(ray_mGL, "depth_size", ray_gl_depth_size, 0);
+  rb_define_module_function(ray_mGL, "depth_size=", ray_gl_set_depth_size, 1);
+
+  rb_define_module_function(ray_mGL, "stencil_size", ray_gl_stencil_size, 0);
+  rb_define_module_function(ray_mGL, "stencil_size=", ray_gl_set_stencil_size,
+                            1);
+
+  rb_define_module_function(ray_mGL, "major_version", ray_gl_major_version, 0);
+  rb_define_module_function(ray_mGL, "major_version=", ray_gl_set_major_version,
+                            1);
+
+  rb_define_module_function(ray_mGL, "minor_version", ray_gl_minor_version, 0);
+  rb_define_module_function(ray_mGL, "minor_version=", ray_gl_set_minor_version,
+                            1);
+
+  rb_define_module_function(ray_mGL, "core_profile?", ray_gl_core_profile, 0);
+  rb_define_module_function(ray_mGL, "core_profile=", ray_gl_set_core_profile, 1);
 
   rb_define_module_function(ray_mGL, "draw_arrays", ray_gl_draw_arrays, 3);
   rb_define_module_function(ray_mGL, "draw_elements", ray_gl_draw_elements, 3);
