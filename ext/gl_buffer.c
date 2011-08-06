@@ -294,7 +294,7 @@ VALUE ray_gl_buffer_update_instance(int argc, VALUE *argv, VALUE self) {
     rb_raise(rb_eRuntimeError, "buffer has no per-instance data");
 
   if (argc == 0)
-    say_buffer_update(buf);
+    say_buffer_update_instance(buf);
   else if (argc == 2) {
     size_t begin = NUM2ULONG(argv[0]);
     size_t end   = NUM2ULONG(argv[1]);
