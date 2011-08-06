@@ -31,7 +31,7 @@ class Model < Ray::Drawable
     (0...InstanceSqrt).each do
       z = 0
       (0...InstanceSqrt).each do
-        translation = [(x + rand * 2 - 1) * 10 - 1, 0, -10 * (z + 1)]
+        translation = [(x + rand * 2 - 1) * 10, 0, -10 * (z + 1)]
         @buffer.set_instance(n, Vertex::Instance.new(Ray::Color.new(rand(256),
                                                                     rand(256),
                                                                     rand(256)),
@@ -72,11 +72,20 @@ class Model < Ray::Drawable
 
     @buffer.update
 
-    self.matrix =  Ray::Matrix.looking_at([-50, 100, 500],
-                                          [-50, 0, -500],
-                                          [0, 1, 0]).scale([4, 4, 4])
+    self.matrix_proc = proc do
+      c = Math.cos(@n / 100.0)
+      s = Math.sin(@n / 100.0)
+      Ray::Matrix.looking_at([200 + 50 * c, 100 * s, -50],
+                             [500, 20, -500],
+                             [0, -1, 0]).scale([4, 4, 4])
+    end
 
     self.blend_mode = nil
+  end
+
+  def move(n)
+    @n = n
+    matrix_changed!
   end
 
   def render(first, index)
@@ -85,7 +94,7 @@ class Model < Ray::Drawable
   end
 end
 
-Ray.game "A teapot!" do
+Ray.game "*Many* cubes!" do
   register { add_hook :quit, method(:exit!) }
 
   scene :teapot do
@@ -101,16 +110,13 @@ in vec4 in_Color;
 uniform mat4 in_ModelView;
 uniform mat4 in_Projection;
 
-uniform float cos_a;
-uniform float sin_a;
-
 out vec4 var_Color;
 
 void main() {
   mat4 transform = in_ModelView *
-    mat4(cos_a, -sin_a, 0, in_Translation.x,
+    mat4(1, 0, 0, in_Translation.x,
          0, 1, 0, in_Translation.y,
-         sin_a, cos_a, 1, in_Translation.z,
+         0, 0, 1, in_Translation.z,
          0, 0, 0, 1);
   mat4 mvp = transform * in_Projection;
   gl_Position = vec4(in_Position, 1) * mvp;
@@ -134,14 +140,12 @@ code
     window.shader.compile(:vertex => StringIO.new(vertex_shader),
                           :frag   => StringIO.new(frag_shader))
 
-    window.view = Ray::View.new Ray::Matrix.perspective(90, 480.fdiv(640), 1,
+    window.view = Ray::View.new Ray::Matrix.perspective(120, 480.fdiv(640), 1,
                                                         1000)
 
     n = 0
     always do
-      n += 0.01
-      window.shader[:cos_a] = Math.cos(n)
-      window.shader[:sin_a] = Math.sin(n)
+      @model.move(n += 1)
     end
 
     render do |win|
