@@ -51,7 +51,6 @@ class Model < Ray::Drawable
     index = -1
 
     positions = []
-    normals   = []
 
     open(filename) do |io|
       io.each_line do |line|
@@ -143,7 +142,7 @@ code
     window.view = Ray::View.new Ray::Matrix.perspective(120, 480.fdiv(640), 1,
                                                         1000)
 
-    n = 0
+    n = 0.0
     always do
       @model.move(n += 1)
     end
