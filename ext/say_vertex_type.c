@@ -53,6 +53,8 @@ static size_t say_vertex_type_size_of(say_vertex_elem_type type) {
   case SAY_VECTOR2: return(sizeof(GLfloat) * 2);
   case SAY_VECTOR3: return(sizeof(GLfloat) * 3);
   }
+
+  return 0;
 }
 
 size_t say_vertex_type_make_new() {
