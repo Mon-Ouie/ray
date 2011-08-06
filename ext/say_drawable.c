@@ -54,6 +54,9 @@ static void say_drawable_enable_blend_mode(say_blend_mode mode) {
       glBlendFunc(GL_DST_COLOR, GL_ZERO);
       break;
     }
+
+    say_last_blend         = mode;
+    say_blend_last_context = context;
   }
 }
 
