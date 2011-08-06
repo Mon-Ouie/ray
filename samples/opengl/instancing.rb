@@ -134,7 +134,7 @@ code
     window.shader.compile(:vertex => StringIO.new(vertex_shader),
                           :frag   => StringIO.new(frag_shader))
 
-    window.view = Ray::View.new Ray::Matrix.perspective(90, 640.fdiv(480), 1,
+    window.view = Ray::View.new Ray::Matrix.perspective(90, 480.fdiv(640), 1,
                                                         1000)
 
     n = 0
