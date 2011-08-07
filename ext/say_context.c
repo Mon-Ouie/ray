@@ -131,12 +131,8 @@ static void say_context_create_initial() {
 
   /* Identify GLSL version to be used */
   const GLubyte *str = glGetString(GL_SHADING_LANGUAGE_VERSION);
-
-  /* Only use new shaders if we can bind frag data */
-  if (glBindFragDataLocation) {
-    if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'3')) {
-      say_shader_enable_new_glsl();
-    }
+  if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'3')) {
+    say_shader_enable_new_glsl();
   }
 }
 
@@ -216,7 +212,6 @@ static void say_context_glew_init() {
   replace(glCreateProgramObjectARB, glCreateProgram)
   replace(glAttachObjectARB, glAttachShader);
   replace(glDetachObjectARB, glDetachShader);
-  replace(glBindFragDataLocationEXT, glBindFragDataLocation);
   replace(glBindAttribLocationARB, glBindAttribLocation);
   replace(glLinkProgramARB, glLinkProgram);
   replace(glUseProgramObjectARB, glUseProgram);
