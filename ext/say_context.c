@@ -194,12 +194,6 @@ static void say_context_glew_init() {
   glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)
     say_get_proc("glGenVertexArrays");
 
-  /* Vertex arrays */
-  replace(glBindVertexArrayAPPLE, glBindVertexArray);
-  replace(glDeleteVertexArraysAPPLE, glDeleteVertexArrays);
-  if (!glGenVertexArrays && glGenVertexArraysAPPLE)
-    glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)glGenVertexArraysAPPLE;
-
   /* Shaders */
   replace(glCreateShaderObjectARB, glCreateShader);
   replace(glShaderSourceARB, glShaderSource);
