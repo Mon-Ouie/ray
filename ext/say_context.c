@@ -124,8 +124,6 @@ static void say_context_create_initial() {
   say_shared_context = (say_context*)malloc(sizeof(say_context));
 
   say_context_setup(say_shared_context);
-  say_context_setup_states(say_shared_context);
-
   say_context_make_current(say_shared_context);
   say_context_glew_init();
 

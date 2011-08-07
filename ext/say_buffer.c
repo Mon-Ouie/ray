@@ -83,7 +83,6 @@ static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
 
 static size_t say_buffer_register_pointer(size_t attr_i, say_vertex_elem_type t,
                                           size_t stride, size_t offset) {
-  attr_i += 1;
   switch (t) {
   case SAY_FLOAT:
     glVertexAttribPointer(attr_i, 1, GL_FLOAT, GL_FALSE, stride,
@@ -138,12 +137,12 @@ static void say_buffer_setup_pointer(say_buffer *buf) {
 
     if (say_vertex_type_is_per_instance(type, i)) {
       say_vbo_make_current(buf->instance_vbo);
-      instance_offset = say_buffer_register_pointer(i, t, instance_stride,
+      instance_offset = say_buffer_register_pointer(i + 1, t, instance_stride,
                                                     instance_offset);
     }
     else {
       say_vbo_make_current(buf->vbo);
-      offset = say_buffer_register_pointer(i, t, stride, offset);
+      offset = say_buffer_register_pointer(i + 1, t, stride, offset);
     }
 
     glEnableVertexAttribArray(i + 1);

@@ -235,7 +235,6 @@ void say_shader_apply_vertex_type(say_shader *shader, size_t vtype) {
   say_context_ensure();
 
   say_vertex_type *type = say_get_vertex_type(vtype);
-
   for (size_t i = 0; i < say_vertex_type_get_elem_count(type); i++) {
     glBindAttribLocation(shader->program, i + 1,
                          say_vertex_type_get_name(type, i));
