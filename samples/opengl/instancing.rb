@@ -78,8 +78,6 @@ class Model < Ray::Drawable
                              [500, 20, -500],
                              [0, -1, 0]).scale([4, 4, 4])
     end
-
-    self.blend_mode = nil
   end
 
   def move(n)
