@@ -20,6 +20,7 @@ Ray.game "My Own Buffer" do
 
     render do |win|
       win.make_current
+      @buffer.bind
       Ray::GL.draw_arrays :triangles, 0, 3
     end
   end
