@@ -131,6 +131,12 @@ static void say_buffer_setup_pointer(say_buffer *buf) {
   size_t instance_stride = say_vertex_type_get_instance_size(type);
   size_t instance_offset = 0;
 
+  /*
+   * This fixes a bug on OSX (with OpenGL 2.1). Nothing is drawn unless vertex
+   * attribute 0 is enabled.
+   */
+  glEnableVertexAttribArray(0);
+
   size_t i = 0;
   for (; i < count; i++) {
     say_vertex_elem_type t = say_vertex_type_get_type(type, i);
