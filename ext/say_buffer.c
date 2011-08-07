@@ -124,6 +124,8 @@ static void say_buffer_setup_pointer(say_buffer *buf) {
   say_vertex_type *type = say_get_vertex_type(buf->vtype);
 
   size_t count = say_vertex_type_get_elem_count(type);
+  if (count == 0) /* No attrbutes to set */
+    return;
 
   size_t stride = say_vertex_type_get_size(type);
   size_t offset = 0;
@@ -134,12 +136,26 @@ static void say_buffer_setup_pointer(say_buffer *buf) {
   /*
    * This fixes a bug on OSX (with OpenGL 2.1). Nothing is drawn unless vertex
    * attribute 0 is enabled.
+   *
+   * We set its data to the same as those used by the first element to ensure
+   * memory we do not own isn't accessed.
    */
+  say_vertex_elem_type t = say_vertex_type_get_type(type, 0);
+
+  if (say_vertex_type_is_per_instance(type, 0)) {
+    say_vbo_make_current(buf->instance_vbo);
+    say_buffer_register_pointer(0, t, instance_stride, instance_offset);
+  }
+  else {
+    say_vbo_make_current(buf->vbo);
+    say_buffer_register_pointer(0, t, stride, offset);
+  }
+
   glEnableVertexAttribArray(0);
 
   size_t i = 0;
   for (; i < count; i++) {
-    say_vertex_elem_type t = say_vertex_type_get_type(type, i);
+    t = say_vertex_type_get_type(type, i);
 
     if (say_vertex_type_is_per_instance(type, i)) {
       say_vbo_make_current(buf->instance_vbo);
