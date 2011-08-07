@@ -124,8 +124,6 @@ static void say_context_create_initial() {
   say_shared_context = (say_context*)malloc(sizeof(say_context));
 
   say_context_setup(say_shared_context);
-  say_context_setup_states(say_shared_context);
-
   say_context_make_current(say_shared_context);
   say_context_glew_init();
 
@@ -193,12 +191,6 @@ static void say_context_glew_init() {
     say_get_proc("glDeleteVertexArrays");
   glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)
     say_get_proc("glGenVertexArrays");
-
-  /* Vertex arrays */
-  replace(glBindVertexArrayAPPLE, glBindVertexArray);
-  replace(glDeleteVertexArraysAPPLE, glDeleteVertexArrays);
-  if (!glGenVertexArrays && glGenVertexArraysAPPLE)
-    glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)glGenVertexArraysAPPLE;
 
   /* Shaders */
   replace(glCreateShaderObjectARB, glCreateShader);

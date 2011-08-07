@@ -2,7 +2,6 @@
 
 static bool say_has_vao() {
   return GLEW_ARB_vertex_array_object ||
-    GLEW_APPLE_vertex_array_object ||
     GLEW_VERSION_3_0;
 }
 
@@ -138,20 +137,20 @@ static void say_buffer_setup_pointer(say_buffer *buf) {
 
     if (say_vertex_type_is_per_instance(type, i)) {
       say_vbo_make_current(buf->instance_vbo);
-      instance_offset = say_buffer_register_pointer(i, t, instance_stride,
+      instance_offset = say_buffer_register_pointer(i + 1, t, instance_stride,
                                                     instance_offset);
     }
     else {
       say_vbo_make_current(buf->vbo);
-      offset = say_buffer_register_pointer(i, t, stride, offset);
+      offset = say_buffer_register_pointer(i + 1, t, stride, offset);
     }
 
-    glEnableVertexAttribArray(i);
+    glEnableVertexAttribArray(i + 1);
     if (glVertexAttribDivisor) {
       if (say_vertex_type_is_per_instance(type, i))
-        glVertexAttribDivisor(i, 1);
+        glVertexAttribDivisor(i + 1, 1);
       else
-        glVertexAttribDivisor(i, 0);
+        glVertexAttribDivisor(i + 1, 0);
     }
   }
 
@@ -159,12 +158,12 @@ static void say_buffer_setup_pointer(say_buffer *buf) {
    * Say will always use all the attribs. Disable all of them until
    * finding one that is already disabled.
    */
-  for (; i < GL_MAX_VERTEX_ATTRIBS; i++) {
+  for (; i < GL_MAX_VERTEX_ATTRIBS - 1; i++) {
     GLint enabled;
-    glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
+    glGetVertexAttribiv(i + 1, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
 
     if (enabled)
-      glDisableVertexAttribArray(i);
+      glDisableVertexAttribArray(i + 1);
     else
       break;
   }
@@ -294,7 +293,7 @@ void say_buffer_unbind() {
   if (say_has_vao())
     say_vao_make_current(0);
   else { /* disable vertex attribs */
-    for (size_t i = 0; i < GL_MAX_VERTEX_ATTRIBS; i++) {
+    for (size_t i = 1; i < GL_MAX_VERTEX_ATTRIBS; i++) {
       GLint enabled;
       glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
 

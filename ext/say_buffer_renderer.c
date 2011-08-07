@@ -83,6 +83,7 @@ void say_buffer_renderer_update(say_buffer_renderer *renderer) {
 void say_buffer_renderer_render(say_buffer_renderer *renderer,
                                 say_shader *shader) {
   say_buffer_bind(renderer->buffer);
+  say_index_buffer_bind(renderer->index_buffer);
 
   int using_texture = 0;
   say_shader_set_int_id(shader, SAY_TEXTURE_ENABLED_LOC_ID, 0);

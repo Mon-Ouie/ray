@@ -28,6 +28,8 @@ Ray.game "My Own Index Buffer" do
 
     render do |win|
       win.make_current
+      @buffer.bind
+      @index_buffer.bind
       Ray::GL.draw_elements :triangles, 3, 0
     end
   end
