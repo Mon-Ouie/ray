@@ -150,8 +150,9 @@ say_shader *say_shader_create() {
   shader->vertex_shader   = glCreateShader(GL_VERTEX_SHADER);
   shader->geometry_shader = 0;
 
-  bool new_shader = !say_shader_force_old ||
-    (say_context_get_config()->core_profile && glBindFragDataLocation);
+  bool new_shader = say_shader_use_new &&
+    (!say_shader_use_old_force ||
+     say_context_get_config()->core_profile);
 
   if (!new_shader) {
     say_shader_compile_frag(shader, say_default_frag_shader);
@@ -168,10 +169,6 @@ say_shader *say_shader_create() {
   glAttachShader(shader->program, shader->vertex_shader);
 
   say_shader_apply_vertex_type(shader, 0);
-
-  if (!new_shader) {
-    glBindFragDataLocation(shader->program, 0, SAY_FRAG_COLOR);
-  }
 
   glLinkProgram(shader->program);
 
