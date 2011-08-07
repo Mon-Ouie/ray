@@ -83,6 +83,7 @@ static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
 
 static size_t say_buffer_register_pointer(size_t attr_i, say_vertex_elem_type t,
                                           size_t stride, size_t offset) {
+  attr_i += 1;
   switch (t) {
   case SAY_FLOAT:
     glVertexAttribPointer(attr_i, 1, GL_FLOAT, GL_FALSE, stride,
