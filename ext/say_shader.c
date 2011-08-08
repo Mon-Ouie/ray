@@ -170,6 +170,9 @@ say_shader *say_shader_create() {
 
   say_shader_apply_vertex_type(shader, 0);
 
+  if (new_shader)
+    glBindFragDataLocation(shader->program, 0, "out_FragColor");
+
   glLinkProgram(shader->program);
 
   say_shader_find_locations(shader);

@@ -129,7 +129,8 @@ static void say_context_create_initial() {
 
   /* Identify GLSL version to be used */
   const GLubyte *str = glGetString(GL_SHADING_LANGUAGE_VERSION);
-  if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'3')) {
+  if (str && (str[0] > (GLubyte)'1' || str[2] >= (GLubyte)'3') &&
+      glBindFragDataLocation) {
     say_shader_enable_new_glsl();
   }
 }
@@ -192,6 +193,9 @@ static void say_context_glew_init() {
   glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)
     say_get_proc("glGenVertexArrays");
 
+  glBindFragDataLocation = (PFNGLBINDFRAGDATALOCATIONPROC)
+    say_get_proc("glBindFragDataLocation");
+
   /* Shaders */
   replace(glCreateShaderObjectARB, glCreateShader);
   replace(glShaderSourceARB, glShaderSource);
@@ -205,6 +209,7 @@ static void say_context_glew_init() {
   replace(glAttachObjectARB, glAttachShader);
   replace(glDetachObjectARB, glDetachShader);
   replace(glBindAttribLocationARB, glBindAttribLocation);
+  replace(glBindFragDataLocationEXT, glBindFragDataLocation);
   replace(glLinkProgramARB, glLinkProgram);
   replace(glUseProgramObjectARB, glUseProgram);
   replace(glDeleteObjectARB, glDeleteShader);
