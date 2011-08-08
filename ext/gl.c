@@ -15,7 +15,6 @@ static VALUE ray_gl_primitives = Qnil;
 static
 VALUE ray_gl_draw_arrays(VALUE self, VALUE primitive, VALUE first,
                          VALUE count) {
-
   glDrawArrays(NUM2INT(rb_hash_aref(ray_gl_primitives, primitive)),
                NUM2ULONG(first), NUM2ULONG(count));
   return Qnil;

@@ -3,6 +3,10 @@ $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../ext")
 
 require 'ray'
 
+Ray::GL.core_profile  = true
+Ray::GL.major_version = 3
+Ray::GL.minor_version = 2
+
 def path_of(res)
   File.expand_path(res, File.join(File.dirname(__FILE__), '../../test/res'))
 end

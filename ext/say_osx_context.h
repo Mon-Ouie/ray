@@ -8,6 +8,8 @@
   static NSOpenGLPixelFormat *format = nil;
 
   if (!format) {
+    say_context_config *conf = say_context_get_config();
+
     NSOpenGLPixelFormatAttribute attr[] = {
       NSOpenGLPFAClosestPolicy,
       NSOpenGLPFADoubleBuffer,
@@ -16,10 +18,42 @@
       NSOpenGLPFAColorSize, 24,
       NSOpenGLPFAAlphaSize, 8,
 
-      NSOpenGLPFADepthSize, 24,
+      /*
+       * Next elements must be set depending on user configuration.
+       */
 
-      0
+      0, 0, /* depth */
+      0, 0, /* stencil */
+
+      0, 0, /* profile */
+
+      0 /* terminator */
     };
+
+    size_t i = 7;
+
+    if (conf->depth_size) {
+      attr[i + 0] = NSOpenGLPFADepthSize;
+      attr[i + 1] = conf->depth_size;
+
+      i += 2;
+    }
+
+    if (conf->stencil_size) {
+      attr[i + 0] = NSOpenGLPFAStencilSize;
+      attr[i + 1] = conf->stencil_size;
+
+      i += 2;
+    }
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+    if (conf->core_profile) { /* OpenGL 3.2! */
+      attr[i + 0] = NSOpenGLPFAOpenGLProfile;
+      attr[i + 1] = NSOpenGLProfileVersion3_2Core;
+
+      i += 2;
+    }
+#endif
 
     format = [[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
   }

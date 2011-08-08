@@ -7,6 +7,10 @@ end
 
 require 'ray'
 
+Ray::GL.core_profile  = true
+Ray::GL.major_version = 3
+Ray::GL.minor_version = 2
+
 class Sprites < Ray::Drawable
   Radius = 300
 
@@ -135,7 +139,7 @@ in vec2 var_TexCoord;
 out vec4 out_FragColor;
 
 void main() {
-  out_FragColor = var_Color * texture2D(in_Texture, var_TexCoord);
+  out_FragColor = var_Color * texture(in_Texture, var_TexCoord);
 }
 frag
 
