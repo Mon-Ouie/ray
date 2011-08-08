@@ -588,7 +588,8 @@ bool say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
     return false;
   }
 
-  say_color *orig = say_image_get_buffer(img);
+  say_color *orig = say_flip_color_buffer_copy(say_image_get_buffer(img),
+                                               w, h);
 
   for (size_t i = 0; i < w * h; i++) {
     buf[i * 4 + 0] =  orig[i].b;
@@ -596,6 +597,8 @@ bool say_imp_window_set_icon(say_imp_window win, struct say_image *img) {
     buf[i * 4 + 2] =  orig[i].r;
     buf[i * 4 + 3] =  orig[i].a;
   }
+
+  free(orig);
 
   win->icon = CreateIcon(GetModuleHandle(NULL), w, h, 1, 32, NULL, buf);
 

@@ -375,10 +375,13 @@ bool say_imp_window_set_icon(say_imp_window win, struct say_image *icon) {
 
   /* Convert image to BGRA */
 
-  say_color *orig_buf = say_image_get_buffer(icon);
-  long      *pixels   = malloc(sizeof(long) * (2 + (icon->width * icon->height)));
+  say_color *orig_buf = say_flip_color_buffer_copy(say_image_get_buffer(icon),
+                                                   say_image_get_width(icon),
+                                                   say_image_get_height(icon));
 
-  if (!pixels) {
+  long *pixels = malloc(sizeof(long) * (2 + (icon->width * icon->height)));
+
+  if (!(pixels && orig_buf)) {
     say_error_set("could not allocate icon buffer");
     return false;
   }
@@ -398,6 +401,8 @@ bool say_imp_window_set_icon(say_imp_window win, struct say_image *icon) {
 
     buf++;
   }
+
+  free(orig_buf);
 
   /* Set _NET_WM_ICON */
 

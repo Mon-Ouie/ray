@@ -67,11 +67,6 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
                 width:(size_t)w
                height:(size_t)h
                 style:(uint8_t)style {
-  //if ([NSThread currentThread] != [NSThread mainThread]) {
-  //  say_error_set("can't create window outside main thread");
-  //  return NO;
-  //}
-
   say_osx_setup_process();
 
   NSRect rect = NSMakeRect(0, 0, w, h);
@@ -174,11 +169,9 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
 
                                               bitsPerPixel:0];
 
-
-  say_color *buf = say_image_get_buffer(img);
   for (size_t y = 0; y < h; y++) {
     for (size_t x = 0; x < w; x++) {
-      say_color col = buf[x + y * w];
+      say_color col = say_image_get(img, x, y);
       NSUInteger pixel[] = {col.r, col.g, col.b, col.a};
 
       [rep setPixel:pixel atX:x y:y];
