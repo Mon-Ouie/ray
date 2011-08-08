@@ -44,4 +44,8 @@ bool say_color_eq(say_color a, say_color b);
 typedef void (*say_destructor)(void *data);
 typedef void (*say_creator)(void *data);
 
+say_color *say_flip_color_buffer_copy(say_color *buffer, size_t width,
+                                      size_t height);
+void say_flip_color_buffer(say_color *buffer, size_t width, size_t height);
+
 #endif

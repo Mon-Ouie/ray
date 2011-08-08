@@ -82,18 +82,7 @@ bool say_image_load_raw(say_image *img, size_t w, size_t h, say_color *pixels) {
   /*
    * Vertical flip to fit OpenGL convention.
    */
-  size_t mem_size = sizeof(say_color) * w;
-
-  say_color *temp_line = malloc(mem_size);
-  say_color *buffer    = img->pixels;
-
-  for (size_t i = 0; i < h / 2.0; i++) {
-    memcpy(temp_line, &buffer[w * i], mem_size);
-    memmove(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
-    memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
-  }
-
-  free(temp_line);
+  say_flip_color_buffer(img->pixels, w, h);
 
   return true;
 }
@@ -180,24 +169,8 @@ static bool say_image_assert_non_empty(say_image *img) {
 }
 
 static say_color *say_image_reversed_buffer(say_image *img) {
-  size_t w = img->width, h = img->height;
-
-  say_color *buffer = malloc(sizeof(say_color) * w * h);
-  memcpy(buffer, img->pixels, sizeof(say_color) * w * h);
-
-  size_t mem_size = sizeof(say_color) * w;
-
-  say_color *temp_line = malloc(mem_size);
-
-  for (size_t i = 0; i < h / 2.0; i++) {
-    memcpy(temp_line, &buffer[w * i], mem_size);
-    memmove(&buffer[w * i], &buffer[w * (h - i - 1)], mem_size);
-    memcpy(&buffer[w * (h - i - 1)], temp_line, mem_size);
-  }
-
-  free(temp_line);
-
-  return buffer;
+  return say_flip_color_buffer_copy(img->pixels, img->width,
+                                    img->height);
 }
 
 bool say_image_write_bmp(say_image *img, const char *filename) {
