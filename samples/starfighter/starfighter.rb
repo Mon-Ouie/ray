@@ -7,7 +7,7 @@ require 'ray'
 require 'forwardable'
 
 def path_of(resource)
-  File.expand_path File.join(File.dirname(File.dirname(__FILE__)), resource)
+  File.join(File.dirname(__FILE__), "../../test/res", resource)
 end
 
 class Player
@@ -20,10 +20,10 @@ class Player
 
   def initialize(stars)
     @stars = stars
-    @sprite = Ray::Sprite.new path_of("_media/Starfighter.png")
+    @sprite = Ray::Sprite.new path_of("Starfighter.png")
     @sprite.origin = @sprite.image.size / 2
 
-    @beep = sound path_of("_media/Beep.wav")
+    @beep = sound path_of("Beep.wav")
 
     @vel_x = @vel_y = 0.0
 
@@ -89,7 +89,7 @@ class Star
   attr_reader :sprite
 
   def initialize(position)
-    @sprite = Ray::Sprite.new path_of("_media/Star.png"), :at => position
+    @sprite = Ray::Sprite.new path_of("Star.png"), :at => position
     @sprite.sheet_size = [10, 1]
     @sprite.origin = (@sprite.image.size / @sprite.sheet_size) / 2
     @animation = sprite_animation(:from => [0, 0], :to => [9, 0],
@@ -122,7 +122,7 @@ Ray::Game.new("Starfighter --- [LEFT/RIGHT/UP to move; collect the stars]") do
   end
 
   scene :game do
-    @background_image = sprite path_of("_media/Space.png")
+    @background_image = sprite path_of("Space.png")
     @score_text = text("", :at => [10, 10], :size => 20,
                        :color => Ray::Color.yellow)
 
