@@ -30,9 +30,8 @@ $:.unshift File.expand_path(File.dirname(__FILE__) + "/../../ext")
 require 'ray'
 
 def path_of(resource)
-  File.expand_path File.join(File.dirname(File.dirname(__FILE__)), resource)
+  File.join(File.dirname(__FILE__), "../../test/res", resource)
 end
-
 
 class CptnRuby
   include Ray::Helper
@@ -51,7 +50,7 @@ class CptnRuby
     @map = map
     @vy  = 0
 
-    @sprite = Ray::Sprite.new path_of("_media/CptnRuby.png"), :at => pos
+    @sprite = Ray::Sprite.new path_of("CptnRuby.png"), :at => pos
     @sprite.sheet_size = [4, 1]
 
     @size = Ray::Vector2[@sprite.sprite_width, @sprite.sprite_height]
@@ -151,7 +150,7 @@ class CollectibleGem
   include Ray::Helper
 
   def initialize(pos)
-    @sprite = Ray::Sprite.new path_of("_media/CptnRuby Gem.png"), :at => pos
+    @sprite = Ray::Sprite.new path_of("CptnRuby Gem.png"), :at => pos
     @sprite.origin = @sprite.image.size / 2
 
     @animation = rotation(:from => -30, :to => 30, :duration => 0.6)
@@ -182,7 +181,7 @@ class CollectibleGem
 end
 
 class Map
-  Tileset  = path_of("_media/CptnRuby Tileset.png")
+  Tileset  = path_of("CptnRuby Tileset.png")
   PartSize = 60
   TileSize = 50
 
@@ -241,9 +240,9 @@ Ray.game "Captain Ruby" do
   scene :game do
     @half_size = window.size / 2
 
-    @sky  = sprite path_of("_media/Space.png")
+    @sky  = sprite path_of("Space.png")
 
-    @map  = Map.new path_of("_media/CptnRuby Map.txt")
+    @map  = Map.new path_of("CptnRuby Map.txt")
     @cptn = CptnRuby.new(@map, [400, 100])
 
     @camera = Ray::View.new @cptn.pos, window.size
