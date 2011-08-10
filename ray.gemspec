@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/Mon-Ouie/ray"
 
   s.email   = "mon.ouie@gmail.com"
-  s.authors = ["Mon ouïe"]
+  s.authors = ["Mon ouie"]
 
   s.files |= Dir["lib/**/*.rb"]
   s.files |= Dir["ext/**/*.{c,h}"]
