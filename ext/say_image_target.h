@@ -5,8 +5,9 @@
 #include "say_image.h"
 
 typedef struct {
-  GLuint fbo, rbo;
-  say_image *img;
+  say_array  *fbos;
+  GLuint      rbo;
+  say_image  *img;
   say_target *target;
 } say_image_target;
 
