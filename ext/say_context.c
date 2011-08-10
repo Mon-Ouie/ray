@@ -261,11 +261,23 @@ static void say_context_glew_init() {
   replace(glFramebufferTexture2DEXT, glFramebufferTexture2D);
   replace(glFramebufferRenderbufferEXT, glFramebufferRenderbuffer);
 
+  glGenRenderbuffers = (PFNGLGENRENDERBUFFERSPROC)
+    say_get_proc("glGenRenderbuffers");
+  glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSPROC)
+    say_get_proc("glDeleteRenderbuffers");
+  glBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC)
+    say_get_proc("glBindRenderbuffer");
+  glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEPROC)
+    say_get_proc("glRenderbufferStorage");
+
   /* Renderbuffer objects */
   replace(glGenRenderbuffersEXT, glGenRenderbuffers);
   replace(glDeleteRenderbuffersEXT, glDeleteRenderbuffers);
   replace(glBindRenderbufferEXT, glBindRenderbuffer);
   replace(glRenderbufferStorageEXT, glRenderbufferStorage);
+
+  glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)
+    say_get_proc("glGenerateMipmap");
 
   /* Mipmaps */
   replace(glGenerateMipmapEXT, glGenerateMipmap);
