@@ -46,7 +46,7 @@
       i += 2;
     }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_7_AND_LATER
     if (conf->core_profile) { /* OpenGL 3.2! */
       attr[i + 0] = NSOpenGLPFAOpenGLProfile;
       attr[i + 1] = NSOpenGLProfileVersion3_2Core;
