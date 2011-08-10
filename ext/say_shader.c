@@ -100,7 +100,7 @@ static const char *say_new_default_frag_shader =
   "\n"
   "void main() {\n"
   "  if (in_TextureEnabled)\n"
-  "    out_FragColor = texture2D(in_Texture, var_TexCoord) * var_Color;\n"
+  "    out_FragColor = texture(in_Texture, var_TexCoord) * var_Color;\n"
   "  else\n"
   "    out_FragColor = var_Color;\n"
   "}\n";

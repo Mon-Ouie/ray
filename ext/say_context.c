@@ -157,14 +157,14 @@ static void say_context_setup_states(say_context *context) {
 }
 
 void say_context_clean_up() {
-  if (say_current_context)
-    say_thread_variable_free(say_current_context);
+  if (say_all_ensured_contexts)
+    say_array_free(say_all_ensured_contexts);
 
   if (say_ensured_context)
     say_thread_variable_free(say_ensured_context);
 
-  if (say_all_ensured_contexts)
-    say_array_free(say_all_ensured_contexts);
+  if (say_current_context)
+    say_thread_variable_free(say_current_context);
 
   say_current_context      = NULL;
   say_ensured_context      = NULL;
