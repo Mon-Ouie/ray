@@ -23,8 +23,6 @@ void *say_get_proc(const char *name) {
   strcpy(symbol_name + 1, name);
   symbol_name[0] = '_';
 
-  free(symbol_name);
-
   void *ptr = dlsym(handle, symbol_name);
   free(symbol_name);
   return ptr;
