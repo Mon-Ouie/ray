@@ -32,7 +32,7 @@ uniforms
   /* Apply default value */
   vec4 color;
   if (in_TextureEnabled)
-    color = texture2D(in_Texture, var_TexCoord) * var_Color;
+    color = texture#{"2D" if version<130}(in_Texture, var_TexCoord) * var_Color;
   else
     color = var_Color;
 default
