@@ -78,12 +78,12 @@ static void *say_music_playback_thread(say_music *music) {
         }
       }
     }
-    
+
     /* sleep for 0.25s */
 #ifdef SAY_WIN
     Sleep(250);
 #else
-    usleep(250 * 1000); 
+    usleep(250 * 1000);
 #endif
   }
 
@@ -116,7 +116,9 @@ say_music *say_music_create() {
 void say_music_free(say_music *music) {
   music->continue_running = false;
 
-  /* say_thread_join(music->thread); */ /* fails on windows */
+#ifndef SAY_WIN
+  say_thread_join(music->thread);
+#endif
   say_thread_free(music->thread);
 
   alSourceStop(music->src->src);
