@@ -444,13 +444,14 @@ say_rect say_text_get_rect(say_text *text) {
   if (!text->rect_updated)
     say_text_update_rect(text);
 
-  say_vector2 pos   = say_drawable_get_pos(text->drawable);
-  say_vector2 scale = say_drawable_get_scale(text->drawable);
-  say_vector2 size  = text->rect_size;
+  say_vector2 pos    = say_drawable_get_pos(text->drawable);
+  say_vector2 origin = say_drawable_get_origin(text->drawable);
+  say_vector2 scale  = say_drawable_get_scale(text->drawable);
+  say_vector2 size   = text->rect_size;
 
   say_rect rect = (say_rect){
-    pos.x,
-    pos.y,
+    -origin.x * scale.x + pos.x,
+    -origin.y * scale.y + pos.y,
     size.x * scale.x,
     size.y * scale.y
   };

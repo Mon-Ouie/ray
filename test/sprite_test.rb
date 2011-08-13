@@ -75,6 +75,16 @@ context "a sprite" do
     asserts :y_flipped?
   end
 
+  context "with several transformations" do
+    hookup do
+      topic.pos    = [10, 20]
+      topic.origin = [10, -10]
+      topic.scale  = [2, 3]
+    end
+
+    asserts(:rect).equals Ray::Rect[-10, 50, 200, 450]
+  end
+
   context "copied after several changes" do
     setup do
       topic.flip_x = true

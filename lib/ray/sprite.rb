@@ -44,74 +44,20 @@ module Ray
       # @sprite_sheet_pos  = Ray::Vector2[0, 0]
     end
 
-    # # Sets the size of the sprite sheet. For instance,
-    # #   sprite.sheet_size = [3, 4]
-    # # would mean there are 4 rows and 3 columns in the sprite (and each cell
-    # # has the same size).
-    # def sheet_size=(ary)
-    #   @uses_sprite_sheet = true
-    #   @sprite_sheet_size = ary.to_vector2
-
-    #   self.sheet_pos = [0, 0]
-    # end
-
-    # # Sets which cell of the sprite sheet should be displayed.
-    # #   sprite.sheet_pos = [0, 1] # Uses the first cell of the second line.
-    # #
-    # # pos.x and pos.y are rounded to floor.
-    # # Passing a too high value will make the sprite use the previous cells.
-    # #    sprite.sheet_size = [4, 4]
-    # #    sprite.sheet_size = [5, 5]
-    # #    sprite.sheet_size == [1, 1] # => true
-    # def sheet_pos=(pos)
-    #   pos = pos.to_vector2.dup
-    #   pos.x = pos.x.floor % @sprite_sheet_size.w
-    #   pos.y = pos.y.floor % @sprite_sheet_size.h
-
-    #   self.sub_rect = Ray::Rect.new(pos.x * sprite_width,
-    #                                 pos.y * sprite_height,
-    #                                 sprite_width, sprite_height)
-
-    #   @sheet_pos = pos
-    # end
-
-    # # @return [Ray::Vector2] the position of the cell which is being used.
-    # attr_reader :sheet_pos
-
-    # # @return [Integer, nil] The width of each cell in the sprite sheet
-    # def sprite_width
-    #   if uses_sprite_sheet?
-    #     image.w / @sprite_sheet_size.w
-    #   end
-    # end
-
-    # # @return [Integer, nil] The height of each cell in the sprite sheet
-    # def sprite_height
-    #   if uses_sprite_sheet?
-    #     image.h / @sprite_sheet_size.h
-    #   end
-    # end
-
-    # # Disables the sprite sheet
-    # def disable_sprite_sheet
-    #   self.sub_rect = Ray::Rect.new(0, 0, image.w, image.h) if image
-
-    #   @sprite_sheet_size = nil
-    #   @uses_sprite_sheet = false
-    # end
-
-    # def uses_sprite_sheet?
-    #   @uses_sprite_sheet
-    # end
-
     # @return [Ray::Rect] The rect where this sprite will be drawn, taking
     #   position and scale in account.
     def rect
       pos      = self.pos
       sub_rect = self.sub_rect
-      scade    = self.scale
+      origin   = self.origin
+      scale    = self.scale
 
-      Ray::Rect.new(pos.x, pos.y, sub_rect.w * scale.w, sub_rect.h * scale.h)
+      top_left = (-origin * scale) + pos
+
+      Ray::Rect.new(top_left.x,
+                    top_left.y,
+                    sub_rect.w * scale.w,
+                    sub_rect.h * scale.h)
     end
 
     # @param [Ray::Rect, #to_rect] An object with which the receiver may collide
