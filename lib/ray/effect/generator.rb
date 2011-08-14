@@ -129,6 +129,7 @@ default
       def build(shader = Ray::Shader.new)
         shader.compile :frag => StringIO.new(code)
         apply_defaults shader
+        shader
       end
 
       def apply_defaults(shader)
