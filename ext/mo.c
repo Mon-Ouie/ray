@@ -168,13 +168,13 @@ void mo_array_reserve(mo_array *ary, size_t size) {
   if (ary->capa > size)
     return;
 
-  ary->buffer = realloc(ary->buffer, size * ary->capa);
+  ary->buffer = realloc(ary->buffer, size * ary->el_size);
   ary->capa   = size;
 }
 
 void mo_array_shrink(mo_array *ary) {
   if (ary->capa == ary->size) return;
-  ary->buffer = realloc(ary->buffer, ary->size * ary->capa);
+  ary->buffer = realloc(ary->buffer, ary->size * ary->el_size);
   ary->capa   = ary->size;
 }
 
