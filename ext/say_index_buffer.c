@@ -29,8 +29,8 @@ say_index_buffer *say_index_buffer_create(GLenum type, size_t size) {
   glGenBuffers(1, &buf->ibo);
   buf->type = type;
 
-  buf->buffer = say_array_create(sizeof(GLuint), NULL, NULL);
-  say_array_resize(buf->buffer, size);
+  mo_array_init(&buf->buffer, sizeof(GLuint));
+  mo_array_resize(&buf->buffer, size);
 
   say_ibo_make_current(buf->ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(GLuint),
@@ -44,7 +44,7 @@ void say_index_buffer_free(say_index_buffer *buf) {
 
   say_ibo_will_delete(buf->ibo);
   glDeleteBuffers(1, &buf->ibo);
-  say_array_free(buf->buffer);
+  mo_array_release(&buf->buffer);
   free(buf);
 }
 
@@ -71,27 +71,28 @@ void say_index_buffer_update_part(say_index_buffer *buf, size_t index,
   glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
                   index * sizeof(GLuint),
                   size * sizeof(GLuint),
-                  say_array_get(buf->buffer, index));
+                  mo_array_at(&buf->buffer, index));
 }
 
 void say_index_buffer_update(say_index_buffer *buf) {
-  say_index_buffer_update_part(buf, 0, say_array_get_size(buf->buffer));
+  say_index_buffer_update_part(buf, 0, buf->buffer.size);
 }
 
 size_t say_index_buffer_get_size(say_index_buffer *buf) {
-  return say_array_get_size(buf->buffer);
+  return buf->buffer.size;
 }
 
 void say_index_buffer_resize(say_index_buffer *buf, size_t size) {
   say_context_ensure();
 
-  say_array_resize(buf->buffer, size);
+  mo_array_resize(&buf->buffer, size);
+  mo_array_shrink(&buf->buffer);
 
   say_index_buffer_bind(buf);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, size * sizeof(GLuint),
-               say_array_get(buf->buffer, 0), buf->type);
+               mo_array_at(&buf->buffer, 0), buf->type);
 }
 
 GLuint *say_index_buffer_get(say_index_buffer *buf, size_t i) {
-  return say_array_get(buf->buffer, i);
+  return mo_array_get_ptr(&buf->buffer, i, GLuint);
 }

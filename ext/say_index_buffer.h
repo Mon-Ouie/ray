@@ -2,13 +2,12 @@
 #define SAY_INDEX_BUFFER_H_
 
 #include "say_basic_type.h"
-#include "say_array.h"
 
 typedef struct {
   GLuint ibo;
   GLenum type;
 
-  say_array *buffer;
+  mo_array buffer;
 } say_index_buffer;
 
 say_index_buffer *say_index_buffer_create(GLenum type, size_t size);
