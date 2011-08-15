@@ -4,9 +4,7 @@ static say_font_page *say_page_create() {
   say_font_page *page = malloc(sizeof(say_font_page));
 
   page->glyphs = say_table_create(free);
-  page->rows   = say_array_create(sizeof(say_font_row),
-                                  NULL,
-                                  NULL);
+  mo_array_init(&page->rows, sizeof(say_font_row));
 
   page->current_height = 2;
 
@@ -32,7 +30,7 @@ static say_font_page *say_page_create() {
 static void say_page_free(say_font_page *page) {
   say_image_free(page->image);
 
-  say_array_free(page->rows);
+  mo_array_release(&page->rows);
   say_table_free(page->glyphs);
 
   free(page);
@@ -43,9 +41,10 @@ static say_rect say_page_find_rect(say_font_page *page, size_t width, size_t hei
 
   float best_ratio = 0;
 
-  for (say_font_row *row = say_array_get(page->rows, 0);
-       row;
-       say_array_next(page->rows, (void**)&row)) {
+  say_font_row *end = mo_array_end(&page->rows);
+  for (say_font_row *row = mo_array_at(&page->rows, 0);
+       row && row < end;
+       mo_array_next(&page->rows, (void**)&row)) {
     float ratio = height / (float)row->height;
 
     if (ratio < 0.7 || ratio > 1.0 || ratio < best_ratio)
@@ -72,8 +71,8 @@ static say_rect say_page_find_rect(say_font_page *page, size_t width, size_t hei
     row.y             = page->current_height;
     row.height        = row_height;
 
-    say_array_push(page->rows, &row);
-    found_row = say_array_get(page->rows, say_array_get_size(page->rows) - 1);
+    mo_array_push(&page->rows, &row);
+    found_row = mo_array_at(&page->rows, page->rows.size - 1);
 
     page->current_height += row_height;
   }

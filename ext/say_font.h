@@ -17,7 +17,7 @@ typedef struct {
 
 typedef struct {
   say_table *glyphs;
-  say_array *rows;
+  mo_array   rows;
 
   say_image *image;
 
