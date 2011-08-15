@@ -359,7 +359,7 @@ void say_buffer_resize(say_buffer *buf, size_t size) {
   say_context_ensure();
   say_vbo_make_current(buf->vbo);
   glBufferData(GL_ARRAY_BUFFER,
-               size * buf->buffer.size,
+               size * buf->buffer.el_size,
                say_buffer_get_vertex(buf, 0),
                buf->type);
 }
