@@ -20,9 +20,8 @@ static void say_target_update_states(say_target *target) {
 say_target *say_target_create() {
   say_target *target = (say_target*)malloc(sizeof(say_target));
 
-  target->all_contexts = say_array_create(sizeof(say_context*),
-                                          say_context_free_el,
-                                          NULL);
+  mo_array_init(&target->all_contexts, sizeof(say_context*));
+  target->all_contexts.release = say_context_free_el;
 
   target->context  = say_thread_variable_create();
   target->renderer = say_renderer_create();
@@ -44,7 +43,7 @@ void say_target_free(say_target *target) {
 
   say_thread_variable_free(target->context);
 
-  say_array_free(target->all_contexts);
+  mo_array_release(&target->all_contexts);
 
   free(target);
 }
@@ -52,11 +51,7 @@ void say_target_free(say_target *target) {
 void say_target_set_context_proc(say_target *target, say_context_proc proc) {
   if (target->own_context_needed) {
     say_thread_variable_free(target->context);
-    say_array_free(target->all_contexts);
-
-    target->all_contexts = say_array_create(sizeof(say_context*),
-                                            say_context_free_el,
-                                            NULL);
+    mo_array_resize(&target->all_contexts, 0);
 
     target->context = say_thread_variable_create();
   }
@@ -85,6 +80,7 @@ say_context *say_target_get_context(say_target *target) {
         return NULL;
       }
 
+      mo_array_push(&target->all_contexts, &context);
       say_thread_variable_set(target->context, context);
 
       return context;
