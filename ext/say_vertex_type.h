@@ -22,7 +22,7 @@ typedef struct {
 } say_vertex_elem;
 
 typedef struct {
-  say_array *elements;
+  mo_array elements;
 } say_vertex_type;
 
 size_t say_vertex_type_make_new();

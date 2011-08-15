@@ -1,25 +1,23 @@
 #include "say.h"
 
-static say_array *say_vertex_types = NULL;
+static mo_array *say_vertex_types = NULL;
 
 static void say_vertex_type_delete(say_vertex_type *type) {
-  say_array_free(type->elements);
+  mo_array_release(&type->elements);
 }
 
 static void say_vertex_elem_free(say_vertex_elem *elem) {
   free(elem->name);
 }
 
-static say_array *say_vertex_type_get_all() {
+static mo_array *say_vertex_type_get_all() {
   if (!say_vertex_types) {
-    say_vertex_types = say_array_create(sizeof(say_vertex_type),
-                                        NULL,
-                                        (say_destructor)say_vertex_type_delete);
+    say_vertex_types = mo_array_create(sizeof(say_vertex_type));
+    say_vertex_types->release = (say_destructor)say_vertex_type_delete;
 
     say_vertex_type type;
-    type.elements = say_array_create(sizeof(say_vertex_elem),
-                                     (say_destructor)say_vertex_elem_free,
-                                     NULL);
+    mo_array_init(&type.elements, sizeof(say_vertex_elem));
+    type.elements.release = (say_destructor)say_vertex_elem_free;
 
     say_vertex_elem el;
 
@@ -37,7 +35,7 @@ static say_array *say_vertex_type_get_all() {
     el.name = say_strdup(SAY_TEX_COORD_ATTR);
     say_vertex_type_push(&type, el);
 
-    say_array_push(say_vertex_types, &type);
+    mo_array_push(say_vertex_types, &type);
   }
 
   return say_vertex_types;
@@ -60,41 +58,44 @@ static size_t say_vertex_type_size_of(say_vertex_elem_type type) {
 
 size_t say_vertex_type_make_new() {
   say_vertex_type type;
-  type.elements = say_array_create(sizeof(say_vertex_elem), NULL, NULL);
+  mo_array_init(&type.elements, sizeof(say_vertex_elem));
+  type.elements.release = (say_destructor)say_vertex_elem_free;
 
-  say_array_push(say_vertex_type_get_all(), &type);
-  return say_array_get_size(say_vertex_types) - 1;
+  mo_array_push(say_vertex_type_get_all(), &type);
+  return say_vertex_types->size - 1;
 }
 
 say_vertex_type *say_get_vertex_type(size_t i) {
-  return say_array_get(say_vertex_type_get_all(), i);
+  return mo_array_at(say_vertex_type_get_all(), i);
 }
 
 void say_vertex_type_push(say_vertex_type *type, say_vertex_elem elem) {
-  say_array_push(type->elements, &elem);
+  mo_array_push(&type->elements, &elem);
 }
 
 say_vertex_elem_type say_vertex_type_get_type(say_vertex_type *type, size_t i) {
-  return ((say_vertex_elem*)say_array_get(type->elements, i))->type;
+  return mo_array_get_as(&type->elements, i, say_vertex_elem).type;
 }
 
 const char *say_vertex_type_get_name(say_vertex_type *type, size_t i) {
-  return ((say_vertex_elem*)say_array_get(type->elements, i))->name;
+  return mo_array_get_as(&type->elements, i, say_vertex_elem).name;
 }
 
 bool say_vertex_type_is_per_instance(say_vertex_type *type, size_t i) {
-  return ((say_vertex_elem*)say_array_get(type->elements, i))->per_instance;
+  return mo_array_get_as(&type->elements, i, say_vertex_elem).per_instance;
 }
 
 size_t say_vertex_type_get_elem_count(say_vertex_type *type) {
-  return say_array_get_size(type->elements);
+  return type->elements.size;
 }
 
 size_t say_vertex_type_get_size(say_vertex_type *type) {
   size_t sum = 0;
-  for (say_vertex_elem *e = say_array_get(type->elements, 0);
-       e;
-       say_array_next(type->elements, (void**)&e)) {
+
+  say_vertex_elem *end = mo_array_end(&type->elements);
+  for (say_vertex_elem *e = mo_array_at(&type->elements, 0);
+       e < end;
+       mo_array_next(&type->elements, (void**)&e)) {
     if (e->per_instance)
       continue;
     sum += say_vertex_type_size_of(e->type);
@@ -105,9 +106,11 @@ size_t say_vertex_type_get_size(say_vertex_type *type) {
 
 size_t say_vertex_type_get_instance_size(say_vertex_type *type) {
   size_t sum = 0;
-  for (say_vertex_elem *e = say_array_get(type->elements, 0);
-       e;
-       say_array_next(type->elements, (void**)&e)) {
+
+  say_vertex_elem *end = mo_array_end(&type->elements);
+  for (say_vertex_elem *e = mo_array_at(&type->elements, 0);
+       e < end;
+       mo_array_next(&type->elements, (void**)&e)) {
     if (!e->per_instance)
       continue;
     sum += say_vertex_type_size_of(e->type);
@@ -130,9 +133,10 @@ size_t say_vertex_type_get_offset(say_vertex_type *type, size_t elem) {
 }
 
 bool say_vertex_type_has_instance_data(say_vertex_type *type) {
-  for (say_vertex_elem *e = say_array_get(type->elements, 0);
-       e;
-       say_array_next(type->elements, (void**)&e)) {
+  say_vertex_elem *end = mo_array_end(&type->elements);
+  for (say_vertex_elem *e = mo_array_at(&type->elements, 0);
+       e < end;
+       mo_array_next(&type->elements, (void**)&e)) {
     if (e->per_instance)
       return true;
   }
@@ -142,6 +146,6 @@ bool say_vertex_type_has_instance_data(say_vertex_type *type) {
 
 void say_vertex_type_clean_up() {
   if (say_vertex_types)
-    say_array_free(say_vertex_types);
+    mo_array_free(say_vertex_types);
   say_vertex_types = NULL;
 }
