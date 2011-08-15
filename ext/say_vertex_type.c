@@ -94,7 +94,7 @@ size_t say_vertex_type_get_size(say_vertex_type *type) {
 
   say_vertex_elem *end = mo_array_end(&type->elements);
   for (say_vertex_elem *e = mo_array_at(&type->elements, 0);
-       e < end;
+       e && e < end;
        mo_array_next(&type->elements, (void**)&e)) {
     if (e->per_instance)
       continue;
@@ -109,7 +109,7 @@ size_t say_vertex_type_get_instance_size(say_vertex_type *type) {
 
   say_vertex_elem *end = mo_array_end(&type->elements);
   for (say_vertex_elem *e = mo_array_at(&type->elements, 0);
-       e < end;
+       e && e < end;
        mo_array_next(&type->elements, (void**)&e)) {
     if (!e->per_instance)
       continue;
@@ -135,7 +135,7 @@ size_t say_vertex_type_get_offset(say_vertex_type *type, size_t elem) {
 bool say_vertex_type_has_instance_data(say_vertex_type *type) {
   say_vertex_elem *end = mo_array_end(&type->elements);
   for (say_vertex_elem *e = mo_array_at(&type->elements, 0);
-       e < end;
+       e && e < end;
        mo_array_next(&type->elements, (void**)&e)) {
     if (e->per_instance)
       return true;
