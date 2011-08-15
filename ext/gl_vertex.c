@@ -102,7 +102,7 @@ VALUE ray_gl_vertex_make_type(VALUE self, VALUE types) {
 
     VALUE per_instance = RAY_ARRAY_AT(element, 2);
 
-    char *c_name = StringValuePtr(name);
+    char *c_name = say_strdup(StringValuePtr(name));
     say_vertex_elem_type c_type = NUM2INT(rb_hash_aref(ray_gl_vertex_types,
                                                        type));
 
