@@ -3,6 +3,9 @@
 
 /* Dependencies for all of the files */
 
+/* Data structures */
+#include "mo.h"
+
 /* Standard headers */
 #include <stdlib.h>
 #include <stdio.h>
