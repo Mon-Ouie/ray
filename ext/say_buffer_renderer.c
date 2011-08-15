@@ -11,7 +11,8 @@ say_buffer_renderer *say_buffer_renderer_create(GLenum type,
 
   renderer->buffer       = say_buffer_create(vtype, type, 256);
   renderer->index_buffer = say_index_buffer_create(type, 128);
-  renderer->drawables = say_array_create(sizeof(say_drawable*), NULL, NULL);
+
+  mo_array_init(&renderer->drawables, sizeof(say_drawable*));
 
   renderer->vtype = vtype;
 
@@ -23,14 +24,15 @@ say_buffer_renderer *say_buffer_renderer_create(GLenum type,
 
 void say_buffer_renderer_free(say_buffer_renderer *renderer) {
   say_buffer_free(renderer->buffer);
-  say_array_free(renderer->drawables);
+  say_index_buffer_free(renderer->index_buffer);
+  mo_array_release(&renderer->drawables);
   free(renderer);
 }
 
 void say_buffer_renderer_clear(say_buffer_renderer *renderer) {
   renderer->current_vertex = 0;
   renderer->current_index  = 0;
-  say_array_resize(renderer->drawables, 0);
+  mo_array_resize(&renderer->drawables, 0);
 }
 
 bool say_buffer_renderer_push(say_buffer_renderer *renderer,
@@ -58,7 +60,7 @@ bool say_buffer_renderer_push(say_buffer_renderer *renderer,
   else if (current_size < index_new_size)
     say_index_buffer_resize(renderer->index_buffer, current_size * 2);
 
-  say_array_push(renderer->drawables, &drawable);
+  mo_array_push(&renderer->drawables, &drawable);
 
   say_drawable_fill_buffer(drawable,
                            say_buffer_get_vertex(renderer->buffer,
@@ -89,9 +91,9 @@ void say_buffer_renderer_render(say_buffer_renderer *renderer,
   say_shader_set_int_id(shader, SAY_TEXTURE_ENABLED_LOC_ID, 0);
 
   size_t current_vertex = 0, current_index = 0;
-  for (size_t i = 0; i < say_array_get_size(renderer->drawables); i++) {
-    say_drawable **e = say_array_get(renderer->drawables, i);
-    say_drawable *drawable = *e;
+  for (size_t i = 0; i < renderer->drawables.size; i++) {
+    say_drawable *drawable = mo_array_get_as(&renderer->drawables, i,
+                                             say_drawable*);
 
     if (!drawable->shader &&
         using_texture != say_drawable_is_textured(drawable)) {

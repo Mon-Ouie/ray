@@ -8,7 +8,7 @@
 typedef struct {
   say_buffer       *buffer;
   say_index_buffer *index_buffer;
-  say_array        *drawables;
+  mo_array          drawables;
 
   size_t vtype;
 
