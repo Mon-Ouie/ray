@@ -13,14 +13,14 @@ typedef struct {
 
 typedef struct {
   say_buffer *buf;
-  say_array *ranges;
+  mo_list *ranges;
 } say_global_buffer;
 
 static mo_array *say_global_buffers = NULL;
 
 static void say_global_buffer_free(say_global_buffer *buf) {
   say_buffer_free(buf->buf);
-  say_array_free(buf->ranges);
+  if (buf->ranges) mo_list_free(buf->ranges);
 }
 
 static say_global_buffer *say_global_buffer_create(mo_array *bufs,
@@ -28,7 +28,7 @@ static say_global_buffer *say_global_buffer_create(mo_array *bufs,
   say_global_buffer buffer;
 
   buffer.buf    = say_buffer_create(vtype, SAY_STREAM, size);
-  buffer.ranges = say_array_create(sizeof(say_range), NULL, NULL);
+  buffer.ranges = NULL;
 
   mo_array_push(bufs, &buffer);
 
@@ -45,19 +45,19 @@ static void say_global_buffer_array_free(mo_array *ary) {
   mo_array_release(ary);
 }
 
-static size_t say_global_buffer_add_range_before(say_global_buffer *buf,
-                                                 size_t before, size_t n) {
-  say_range tmp = say_make_range(0, n);
-  say_array_insert(buf->ranges, before, &tmp);
+static size_t say_global_buffer_prepend(say_global_buffer *buf, size_t n) {
+  say_range range = say_make_range(0, n);
+  buf->ranges = mo_list_prepend(buf->ranges, &range);
+  return 0;
+}
 
-  say_range *range = say_array_get(buf->ranges, before);
+static size_t say_global_buffer_insert(mo_list *list, size_t n) {
+  say_range *previous = mo_list_data_ptr(list, say_range);
 
-  if (before != 0) {
-    say_range *prev = say_array_get(buf->ranges, before - 1);
-    range->loc = prev->loc + prev->size;
-  }
+  say_range range = say_make_range(previous->loc + previous->size, n);
+  mo_list_insert(list, &range);
 
-  return range->loc;
+  return range.loc;
 }
 
 static size_t say_global_buffer_find(say_global_buffer *buf, size_t n) {
@@ -65,39 +65,36 @@ static size_t say_global_buffer_find(say_global_buffer *buf, size_t n) {
   if (n > say_buffer_get_size(buf->buf))
     return SAY_MAX_SIZE;
 
-  size_t     ary_size = say_array_get_size(buf->ranges);
-  say_range *first    = say_array_get(buf->ranges, 0);
-
-  /* There's room at the begin of the buffer */
-  if ((ary_size == 0 && say_buffer_get_size(buf->buf) >= n) ||
-      (first && first->loc >= n)) {
-    return say_global_buffer_add_range_before(buf, 0, n);
+  if (!buf->ranges) {
+    buf->ranges = mo_list_create(sizeof(say_range));
+    say_range *range = mo_list_data_ptr(buf->ranges, say_range);
+    *range = say_make_range(0, n);
   }
 
-  if (!first)
-    return SAY_MAX_SIZE;
+  say_range *first = mo_list_data_ptr(buf->ranges, say_range);
 
-  say_range *current = first, *next = NULL;
+  /* There's room at the begin of the buffer */
+  if (first->loc >= n)
+    return say_global_buffer_prepend(buf, 0);
 
-  for (size_t i = 0; i < ary_size - 1; i++) {
-    next = say_array_get(buf->ranges, i + 1);
+  mo_list *it = buf->ranges;
+  for (; it->next; it = it->next) { /* stop before last element */
+    say_range *current = mo_list_data_ptr(it, say_range);
+    say_range *next    = mo_list_data_ptr(it->next, say_range);
 
     size_t begin = current->loc + current->size;
     size_t end   = next->loc;
 
     /* There's enough room between those two elements */
-    if (end - begin >= n) {
-      return say_global_buffer_add_range_before(buf, i + 1, n);
-    }
-
-    current = next;
+    if (end - begin >= n)
+      return say_global_buffer_insert(it, n);
   }
 
-  say_range *last = say_array_get(buf->ranges, ary_size - 1);
+  say_range *last = mo_list_data_ptr(it, say_range);
 
   /* There's enough room at the end of the buffer */
   if ((last->loc + last->size + n) < say_buffer_get_size(buf->buf)) {
-    return say_global_buffer_add_range_before(buf, ary_size, n);
+    return say_global_buffer_insert(it, n);
   }
 
   /* Not enough room here */
@@ -109,23 +106,23 @@ static void say_global_buffer_delete_at(say_global_buffer *buf, size_t loc,
   if (!buf)
     return;
 
-  size_t n = 0, size = say_array_get_size(buf->ranges);
-  for (; n < size; n++) {
-    say_range *range = say_array_get(buf->ranges, n);
-    if (range->loc == loc && range->size == range_size)
-      break;
+  for (mo_list *it = buf->ranges; it; it = it->next) {
+    say_range *range = mo_list_data_ptr(it, say_range);
+    if (range->loc == loc && range->size == range_size) {
+      mo_list *next = it->next;
+      mo_list_delete(it);
+
+      if (it == buf->ranges) buf->ranges = next;
+
+      return;
+    }
   }
-
-  if (n == size)
-    return; /* Element could not be found */
-
-  say_array_delete(buf->ranges, n);
 }
 
 static void say_global_buffer_reduce_size(say_global_buffer *buf, size_t loc,
                                           size_t old_size, size_t size) {
-  for (say_range *range = say_array_get(buf->ranges, 0); range;
-       say_array_next(buf->ranges, (void**)&range)) {
+  for (mo_list *it = buf->ranges; it; it = it->next) {
+    say_range *range = mo_list_data_ptr(it, say_range);
     if (range->loc == loc && range->size == size) {
       range->size = size;
       return;
@@ -133,7 +130,8 @@ static void say_global_buffer_reduce_size(say_global_buffer *buf, size_t loc,
   }
 }
 
-static size_t say_global_buffer_reserve(size_t vtype, size_t size, size_t *ret_id) {
+static size_t say_global_buffer_reserve(size_t vtype, size_t size,
+                                        size_t *ret_id) {
   if (!say_global_buffers) {
     say_global_buffers = mo_array_create(sizeof(mo_array));
     say_global_buffers->init    = (mo_init)say_global_buffer_array_alloc;
