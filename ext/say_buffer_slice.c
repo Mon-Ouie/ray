@@ -16,35 +16,33 @@ typedef struct {
   say_array *ranges;
 } say_global_buffer;
 
-static say_array *say_global_buffers = NULL;
+static mo_array *say_global_buffers = NULL;
 
 static void say_global_buffer_free(say_global_buffer *buf) {
   say_buffer_free(buf->buf);
   say_array_free(buf->ranges);
 }
 
-static say_global_buffer *say_global_buffer_create(say_array *bufs,
+static say_global_buffer *say_global_buffer_create(mo_array *bufs,
                                                    size_t vtype, size_t size) {
   say_global_buffer buffer;
 
   buffer.buf    = say_buffer_create(vtype, SAY_STREAM, size);
   buffer.ranges = say_array_create(sizeof(say_range), NULL, NULL);
 
-  say_array_push(bufs, &buffer);
+  mo_array_push(bufs, &buffer);
 
-  return say_array_get(bufs, say_array_get_size(bufs) - 1);
+  return mo_array_at(bufs, bufs->size - 1);
 }
 
 
-static void say_global_buffer_array_alloc(say_array **ary) {
-  *ary = say_array_create(sizeof(say_global_buffer),
-                          (say_destructor)say_global_buffer_free,
-                          NULL);
+static void say_global_buffer_array_alloc(mo_array *ary) {
+  mo_array_init(ary, sizeof(say_global_buffer));
+  ary->release = (say_destructor)say_global_buffer_free;
 }
 
-static void say_global_buffer_array_free(say_array **ary) {
-  if (*ary)
-    say_array_free(*ary);
+static void say_global_buffer_array_free(mo_array *ary) {
+  mo_array_release(ary);
 }
 
 static size_t say_global_buffer_add_range_before(say_global_buffer *buf,
@@ -137,30 +135,24 @@ static void say_global_buffer_reduce_size(say_global_buffer *buf, size_t loc,
 
 static size_t say_global_buffer_reserve(size_t vtype, size_t size, size_t *ret_id) {
   if (!say_global_buffers) {
-    say_global_buffers = say_array_create(sizeof(say_array*),
-                                          (say_destructor)say_global_buffer_array_free,
-                                          (say_creator)say_global_buffer_array_alloc);
+    say_global_buffers = mo_array_create(sizeof(mo_array));
+    say_global_buffers->init    = (mo_init)say_global_buffer_array_alloc;
+    say_global_buffers->release = (mo_release)say_global_buffer_array_free;
   }
 
-  if (say_array_get_size(say_global_buffers) <= vtype) {
-    say_array_resize(say_global_buffers, vtype + 1);
+  if (say_global_buffers->size <= vtype) {
+    mo_array_resize(say_global_buffers, vtype + 1);
   }
 
-  say_array *global_bufs = *(say_array**)say_array_get(say_global_buffers,
-                                                       vtype);
+  mo_array *global_bufs = mo_array_get_ptr(say_global_buffers, vtype, mo_array);
 
-  size_t i = 0;
-  for (say_global_buffer *buf = say_array_get(global_bufs, 0);
-       buf;
-       say_array_next(global_bufs, (void**)&buf)) {
-    size_t res = say_global_buffer_find(buf, size);
+  for (size_t i = 0; i < global_bufs->size; i++) {
+    size_t res = say_global_buffer_find(mo_array_at(global_bufs, i), size);
 
     if (res != SAY_MAX_SIZE) {
       *ret_id = i;
       return res;
     }
-
-    i++;
   }
 
   /* Existing buffers can't store this object, save it somewhere else */
@@ -174,7 +166,7 @@ static size_t say_global_buffer_reserve(size_t vtype, size_t size, size_t *ret_i
   say_global_buffer *buf = say_global_buffer_create(global_bufs,
                                                     vtype,
                                                     buf_size);
-  *ret_id = say_array_get_size(global_bufs) - 1;
+  *ret_id = global_bufs->size - 1;
   return say_global_buffer_find(buf, size);
 }
 
@@ -182,8 +174,7 @@ static say_global_buffer *say_global_buffer_at(size_t vtype, size_t id) {
   if (!say_global_buffers)
     return NULL;
 
-  return say_array_get(*(say_array**)say_array_get(say_global_buffers, vtype),
-                       id);
+  return mo_array_at(mo_array_at(say_global_buffers, vtype), id);
 }
 
 say_buffer_slice *say_buffer_slice_create(size_t vtype, size_t size) {
@@ -246,7 +237,7 @@ void say_buffer_slice_bind(say_buffer_slice *slice) {
 
 void say_buffer_slice_clean_up() {
   if (say_global_buffers) {
-    say_array_free(say_global_buffers);
+    mo_array_free(say_global_buffers);
     say_global_buffers = NULL;
   }
 }
