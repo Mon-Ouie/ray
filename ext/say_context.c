@@ -17,7 +17,7 @@ static say_context *say_shared_context = NULL;
 static say_thread_variable *say_current_context = NULL;
 static say_thread_variable *say_ensured_context = NULL;
 
-static say_array *say_all_ensured_contexts = NULL;
+static mo_array *say_all_ensured_contexts = NULL;
 
 static void say_context_create_initial();
 static void say_context_setup(say_context *context);
@@ -53,9 +53,8 @@ void say_context_ensure() {
     say_ensured_context = say_thread_variable_create();
 
   if (!say_all_ensured_contexts) {
-    say_all_ensured_contexts = say_array_create(sizeof(say_context*),
-                                                say_context_free_el,
-                                                NULL);
+    say_all_ensured_contexts = mo_array_create(sizeof(say_context*));
+    say_all_ensured_contexts->release = say_context_free_el;
   }
 
   if (!say_context_current()) {
@@ -64,7 +63,7 @@ void say_context_ensure() {
     if (!context) {
       context = say_context_create();
       say_thread_variable_set(say_ensured_context, context);
-      say_array_push(say_all_ensured_contexts, &context);
+      mo_array_push(say_all_ensured_contexts, &context);
     }
 
     say_context_make_current(context);
@@ -158,7 +157,7 @@ static void say_context_setup_states(say_context *context) {
 
 void say_context_clean_up() {
   if (say_all_ensured_contexts)
-    say_array_free(say_all_ensured_contexts);
+    mo_array_free(say_all_ensured_contexts);
 
   if (say_ensured_context)
     say_thread_variable_free(say_ensured_context);
