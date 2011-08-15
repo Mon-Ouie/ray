@@ -144,9 +144,9 @@ mo_array *mo_array_qsort(mo_array *ary, mo_cmp cmp) {
 }
 
 void mo_array_resize(mo_array *ary, size_t size) {
-  if (size > ary->size && ary->init) {
-    mo_array_reserve(ary, size);
+  mo_array_reserve(ary, size);
 
+  if (size > ary->size && ary->init) {
     void *end = mo_array_quick_at(ary, size);
     for (void *i = mo_array_quick_at(ary, ary->size); i < end;
          mo_array_next(ary, &i)) {
@@ -173,6 +173,7 @@ void mo_array_reserve(mo_array *ary, size_t size) {
 }
 
 void mo_array_shrink(mo_array *ary) {
+  if (ary->capa == ary->size) return;
   ary->buffer = realloc(ary->buffer, ary->size * ary->capa);
   ary->capa   = ary->size;
 }
