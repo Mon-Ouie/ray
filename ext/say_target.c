@@ -59,7 +59,7 @@ void say_target_set_context_proc(say_target *target, say_context_proc proc) {
   target->context_proc = proc;
 }
 
-void say_target_need_own_contxt(say_target *target, uint8_t val) {
+void say_target_need_own_context(say_target *target, uint8_t val) {
   target->own_context_needed = val;
 }
 

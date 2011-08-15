@@ -33,7 +33,7 @@ say_target *say_target_create();
 void say_target_free(say_target *target);
 
 void say_target_set_context_proc(say_target *target, say_context_proc proc);
-void say_target_need_own_contxt(say_target *target, uint8_t val);
+void say_target_need_own_contet(say_target *target, uint8_t val);
 say_context *say_target_get_context(say_target *target);
 
 void say_target_set_bind_hook(say_target *target, say_bind_hook proc);
