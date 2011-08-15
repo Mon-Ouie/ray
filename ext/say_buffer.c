@@ -250,7 +250,7 @@ say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size) {
     say_vbo_make_current(buf->instance_vbo);
 
     byte_size = say_vertex_type_get_instance_size(vtype_ref);
-    buf->instance_buffer = say_array_create(byte_size, NULL, NULL);
+    buf->instance_buffer = mo_array_create(byte_size);
   }
 
   return buf;
@@ -271,7 +271,7 @@ void say_buffer_free(say_buffer *buf) {
     say_vbo_will_delete(buf->instance_vbo);
     glDeleteBuffers(1, &buf->instance_vbo);
 
-    say_array_free(buf->instance_buffer);
+    mo_array_free(buf->instance_buffer);
   }
 
   mo_array_release(&buf->buffer);
@@ -287,7 +287,7 @@ void *say_buffer_get_vertex(say_buffer *buf, size_t id) {
 }
 
 void *say_buffer_get_instance(say_buffer *buf, size_t id) {
-  return say_array_get(buf->instance_buffer, id);
+  return mo_array_at(buf->instance_buffer, id);
 }
 
 void say_buffer_bind(say_buffer *buf) {
@@ -370,7 +370,7 @@ void say_buffer_update_instance_part(say_buffer *buf, size_t id,
 
   say_context_ensure();
 
-  size_t byte_size = say_array_get_elem_size(buf->instance_buffer);
+  size_t byte_size = buf->instance_buffer->el_size;
   say_vbo_make_current(buf->instance_vbo);
   glBufferSubData(GL_ARRAY_BUFFER,
                   byte_size * id,
@@ -380,20 +380,20 @@ void say_buffer_update_instance_part(say_buffer *buf, size_t id,
 
 void say_buffer_update_instance(say_buffer *buf) {
   say_buffer_update_instance_part(buf, 0,
-                                  say_array_get_size(buf->instance_buffer));
+                                  buf->instance_buffer->size);
 }
 
 size_t say_buffer_get_instance_size(say_buffer *buf) {
-  return say_array_get_size(buf->instance_buffer);
+  return buf->instance_buffer->size;
 }
 
 void say_buffer_resize_instance(say_buffer *buf, size_t size) {
-  say_array_resize(buf->instance_buffer, size);
+  mo_array_resize(buf->instance_buffer, size);
 
   say_context_ensure();
   say_vbo_make_current(buf->instance_vbo);
   glBufferData(GL_ARRAY_BUFFER,
-               size * say_array_get_elem_size(buf->instance_buffer),
+               size * buf->instance_buffer->el_size,
                say_buffer_get_instance(buf, 0),
                buf->type);
 }

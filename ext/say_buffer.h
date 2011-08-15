@@ -17,8 +17,7 @@ typedef struct {
 
   say_table *vaos;
 
-  mo_array   buffer;
-  say_array *instance_buffer;
+  mo_array buffer, *instance_buffer;
 } say_buffer;
 
 say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size);
