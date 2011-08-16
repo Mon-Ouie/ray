@@ -2,27 +2,29 @@
 
 VALUE ray_cIntArray = Qnil;
 
-say_array *ray_rb2int_array(VALUE obj) {
+mo_array *ray_rb2int_array(VALUE obj) {
   if (!rb_obj_is_kind_of(obj, rb_path2class("Ray::GL::IntArray"))) {
     rb_raise(rb_eTypeError, "can't convert %s into Ray::GL::IntArray",
              RAY_OBJ_CLASSNAME(obj));
   }
 
-  say_array *ptr = NULL;
-  Data_Get_Struct(obj, say_array, ptr);
+  mo_array *ptr = NULL;
+  Data_Get_Struct(obj, mo_array, ptr);
 
   return ptr;
 }
 
 static
 void ray_int_set_to_zero(void *elem) {
-  *(int*)elem = 0;
+  *(GLint*)elem = 0;
 }
 
 static
 VALUE ray_int_array_alloc(VALUE self) {
-  say_array *obj = say_array_create(sizeof(int), NULL, ray_int_set_to_zero);
-  return Data_Wrap_Struct(self, NULL, say_array_free, obj);
+  mo_array *obj = mo_array_create(sizeof(GLint));
+  obj->init = ray_int_set_to_zero;
+
+  return Data_Wrap_Struct(self, NULL, mo_array_free, obj);
 }
 
 /*
@@ -31,11 +33,11 @@ VALUE ray_int_array_alloc(VALUE self) {
  */
 static
 VALUE ray_int_array_init(int argc, VALUE *argv, VALUE self) {
-  say_array *ary = ray_rb2int_array(self);
+  mo_array *ary = ray_rb2int_array(self);
 
   for (int i = 0; i < argc; i++) {
-    int val = NUM2INT(argv[i]);
-    say_array_push(ary, &val);
+    GLint val = NUM2INT(argv[i]);
+    mo_array_push(ary, &val);
   }
 
   return self;
@@ -43,7 +45,7 @@ VALUE ray_int_array_init(int argc, VALUE *argv, VALUE self) {
 
 static
 VALUE ray_int_array_init_copy(VALUE self, VALUE orig) {
-  say_array_copy(ray_rb2int_array(self), ray_rb2int_array(orig));
+  mo_array_copy(ray_rb2int_array(self), ray_rb2int_array(orig));
   return self;
 }
 
@@ -56,10 +58,10 @@ static
 VALUE ray_int_array_push(VALUE self, VALUE val) {
   rb_check_frozen(self);
 
-  say_array *ary = ray_rb2int_array(self);
-  int e = NUM2INT(val);
+  mo_array *ary = ray_rb2int_array(self);
+  GLint     e   = NUM2INT(val);
 
-  say_array_push(ary, &e);
+  mo_array_push(ary, &e);
 
   return self;
 }
@@ -71,10 +73,10 @@ VALUE ray_int_array_push(VALUE self, VALUE val) {
 */
 static
 VALUE ray_int_array_get(VALUE self, VALUE i) {
-  say_array *ary = ray_rb2int_array(self);
+  mo_array *ary = ray_rb2int_array(self);
   size_t idx = NUM2ULONG(i);
 
-  int *elem = say_array_get(ary, idx);
+  GLint *elem = mo_array_get_ptr(ary, idx, GLint);
 
   if (elem) {
     return INT2FIX(*elem);
@@ -92,13 +94,13 @@ static
 VALUE ray_int_array_set(VALUE self, VALUE i, VALUE val) {
   rb_check_frozen(self);
 
-  say_array *ary   = ray_rb2int_array(self);
-  size_t     idx   = NUM2ULONG(i);
+  mo_array *ary  = ray_rb2int_array(self);
+  size_t     idx = NUM2ULONG(i);
 
-  if (say_array_get_size(ary) <= idx)
-    say_array_resize(ary, idx + 1);
+  if (ary->size <= idx)
+    mo_array_resize(ary, idx + 1);
 
-  *(int*)say_array_get(ary, idx) = NUM2INT(val);
+  mo_array_get_as(ary, idx, GLint) = NUM2INT(val);
 
   return val;
 }
@@ -106,13 +108,13 @@ VALUE ray_int_array_set(VALUE self, VALUE i, VALUE val) {
 /* @return [Integer] size of the array */
 static
 VALUE ray_int_array_size(VALUE self) {
-  return INT2FIX(say_array_get_size(ray_rb2int_array(self)));
+  return INT2FIX(ray_rb2int_array(self)->size);
 }
 
 /* Removes all the elements from the array */
 static
 VALUE ray_int_array_clear(VALUE self) {
-  say_array_resize(ray_rb2int_array(self), 0);
+  mo_array_resize(ray_rb2int_array(self), 0);
   return self;
 }
 

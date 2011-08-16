@@ -90,17 +90,15 @@ VALUE ray_gl_draw_elements_instanced(VALUE self, VALUE primitive, VALUE count,
 static
 VALUE ray_gl_multi_draw_arrays(VALUE self, VALUE primitive, VALUE rb_first,
                                VALUE rb_count) {
-  say_array *first = ray_rb2int_array(rb_first);
-  say_array *count = ray_rb2int_array(rb_count);
+  mo_array *first = ray_rb2int_array(rb_first);
+  mo_array *count = ray_rb2int_array(rb_count);
 
-  size_t size = say_array_get_size(first);
-
-  if (size != say_array_get_size(count))
+  if (first->size != count->size)
     rb_raise(rb_eArgError, "first and count arrays should have the same size");
 
   glMultiDrawArrays(NUM2INT(rb_hash_aref(ray_gl_primitives, primitive)),
-                    say_array_get(first, 0), say_array_get(count, 0),
-                    size);
+                    mo_array_at(first, 0), mo_array_at(count, 0),
+                    first->size);
 
   return Qnil;
 }
@@ -115,18 +113,16 @@ VALUE ray_gl_multi_draw_arrays(VALUE self, VALUE primitive, VALUE rb_first,
 static
 VALUE ray_gl_multi_draw_elements(VALUE self, VALUE primitive, VALUE rb_count,
                                  VALUE rb_index) {
-  say_array *index = ray_rb2int_array(rb_index);
-  say_array *count = ray_rb2int_array(rb_count);
+  mo_array *index = ray_rb2int_array(rb_index);
+  mo_array *count = ray_rb2int_array(rb_count);
 
-  size_t size = say_array_get_size(index);
-
-  if (size != say_array_get_size(count))
+  if (index->size != count->size)
     rb_raise(rb_eArgError, "index and count arrays should have the same size");
 
   glMultiDrawElements(NUM2INT(rb_hash_aref(ray_gl_primitives, primitive)),
-                      say_array_get(count, 0),
-                      GL_UNSIGNED_INT, (const GLvoid**)say_array_get(count, 0),
-                      size);
+                      mo_array_at(count, 0),
+                      GL_UNSIGNED_INT, (const GLvoid**)mo_array_at(index, 0),
+                      index->size);
   return Qnil;
 }
 

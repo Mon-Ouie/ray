@@ -166,7 +166,7 @@ say_audio_source *ray_rb2audio_source(VALUE obj);
 say_sound *ray_rb2sound(VALUE obj);
 say_music *ray_rb2music(VALUE obj);
 
-say_array *ray_rb2int_array(VALUE obj);
+mo_array *ray_rb2int_array(VALUE obj);
 
 say_buffer_renderer *ray_rb2buf_renderer(VALUE obj);
 

@@ -86,16 +86,16 @@ void ray_drawable_indices_fill_proc(void *data, GLuint *ptr, size_t first) {
   VALUE array = rb_funcall(drawable->obj, RAY_METH("fill_indices"), 1,
                            ULONG2NUM(first));
 
-  say_array *c_array     = ray_rb2int_array(array);
+  mo_array *c_array      = ray_rb2int_array(array);
   size_t     size        = say_drawable_get_index_count(drawable->drawable);
-  size_t     actual_size = say_array_get_size(c_array);
+  size_t     actual_size = c_array->size;
 
-  if (say_array_get_size(c_array) < size) {
+  if (actual_size < size) {
     rb_raise(rb_eRuntimeError, "received %zu indices, expected %zu",
              actual_size, size);
   }
 
-  memcpy(ptr, say_array_get(ray_rb2int_array(array), 0), sizeof(GLuint) * size);
+  memcpy(ptr, mo_array_at(c_array, 0), sizeof(GLuint) * size);
 }
 
 say_drawable *ray_rb2drawable(VALUE obj) {
