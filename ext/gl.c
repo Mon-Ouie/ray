@@ -294,10 +294,13 @@ VALUE ray_gl_has_callback(VALUE self) {
  *   in debug mode.
  *
  *   @example
+ *      Ray::GL.debug = true # required
  *
  *      Ray::GL.callback = proc do |source, type, _, severity, msg|
  *        puts "[#{source}][#{type}][#{severity}] #{msg}"
  *      end
+ *
+ *   @see debug?
  */
 static
 VALUE ray_gl_set_callback(VALUE self, VALUE proc) {
