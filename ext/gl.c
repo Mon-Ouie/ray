@@ -216,7 +216,6 @@ void ray_gl_debug_proc(GLenum source,
                        GLsizei length,
                        const GLchar *message,
                        GLvoid *param) {
-  printf("in debugprco\n");
   VALUE rb_source = Qnil;
   switch (source) {
   case GL_DEBUG_SOURCE_API_ARB:
