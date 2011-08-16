@@ -9,6 +9,8 @@
 
 #include <GL/glx.h>
 
+#include "mo.h"
+
 typedef struct say_x11_window {
   Display *dis;
   Window win;
@@ -17,7 +19,7 @@ typedef struct say_x11_window {
   XVisualInfo *vi;
   GLXFBConfig config;
 
-  struct say_array *events;
+  mo_array events;
 
   XIM im;
   XIC ic;

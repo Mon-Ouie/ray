@@ -129,13 +129,13 @@ say_imp_window say_imp_window_create() {
   win->hidden_cursor = None;
   win->old_video_mode = -1;
 
-  win->events = say_array_create(sizeof(say_event), NULL, NULL);
+  mo_array_init(&win->events, sizeof(say_event));
 
   return win;
 }
 
 void say_imp_window_free(say_imp_window win) {
-  say_array_free(win->events);
+  mo_array_release(&win->events);
   free(win);
 }
 
@@ -298,7 +298,7 @@ bool say_imp_window_open(say_imp_window win, const char *title,
 }
 
 void say_imp_window_close(say_imp_window win) {
-  say_array_resize(win->events, 0);
+  mo_array_resize(&win->events, 0);
 
 #ifdef HAVE_XRANDR
   if (win->dis && win->old_video_mode >= 0) {
@@ -700,7 +700,7 @@ static int say_x11_window_parse_event(say_x11_window *win, say_event *ev,
             ev.type = SAY_EVENT_TEXT_ENTERED;
             ev.ev.text.text = character;
 
-            say_array_push(win->events, &ev);
+            mo_array_push(&win->events, &ev);
           }
         }
         else
@@ -716,14 +716,14 @@ static int say_x11_window_parse_event(say_x11_window *win, say_event *ev,
             ev.type = SAY_EVENT_TEXT_ENTERED;
             ev.ev.text.text = (uint32_t)key_buffer[0];
 
-            say_array_push(win->events, &ev);
+            mo_array_push(&win->events, &ev);
           }
         }
       }
 
-      if (ev->type == SAY_EVENT_NONE && say_array_get_size(win->events) != 0) {
-        *ev = *(say_event*)say_array_get(win->events, 0);
-        say_array_delete(win->events, 0);
+      if (ev->type == SAY_EVENT_NONE && win->events.size != 0) {
+        *ev = mo_array_get_as(&win->events, 0, say_event);
+        mo_array_delete(&win->events, 0);
 
         return 1;
       }
@@ -780,9 +780,9 @@ static int say_x11_window_parse_event(say_x11_window *win, say_event *ev,
 
 bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev,
                                struct say_input *input) {
-  if (say_array_get_size(win->events) != 0) {
-    *ev = *(say_event*)say_array_get(win->events, 0);
-    say_array_delete(win->events, 0);
+  if (win->events.size != 0) {
+    *ev = mo_array_get_as(&win->events, 0, say_event);
+    mo_array_delete(&win->events, 0);
 
     return 1;
   }
@@ -803,9 +803,9 @@ bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev,
 
 void say_imp_window_wait_event(say_imp_window win, struct say_event *ev,
                                struct say_input *input) {
-  if (say_array_get_size(win->events) != 0) {
-    *ev = *(say_event*)say_array_get(win->events, 0);
-    say_array_delete(win->events, 0);
+  if (win->events.size != 0) {
+    *ev = mo_array_get_as(&win->events, 0, say_event);
+    mo_array_delete(&win->events, 0);
 
     return;
   }
