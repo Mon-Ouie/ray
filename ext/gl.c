@@ -195,6 +195,19 @@ VALUE ray_gl_set_core_profile(VALUE self, VALUE val) {
   return val;
 }
 
+/* @return [true, false] True if debugging mode is enabled */
+static
+VALUE ray_gl_debug(VALUE self) {
+  return say_context_get_config()->debug ? Qtrue : Qfalse;
+}
+
+/* @see debug? */
+static
+VALUE ray_gl_set_debug(VALUE self, VALUE val) {
+  say_context_get_config()->debug = RTEST(val);
+  return val;
+}
+
 static
 void ray_gl_debug_proc(GLenum source,
                        GLenum type,
@@ -278,6 +291,9 @@ VALUE ray_gl_has_callback(VALUE self) {
  *   4. A severity (:high, :medium, :low).
  *   5. A human-readable message.
  *
+ *   Notice the debugging proc is only called if the context has been created
+ *   in debug mode.
+ *
  *   @example
  *
  *      Ray::GL.callback = proc do |source, type, _, severity, msg|
@@ -336,6 +352,9 @@ void Init_ray_gl() {
   rb_define_module_function(ray_mGL, "core_profile?", ray_gl_core_profile, 0);
   rb_define_module_function(ray_mGL, "core_profile=", ray_gl_set_core_profile,
                             1);
+
+  rb_define_module_function(ray_mGL, "debug?", ray_gl_debug, 0);
+  rb_define_module_function(ray_mGL, "debug=", ray_gl_set_debug, 1);
 
   rb_define_module_function(ray_mGL, "draw_arrays", ray_gl_draw_arrays, 3);
   rb_define_module_function(ray_mGL, "draw_elements", ray_gl_draw_elements, 3);

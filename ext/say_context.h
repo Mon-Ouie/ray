@@ -10,6 +10,7 @@ typedef struct {
   size_t major_version, minor_version;
 
   bool core_profile;
+  bool debug;
 } say_context_config;
 
 struct say_window;

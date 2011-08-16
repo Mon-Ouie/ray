@@ -29,8 +29,9 @@ static uint32_t say_context_count = 0;
 say_context_config *say_context_get_config() {
   static say_context_config conf = {
     24, 0, /* 24 bit depth buffer, no stencil buffer */
-    2, 1, /* Anything older than 3.x doesn't matter */
-    false /* let user call deprecated features */
+    2, 1,  /* Anything older than 3.x doesn't matter */
+    false, /* Let user call deprecated features */
+    false  /* Disable debugging */
   };
 
   return &conf;
