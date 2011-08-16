@@ -5,10 +5,13 @@
 #else
 # define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
 # define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
+# define GLX_CONTEXT_FLAGS_ARB	       0x2094
 # define GLX_CONTEXT_PROFILE_MASK_ARB  0x9126
 
 # define GLX_CONTEXT_CORE_PROFILE_BIT_ARB          0x00000001
 # define GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
+
+# define GLX_CONTEXT_DEBUG_BIT_ARB                 0x00000001
 #endif
 
 typedef GLXContext (*say_glx_create_context)(Display *dpy,
@@ -32,10 +35,11 @@ static GLXContext say_x11_do_create_context(Display     *dis,
   say_context_config *say_conf = say_context_get_config();
   size_t major = say_conf->major_version, minor = say_conf->minor_version;
 
-  if (major >= 3 && glXCreateContextAttribs) {
+  if (glXCreateContextAttribs) {
     GLint attribs[] = {
       GLX_CONTEXT_MAJOR_VERSION_ARB, major,
       GLX_CONTEXT_MINOR_VERSION_ARB, minor,
+      GLX_CONTEXT_FLAGS_ARB, say_conf->debug ? GLX_CONTEXT_DEBUG_BIT_ARB : 0,
       GLX_CONTEXT_PROFILE_MASK_ARB, say_conf->core_profile ?
       GLX_CONTEXT_CORE_PROFILE_BIT_ARB :
       GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
