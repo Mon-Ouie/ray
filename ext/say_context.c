@@ -281,5 +281,11 @@ static void say_context_glew_init() {
   /* Mipmaps */
   replace(glGenerateMipmapEXT, glGenerateMipmap);
 
+  /*
+   * Debug output
+   */
+  glDebugMessageCallbackARB = (PFNGLDEBUGMESSAGECALLBACKARBPROC)
+    say_get_proc("glDebugMessageCallbackARB");
+
 #undef replace
 }

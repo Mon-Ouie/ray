@@ -195,6 +195,111 @@ VALUE ray_gl_set_core_profile(VALUE self, VALUE val) {
   return val;
 }
 
+static
+void ray_gl_debug_proc(GLenum source,
+                       GLenum type,
+                       GLuint id,
+                       GLenum severity,
+                       GLsizei length,
+                       const GLchar *message,
+                       GLvoid *param) {
+  printf("in debugprco\n");
+  VALUE rb_source = Qnil;
+  switch (source) {
+  case GL_DEBUG_SOURCE_API_ARB:
+    rb_source = RAY_SYM("api"); break;
+  case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
+    rb_source = RAY_SYM("window_system"); break;
+  case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
+    rb_source = RAY_SYM("shader_compiler"); break;
+  case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
+    rb_source = RAY_SYM("third_party"); break;
+  case GL_DEBUG_SOURCE_APPLICATION_ARB:
+    rb_source = RAY_SYM("application"); break;
+  default:
+    rb_source = RAY_SYM("other"); break;
+  }
+
+  VALUE rb_type = Qnil;
+  switch (type) {
+  case GL_DEBUG_TYPE_ERROR_ARB:
+    rb_type = RAY_SYM("error"); break;
+  case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
+    rb_type = RAY_SYM("deprecated_behavior"); break;
+  case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+    rb_type = RAY_SYM("undefined_behavior"); break;
+  case GL_DEBUG_TYPE_PORTABILITY_ARB:
+    rb_type = RAY_SYM("portability"); break;
+  case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+    rb_type = RAY_SYM("performance"); break;
+  default:
+    rb_type = RAY_SYM("other"); break;
+  }
+
+  VALUE rb_id = ULONG2NUM(id);
+
+  VALUE rb_severity = Qnil;
+  switch (severity) {
+  case GL_DEBUG_SEVERITY_HIGH_ARB:
+    rb_severity = RAY_SYM("high"); break;
+  case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+    rb_severity = RAY_SYM("medium"); break;
+  default:
+    rb_severity = RAY_SYM("low"); break;
+  }
+
+  VALUE rb_message = rb_str_new(message, length);
+
+  VALUE proc = rb_iv_get(rb_path2class("Ray::GL"), "@callback");
+  rb_funcall(proc, RAY_METH("call"), 5, rb_source, rb_type, rb_id, rb_severity,
+             rb_message);
+}
+
+/* @return [True, False] True if a callback proc can be set */
+static
+VALUE ray_gl_has_callback(VALUE self) {
+  say_context_ensure();
+  return glDebugMessageCallbackARB ? Qtrue : Qfalse;
+}
+
+/*
+ * @overload callback=(proc)
+ *   Sets the proc called by OpenGL for debugging purpose
+ *   @param [Proc, nil] proc A proc, or nil to disable debugging
+ *
+ *   The given proc will be called upon some events (errors or warnings about
+ *   performance and undifined behaviors) with the following arguments:
+ *
+ *   1. A source (:api, :window_system, :shader_compiler, :third_party,
+ *      :application, :other).
+ *   2. A type (:error, :depreacted_behavior, :undefined_behavior, :portability,
+ *      :performance, :other).
+ *   3. An integer identifier.
+ *   4. A severity (:high, :medium, :low).
+ *   5. A human-readable message.
+ *
+ *   @example
+ *
+ *      Ray::GL.callback = proc do |source, type, _, severity, msg|
+ *        puts "[#{source}][#{type}][#{severity}] #{msg}"
+ *      end
+ */
+static
+VALUE ray_gl_set_callback(VALUE self, VALUE proc) {
+  say_context_ensure();
+
+  if (!glDebugMessageCallbackARB)
+    rb_raise(rb_eRuntimeError, "setting the debug proc isn't supported");
+
+  rb_iv_set(rb_path2class("Ray::GL"), "@callback", proc);
+  if (RTEST(proc))
+    glDebugMessageCallbackARB(ray_gl_debug_proc, NULL);
+  else
+    glDebugMessageCallbackARB(NULL, NULL);
+
+  return proc;
+}
+
 void Init_ray_gl() {
   ray_mGL = rb_define_module_under(ray_mRay, "GL");
 
@@ -229,7 +334,8 @@ void Init_ray_gl() {
                             1);
 
   rb_define_module_function(ray_mGL, "core_profile?", ray_gl_core_profile, 0);
-  rb_define_module_function(ray_mGL, "core_profile=", ray_gl_set_core_profile, 1);
+  rb_define_module_function(ray_mGL, "core_profile=", ray_gl_set_core_profile,
+                            1);
 
   rb_define_module_function(ray_mGL, "draw_arrays", ray_gl_draw_arrays, 3);
   rb_define_module_function(ray_mGL, "draw_elements", ray_gl_draw_elements, 3);
@@ -243,4 +349,7 @@ void Init_ray_gl() {
                             ray_gl_multi_draw_arrays, 3);
   rb_define_module_function(ray_mGL, "multi_draw_elements",
                             ray_gl_multi_draw_elements, 3);
+
+  rb_define_module_function(ray_mGL, "has_callback?", ray_gl_has_callback, 0);
+  rb_define_module_function(ray_mGL, "callback=", ray_gl_set_callback, 1);
 }
