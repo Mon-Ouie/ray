@@ -5,7 +5,7 @@
 #include "say_image.h"
 
 typedef struct {
-  say_array  *fbos;
+  mo_hash    *fbos;
   GLuint      rbo;
   say_image  *img;
   say_target *target;

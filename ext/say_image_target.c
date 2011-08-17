@@ -18,10 +18,6 @@ static void say_fbo_delete_current(void *data) {
   }
 }
 
-static void say_fbo_set_zero(void *fbo) {
-  *(say_fbo*)fbo = (say_fbo){0, NULL, NULL};
-}
-
 void say_fbo_make_current(GLuint fbo);
 void say_rbo_make_current(GLuint rbo);
 
@@ -78,9 +74,10 @@ void say_rbo_make_current(GLuint rbo) {
   }
 }
 
-void say_image_target_will_delete(say_array *fbos, GLuint rbo) {
-  say_fbo *fbo = say_array_get(fbos, 0);
-  for (; fbo; say_array_next(fbos, (void**)&fbo)) {
+void say_image_target_will_delete(mo_hash *fbos, GLuint rbo) {
+  mo_hash_it it = mo_hash_begin(fbos);
+  for (; !mo_hash_it_is_end(&it); mo_hash_it_next(&it)) {
+    say_fbo *fbo = mo_hash_it_val_ptr(&it, say_fbo);
     if (fbo->id == say_current_fbo) {
       say_current_fbo = 0;
       break;
@@ -103,9 +100,10 @@ say_image_target *say_image_target_create() {
   target->target = say_target_create();
   target->img    = NULL;
 
-  target->fbos = say_array_create(sizeof(say_fbo),
-                                  say_fbo_delete_current,
-                                  say_fbo_set_zero);
+  target->fbos = mo_hash_create(sizeof(say_context*), sizeof(say_fbo));
+  target->fbos->release = say_fbo_delete_current;
+  target->fbos->hash_of = mo_hash_of_pointer;
+  target->fbos->key_cmp = mo_hash_pointer_cmp;
 
   glGenRenderbuffers(1, &target->rbo);
 
@@ -117,7 +115,7 @@ void say_image_target_free(say_image_target *target) {
   say_image_target_will_delete(target->fbos, target->rbo);
 
   glDeleteRenderbuffers(1, &target->rbo);
-  say_array_free(target->fbos);
+  mo_hash_free(target->fbos);
 
   say_target_free(target->target);
   free(target);
@@ -162,16 +160,21 @@ void say_image_target_bind(say_image_target *target) {
    * we don't find one, we need to build it.
    */
   say_context *ctxt = say_context_current();
-  if (say_array_get_size(target->fbos) <= ctxt->count)
-    say_array_resize(target->fbos, ctxt->count + 1);
 
-  say_fbo *fbo = say_array_get(target->fbos, ctxt->count);
-  fbo->ctxt = ctxt;
+  if (!mo_hash_has_key(target->fbos, &ctxt)) {
+    say_fbo tmp = {0, NULL, NULL};
+    mo_hash_set(target->fbos, &ctxt, &tmp);
 
-  if (fbo->img != target->img && target->img)
-    say_fbo_build(target, fbo); /* also makes it current */
-  else
-    say_fbo_make_current(fbo->id);
+    say_fbo_build(target, mo_hash_get(target->fbos, &ctxt));
+  }
+  else {
+    say_fbo *fbo = mo_hash_get(target->fbos, &ctxt);
+
+    if (fbo->img != target->img && target->img)
+      say_fbo_build(target, fbo);
+    else
+      say_fbo_make_current(fbo->id);
+  }
 
   /*
    * Needed to avoid having garbage data there.
