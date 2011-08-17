@@ -12,15 +12,15 @@ typedef struct {
 
 typedef struct {
   say_index_buffer *buf;
-  say_array        *ranges;
+  mo_list          *ranges;
 } say_global_ibo;
 
-static say_array *say_index_buffers = NULL;
+static mo_array *say_index_buffers = NULL;
 
 static say_global_ibo say_global_ibo_create(size_t size) {
   say_global_ibo ret;
   ret.buf    = say_index_buffer_create(SAY_STREAM, size);
-  ret.ranges = say_array_create(sizeof(say_range), NULL, NULL);
+  ret.ranges = NULL;
 
   return ret;
 }
@@ -29,66 +29,16 @@ static void say_global_ibo_free(void *data) {
   say_global_ibo *ibo = (say_global_ibo*)data;
 
   say_index_buffer_free(ibo->buf);
-  say_array_free(ibo->ranges);
+  if (ibo->ranges) mo_list_free(ibo->ranges);
 }
 
 static say_global_ibo *say_global_ibo_at(size_t index) {
   if (!say_index_buffers)
     return NULL;
-  return say_array_get(say_index_buffers, index);
+  return mo_array_at(say_index_buffers, index);
 }
 
-static size_t say_global_ibo_insert(say_global_ibo *ibo, size_t i,
-                                    size_t size) {
-  say_range tmp = say_make_range(0, size);
-  say_array_insert(ibo->ranges, i, &tmp);
-
-  say_range *range = say_array_get(ibo->ranges, i);
-
-  if (i != 0) {
-    say_range *prev = say_array_get(ibo->ranges, i - 1);
-    range->loc = prev->loc + prev->size;
-  }
-
-  return range->loc;
-}
-
-static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
-  size_t buffer_size = say_index_buffer_get_size(ibo->buf);
-
-  size_t     ary_size = say_array_get_size(ibo->ranges);
-  say_range *first    = say_array_get(ibo->ranges, 0);
-
-  /* There's room at the begin of the buffer */
-  if ((ary_size == 0 && buffer_size >= size) || (first && first->loc >= size)) {
-    return say_global_ibo_insert(ibo, 0, size);
-  }
-
-  say_range *current = first, *next = NULL;
-
-  for (size_t i = 0; first && i < ary_size - 1; i++) {
-    next = say_array_get(ibo->ranges, i + 1);
-
-    size_t begin = current->loc + current->size;
-    size_t end   = next->loc;
-
-    /* There's enough room between those two elements */
-    if (end - begin >= size) {
-      return say_global_ibo_insert(ibo, i + 1, size);
-    }
-
-    current = next;
-  }
-
-  say_range *last = say_array_get(ibo->ranges, ary_size - 1);
-
-  /* There's enough room at the end of the buffer */
-  if (last && (last->loc + last->size + size) <
-      say_index_buffer_get_size(ibo->buf)) {
-    return say_global_ibo_insert(ibo, ary_size, size);
-  }
-
-  /* Not enough room here. But perhaps we can make some? */
+/*
   if (buffer_size < SAY_BUFFER_MAX_SIZE && size <= SAY_BUFFER_MAX_SIZE) {
     size_t sought_size = last ? last->loc + last->size + size : size;
     size_t right_size  = say_index_buffer_get_size(ibo->buf);
@@ -99,21 +49,89 @@ static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
     say_index_buffer_resize(ibo->buf, right_size);
     return say_global_ibo_insert(ibo, ary_size, size);
   }
+
+ */
+
+static bool say_global_ibo_fit_into(say_global_ibo *ibo, size_t used,
+                                    size_t size) {
+  size_t buffer_size = say_index_buffer_get_size(ibo->buf);
+
+  if (used + size < buffer_size)
+    return true;
+  else if (used + size < SAY_BUFFER_MAX_SIZE &&
+           buffer_size <= SAY_BUFFER_MAX_SIZE) {
+    size_t sought_size = used + size;
+    size_t right_size  = buffer_size;
+
+    while (right_size < sought_size) right_size *= 2;
+
+    say_index_buffer_resize(ibo->buf, right_size);
+    return true;
+  }
+  else
+    return false;
+}
+
+static size_t say_global_ibo_prepend(say_global_ibo *ibo, size_t size) {
+  say_range range = say_make_range(0, size);
+  ibo->ranges = mo_list_prepend(ibo->ranges, &range);
+  return 0;
+}
+
+static size_t say_global_ibo_insert(mo_list *list, size_t size) {
+  say_range *range = mo_list_data_ptr(list, say_range);
+  say_range tmp = say_make_range(range->loc + range->size, size);
+
+  mo_list_insert(list, &tmp);
+  return tmp.loc;
+}
+
+static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
+  if (!ibo->ranges && say_global_ibo_fit_into(ibo, 0, size)) {
+    ibo->ranges = mo_list_create(sizeof(say_range));
+    say_range *range = mo_list_data_ptr(ibo->ranges, say_range);
+    *range = say_make_range(0, size);
+    return 0;
+  }
+
+  say_range *first = mo_list_data_ptr(ibo->ranges, say_range);
+
+  /* There's room at the begin of the buffer */
+  if (first->loc >= size) {
+    return say_global_ibo_prepend(ibo, size);
+  }
+
+  mo_list *it = ibo->ranges;
+  for (; it->next; it = it->next) {
+    say_range *current = mo_list_data_ptr(it, say_range);
+    say_range *next    = mo_list_data_ptr(it->next, say_range);
+
+    size_t begin = current->loc + current->size;
+    size_t end   = next->loc;
+
+    /* There's enough room between those two elements */
+    if (end - begin >= size)
+      return say_global_ibo_insert(it, size);
+  }
+
+  say_range *last = mo_list_data_ptr(it, say_range);
+
+  /* There's enough room at the end of the buffer */
+  if (say_global_ibo_fit_into(ibo, last->loc + last->size, size))
+    return say_global_ibo_insert(it, size);
   else
     return SAY_MAX_SIZE;
 }
 
 static size_t say_global_ibo_find(size_t size, size_t *buf_id) {
   if (!say_index_buffers) {
-    say_index_buffers = say_array_create(sizeof(say_global_ibo),
-                                         say_global_ibo_free,
-                                         NULL);
+    say_index_buffers = mo_array_create(sizeof(say_global_ibo));
+    say_index_buffers->release = say_global_ibo_free;
   }
 
-  size_t i = 0;
-  for (say_global_ibo *ibo = say_array_get(say_index_buffers, 0);
-       ibo;
-       say_array_next(say_index_buffers, (void**)&ibo)) {
+  for (size_t i = 0; i < say_index_buffers->size; i++) {
+    say_global_ibo *ibo = mo_array_at(say_index_buffers, 0);
+
     size_t loc;
     if ((loc = say_global_ibo_find_in(ibo, size)) != SAY_MAX_SIZE) {
       *buf_id = i;
@@ -133,9 +151,9 @@ static size_t say_global_ibo_find(size_t size, size_t *buf_id) {
   }
 
   say_global_ibo ibo = say_global_ibo_create(buf_size);
-  say_array_push(say_index_buffers, &ibo);
+  mo_array_push(say_index_buffers, &ibo);
 
-  *buf_id = say_array_get_size(say_index_buffers) - 1;
+  *buf_id = say_index_buffers->size - 1;
   return say_global_ibo_find_in(say_global_ibo_at(*buf_id), size);
 }
 
@@ -144,23 +162,23 @@ static void say_global_ibo_delete_at(say_global_ibo *ibo, size_t loc,
   if (!ibo)
     return;
 
-  size_t n = 0, size = say_array_get_size(ibo->ranges);
-  for (; n < size; n++) {
-    say_range *range = say_array_get(ibo->ranges, n);
-    if (range->loc == loc && range->size == range_size)
-      break;
+  for (mo_list *it = ibo->ranges; it; it = it->next) {
+    say_range *range = mo_list_data_ptr(it, say_range);
+    if (range->loc == loc && range->size == range_size) {
+      mo_list *next = it->next;
+      mo_list_delete(it);
+
+      if (it == ibo->ranges) ibo->ranges = next;
+
+      return;
+    }
   }
-
-  if (n == size)
-    return; /* Element could not be found */
-
-  say_array_delete(ibo->ranges, n);
 }
 
 static void say_global_ibo_reduce_size(say_global_ibo *ibo, size_t loc,
                                        size_t old_size, size_t size) {
-  for (say_range *range = say_array_get(ibo->ranges, 0); range;
-       say_array_next(ibo->ranges, (void**)&range)) {
+  for (mo_list *it = ibo->ranges; it; it = it->next) {
+    say_range *range = mo_list_data_ptr(it, say_range);
     if (range->loc == loc && range->size == old_size) {
       range->size = size;
       return;
@@ -225,7 +243,7 @@ void say_index_buffer_slice_bind(say_index_buffer_slice *slice) {
 
 void say_index_buffer_slice_clean_up() {
   if (say_index_buffers) {
-    say_array_free(say_index_buffers);
+    mo_array_free(say_index_buffers);
     say_index_buffers = NULL;
   }
 }
