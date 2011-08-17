@@ -429,7 +429,7 @@ void mo_hash_fill_bucket(mo_hash *hash, void *store, void *key, void *data) {
   if (hash->copy)
     hash->copy((uint8_t*)store + sizeof(mo_hash*) + hash->key_size, data);
   else
-    memcpy((uint8_t*)store + sizeof(mo_hash*) + hash->el_size, data,
+    memcpy((uint8_t*)store + sizeof(mo_hash*) + hash->key_size, data,
            hash->el_size);
 }
 
