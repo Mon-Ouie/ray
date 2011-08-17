@@ -38,20 +38,6 @@ static say_global_ibo *say_global_ibo_at(size_t index) {
   return mo_array_at(say_index_buffers, index);
 }
 
-/*
-  if (buffer_size < SAY_BUFFER_MAX_SIZE && size <= SAY_BUFFER_MAX_SIZE) {
-    size_t sought_size = last ? last->loc + last->size + size : size;
-    size_t right_size  = say_index_buffer_get_size(ibo->buf);
-
-    while (right_size < sought_size)
-      right_size *= 2;
-
-    say_index_buffer_resize(ibo->buf, right_size);
-    return say_global_ibo_insert(ibo, ary_size, size);
-  }
-
- */
-
 static bool say_global_ibo_fit_into(say_global_ibo *ibo, size_t used,
                                     size_t size) {
   size_t buffer_size = say_index_buffer_get_size(ibo->buf);
