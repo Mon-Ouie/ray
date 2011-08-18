@@ -97,6 +97,17 @@ module Ray
 
     alias :to_s :string
 
+    def pretty_print(q)
+      attr = %w[
+        string
+        font color size style
+
+        rect auto_center
+      ]
+
+      pretty_print_attributes q, attr
+    end
+
     private
     def parse_style(style)
       case style

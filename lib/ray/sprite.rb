@@ -78,5 +78,20 @@ module Ray
     def to_rect
       rect
     end
+
+    def pretty_print(q)
+      attr = %w[
+        image
+        color
+        x_flipped? y_flipped?
+        sub_rect rect
+      ]
+
+      if uses_sprite_sheet?
+        attr.concat %w[sheet_size sheet_pos sprite_width sprite_height]
+      end
+
+      pretty_print_attributes q, attr
+    end
   end
 end
