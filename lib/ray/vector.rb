@@ -141,6 +141,14 @@ module Ray
       "(%g, %g)" % [x, y]
     end
 
+    def pretty_print(q)
+      q.text "("
+      q.pp ("%g" % x).to_f # hides simple-precision inacurracy
+      q.text ", "
+      q.pp ("%g" % y).to_f
+      q.text ")"
+    end
+
     alias :w :x
     alias :h :y
 
