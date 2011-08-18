@@ -49,6 +49,20 @@ module Ray
       "RGBA(#{r}, #{g}, #{b}, #{a})"
     end
 
+    def pretty_print(q)
+      q.text("RGB#{'A' if a != 255}(")
+      q.pp r
+      q.text ", "
+      q.pp g
+      q.text ", "
+      q.pp b
+      if a != 255
+        q.text ", "
+        q.pp a
+      end
+      q.text ")"
+    end
+
     # @param [Ray::Color] color Another color.
     # @return [Ray::Color] Sum of two colors, adding component pairs.
     def +(color)
