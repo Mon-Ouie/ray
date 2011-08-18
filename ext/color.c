@@ -29,10 +29,10 @@ VALUE ray_color_alloc(VALUE self) {
 }
 
 /*
-  @overload initialize(red, green, blue, alpha = 255)
-    Creates a new color. All the parameters must be integers between
-    0 and 255. Alpha is the transparency (255: opaque, 0: invisible).
-*/
+ * @overload initialize(red, green, blue, alpha = 255)
+ *   Creates a new color. All the parameters must be integers between
+ *     0 and 255. Alpha is the transparency (255: opaque, 0: invisible).
+ */
 static
 VALUE ray_color_init(int argc, VALUE *argv, VALUE self) {
   VALUE r, g, b, a;
@@ -98,10 +98,10 @@ VALUE ray_color_a(VALUE self) {
 }
 
 /*
-  @overload r=(val)
-    Sets the red intensity.
-    @param [Integer] The new red intensity.
-*/
+ *  @overload r=(val)
+ *    Sets the red intensity
+ *    @param [Integer] The new red intensity.
+ */
 static
 VALUE ray_color_set_r(VALUE self, VALUE val) {
   rb_check_frozen(self);
@@ -114,9 +114,9 @@ VALUE ray_color_set_r(VALUE self, VALUE val) {
 }
 
 /*
-  @overload r=(val)
-    Sets the red intensity.
-    @param [Integer] The new red intensity.
+ * @overload g=(val)
+ *   Sets the green intensity
+ *   @param [Integer] The new green intensity.
 */
 static
 VALUE ray_color_set_g(VALUE self, VALUE val) {
@@ -130,10 +130,10 @@ VALUE ray_color_set_g(VALUE self, VALUE val) {
 }
 
 /*
-  @overload b=(val)
-    Sets the blue intensity.
-    @param [Integer] The new blue intensity.
-*/
+ * @overload blue=(val)
+ *   Sets the blue intensity
+ *   @param [Integer] The new blue intensity.
+ */
 static
 VALUE ray_color_set_b(VALUE self, VALUE val) {
   rb_check_frozen(self);
@@ -146,10 +146,10 @@ VALUE ray_color_set_b(VALUE self, VALUE val) {
 }
 
 /*
-  @overload a=(val)
-    Sets the alpha opacity.
-    @param [Integer] The new alpha opacity.
-*/
+ * @overload a=(val)
+ *   Sets the alpha opacity
+ *   @param [Integer] The new alpha opacity.
+ */
 static
 VALUE ray_color_set_a(VALUE self, VALUE val) {
   rb_check_frozen(self);
