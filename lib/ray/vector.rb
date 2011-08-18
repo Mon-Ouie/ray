@@ -286,6 +286,16 @@ module Ray
       "(%g, %g, %g)" % [x, y, z]
     end
 
+    def pretty_print(q)
+      q.text "("
+      q.pp ("%g" % x).to_f # hides simple-precision inacurracy
+      q.text ", "
+      q.pp ("%g" % y).to_f
+      q.text ", "
+      q.pp ("%g" % z).to_f
+      q.text ")"
+    end
+
     def to_a
       [x, y, z]
     end
