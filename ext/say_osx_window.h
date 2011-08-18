@@ -59,7 +59,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
   if (!(self = [super init]))
     return nil;
 
-  events = say_array_create(sizeof(say_event), NULL, NULL);
+  mo_array_init(&events, sizeof(say_event));
   return self;
 }
 
@@ -219,7 +219,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
     say_event ev;
     ev.type = SAY_EVENT_RESIZE;
     ev.ev.resize.size = say_make_vector2(w, h);
-    say_array_push(events, &ev);
+    mo_array_push(&events, &ev);
   }
   else {
     NSRect frame = view.frame;
@@ -236,10 +236,12 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
 
 - (void)close {
   if (window) {
-     allow_close = YES;
+    allow_close = YES;
     [window close];
     [window release];
     window = nil;
+
+    mo_array_resize(&events, 0);
   }
 }
 
@@ -248,7 +250,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev);
 
   [self close];
   [view release];
-  say_array_free(events);
+  mo_array_release(&events);
   [super dealloc];
 
   say_osx_flip_pool();
@@ -312,9 +314,9 @@ static NSEvent *say_osx_get_event(bool patient) {
   }
   [pool drain];
 
-  if (say_array_get_size(events) != 0) {
-    *ev = *(say_event*)say_array_get(events, 0);
-    say_array_delete(events, 0);
+  if (events.size != 0) {
+    *ev = mo_array_get_as(&events, 0, say_event);
+    mo_array_delete(&events, 0);
 
     return YES;
   }
@@ -329,14 +331,14 @@ static NSEvent *say_osx_get_event(bool patient) {
 
   NSAutoreleasePool *pool = [NSAutoreleasePool new];
 
-  while (say_array_get_size(events) == 0 && (nsev = say_osx_get_event(true))) {
+  while (events.size == 0 && (nsev = say_osx_get_event(true))) {
     [NSApp sendEvent:nsev];
   }
 
   [pool drain];
 
-  *ev = *(say_event*)say_array_get(events, 0);
-  say_array_delete(events, 0);
+  *ev = mo_array_get_as(&events, 0, say_event);
+  mo_array_delete(&events, 0);
 }
 
 static say_key say_osx_convert_key(NSEvent *ev) {
@@ -473,7 +475,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
     ev.ev.key.mod         = say_osx_convert_mod(nsev);
     ev.ev.key.native_code = nsev.keyCode;
 
-    say_array_push(events, &ev);
+    mo_array_push(&events, &ev);
   }
 
   NSText *text = [window fieldEditor:YES forObject:self];
@@ -484,7 +486,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
     ev.type = SAY_EVENT_TEXT_ENTERED;
     ev.ev.text.text = [text.string characterAtIndex:0];
 
-    say_array_push(events, &ev);
+    mo_array_push(&events, &ev);
 
     text.string = @"";
   }
@@ -498,7 +500,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.ev.key.mod         = say_osx_convert_mod(nsev);
   ev.ev.key.native_code = nsev.keyCode;
 
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)submitFlagChange:(uint8_t)mod forKey:(say_key)key
@@ -510,7 +512,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.ev.key.mod         = mod;
   ev.ev.key.native_code = 0;
 
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)flagsChanged:(NSEvent*)nsev {
@@ -571,7 +573,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.type = SAY_EVENT_BUTTON_PRESS;
   ev.ev.button.pos = [self convertPoint:nsev.locationInWindow];
   ev.ev.button.button = SAY_BUTTON_LEFT;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)ownMouseUp:(NSEvent*)nsev {
@@ -579,7 +581,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.type = SAY_EVENT_BUTTON_RELEASE;
   ev.ev.button.pos = [self convertPoint:nsev.locationInWindow];
   ev.ev.button.button = SAY_BUTTON_LEFT;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)ownRightMouseDown:(NSEvent*)nsev {
@@ -587,7 +589,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.type = SAY_EVENT_BUTTON_PRESS;
   ev.ev.button.pos = [self convertPoint:nsev.locationInWindow];
   ev.ev.button.button = SAY_BUTTON_RIGHT;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)ownRightMouseUp:(NSEvent*)nsev {
@@ -595,7 +597,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.type = SAY_EVENT_BUTTON_RELEASE;
   ev.ev.button.pos = [self convertPoint:nsev.locationInWindow];
   ev.ev.button.button = SAY_BUTTON_RIGHT;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 /* Assume other mouse button will be middle. */
@@ -604,7 +606,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.type = SAY_EVENT_BUTTON_PRESS;
   ev.ev.button.pos = [self convertPoint:nsev.locationInWindow];
   ev.ev.button.button = SAY_BUTTON_MIDDLE;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)ownOtherMouseUp:(NSEvent*)nsev {
@@ -612,26 +614,26 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.type = SAY_EVENT_BUTTON_RELEASE;
   ev.ev.button.pos = [self convertPoint:nsev.locationInWindow];
   ev.ev.button.button = SAY_BUTTON_MIDDLE;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)mouseMoved:(NSEvent*)nsev {
   say_event ev;
   ev.type = SAY_EVENT_MOUSE_MOTION;
   ev.ev.motion.pos = [self convertPoint:nsev.locationInWindow];
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)mouseEntered:(NSEvent*)nsev {
   say_event ev;
   ev.type = SAY_EVENT_MOUSE_ENTERED;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)mouseExited:(NSEvent*)nsev {
   say_event ev;
   ev.type = SAY_EVENT_MOUSE_LEFT;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)ownScrollWheel:(NSEvent*)nsev {
@@ -642,7 +644,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
   ev.type = SAY_EVENT_WHEEL_MOTION;
   ev.ev.wheel.pos = [self convertPoint:nsev.locationInWindow];
   ev.ev.wheel.delta = nsev.deltaY;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 /*
@@ -652,7 +654,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
 - (BOOL)windowShouldClose:(id)sender {
   say_event ev;
   ev.type = SAY_EVENT_QUIT;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 
   if (allow_close) {
     allow_close = NO;
@@ -665,13 +667,13 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
 - (void)windowDidBecomeKey:(NSNotification*)not {
   say_event ev;
   ev.type = SAY_EVENT_FOCUS_GAIN;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)windowDidResignKey:(NSNotification*)not {
   say_event ev;
   ev.type = SAY_EVENT_FOCUS_LOSS;
-  say_array_push(events, &ev);
+  mo_array_push(&events, &ev);
 }
 
 - (void)windowDidResize:(NSNotification*)not {
@@ -682,7 +684,7 @@ static uint8_t say_osx_convert_mod(NSEvent *ev) {
     say_event ev;
     ev.type = SAY_EVENT_RESIZE;
     ev.ev.resize.size = say_make_vector2(size.width, size.height);
-    say_array_push(events, &ev);
+    mo_array_push(&events, &ev);
   }
 
   [view removeTrackingRect:track];

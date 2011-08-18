@@ -2,8 +2,9 @@
 
 #import <Cocoa/Cocoa.h>
 
+#include "mo.h"
+
 struct say_event;
-struct say_array;
 struct say_image;
 
 void say_osx_flip_pool();
@@ -31,7 +32,7 @@ void say_osx_flip_pool();
   NSWindow *window;
   NSOpenGLView *view;
 
-  struct say_array *events;
+  mo_array events;
 
   BOOL allow_close;
 
