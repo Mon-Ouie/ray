@@ -28,7 +28,7 @@ void mo_array_init(mo_array *ary, size_t el_size) {
 }
 
 void mo_array_release(mo_array *ary) {
-  if (ary->release) {
+  if (ary->release && ary->size > 0) {
     void *end = mo_array_end(ary);
     for (void *i = mo_array_begin(ary); i < end; mo_array_next(ary, &i))
       ary->release(i);
