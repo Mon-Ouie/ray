@@ -315,6 +315,15 @@ VALUE ray_gl_set_callback(VALUE self, VALUE proc) {
 }
 
 /*
+ * Ensures an OpenGL context is active for the current thread
+ */
+static
+VALUE ray_gl_ensure_context(VALUE self) {
+  say_context_ensure();
+  return Qnil;
+}
+
+/*
  * Document-Class: Ray::GL
  *
  * The GL module is used to give access to low-level OpenGL features in Ray.
@@ -379,4 +388,7 @@ void Init_ray_gl() {
 
   rb_define_module_function(ray_mGL, "has_callback?", ray_gl_has_callback, 0);
   rb_define_module_function(ray_mGL, "callback=", ray_gl_set_callback, 1);
+
+  rb_define_module_function(ray_mGL, "ensure_context", ray_gl_ensure_context,
+                            0);
 }
