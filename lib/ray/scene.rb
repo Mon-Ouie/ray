@@ -249,10 +249,6 @@ module Ray
       end
     end
 
-    def inspect
-      "#<#{self.class} game=#{self.game.inspect}>"
-    end
-
     alias :pop_scene :exit!
 
     # Sets the name of the scene

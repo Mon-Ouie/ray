@@ -4,6 +4,8 @@ module Ray
 
     # One of the points contained in a polygon.
     class Point
+      include Ray::PP
+
       def initialize(polygon, id)
         @polygon, @id = polygon, id
       end
@@ -44,26 +46,7 @@ outline=#{outline}>"
       end
 
       def pretty_print(q)
-        id = "%x" % (__id__ * 2)
-        id.sub!(/\Af(?=[[:xdigit:]]{2}+\z)/, '') if id.sub!(/\A\.\./, '')
-
-        klass = self.class.pretty_inspect.chomp
-
-        attributes = %w[pos color outline]
-
-        q.group(2, "\#<#{klass}:0x#{id}", '>') do
-          q.seplist(attributes, lambda { q.text ',' }) do |key|
-            q.breakable
-
-            q.text key.to_s
-            q.text '='
-
-            q.group(2) do
-              q.breakable ''
-              q.pp send(key)
-            end
-          end
-        end
+        pretty_print_attributes q, ["pos", "color", "outline"]
       end
 
       attr_reader :polygon, :id
@@ -99,13 +82,13 @@ outline=#{outline}>"
       Point.new(self, id)
     end
 
-    def pretty_print(q)
-      attr = %w[
-        filled? outlined? outline_width
-        points
-      ]
+    def pretty_print(q, other_attr = [])
+      attr = [
+              "filled?", "outlined?", "outline_width",
+              "points"
+             ]
 
-      pretty_print_attributes q, attr
+      super q, attr + other_attr
     end
   end
 end

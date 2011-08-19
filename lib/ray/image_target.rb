@@ -11,5 +11,9 @@ module Ray
         yield self
       end
     end
+
+    def pretty_print(q)
+      super q, ["image"]
+    end
   end
 end

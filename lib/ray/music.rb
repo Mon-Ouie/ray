@@ -4,6 +4,10 @@ module Ray
       open(filename) if filename
     end
 
+    def pretty_print(q)
+      super q, ["time", "duration", "looping?"]
+    end
+
     alias time= seek
 
     alias position  pos

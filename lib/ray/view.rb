@@ -1,5 +1,7 @@
 module Ray
   class View
+    include Ray::PP
+
     # @param [Ray::Rect] rect Rect to show, in pixels.
     # @param [Ray::Vector2] target_size Size of the complete target, in pixels.
     #
@@ -58,6 +60,10 @@ module Ray
 
     def inspect
       "#<#{self.class} center=#{center} size=#{size} viewport=#{viewport}>"
+    end
+
+    def pretty_print(q)
+      pretty_print_attributes q, ["center", "size", "matrix", "viewport"]
     end
   end
 end

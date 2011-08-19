@@ -1,13 +1,7 @@
 module Ray
   class Image
     include Enumerable
-
-    def inspect
-      "#<#{self.class} size=#{size}>"
-    end
-
-    alias :w :width
-    alias :h :height
+    include Ray::PP
 
     extend Ray::ResourceSet
     add_set(/^(.*)$/) { |filename| new(filename) }
@@ -111,5 +105,16 @@ module Ray
     end
 
     # @endgroup
+
+    def inspect
+      "#<#{self.class} size=#{size}>"
+    end
+
+    def pretty_print(q)
+      pretty_print_attributes q, ["size", "smooth?"]
+    end
+
+    alias w width
+    alias h height
   end
 end

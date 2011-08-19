@@ -97,15 +97,14 @@ module Ray
 
     alias :to_s :string
 
-    def pretty_print(q)
-      attr = %w[
-        string
-        font color size style
+    def pretty_print(q, other_attributes = [])
+      attr = [
+              "string",
+              "font", "color", "size", "style",
+              "rect", "auto_center"
+             ]
 
-        rect auto_center
-      ]
-
-      pretty_print_attributes q, attr
+      super q, (attr + other_attributes)
     end
 
     private

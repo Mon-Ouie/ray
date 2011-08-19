@@ -10,6 +10,10 @@ module Ray
       end
     end
 
+    def pretty_print(q)
+      super q, ["time", "duration", "looping?", "buffer"]
+    end
+
     alias time= seek
 
     alias position  pos

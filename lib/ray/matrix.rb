@@ -86,5 +86,31 @@ module Ray
     def to_s
       "#<#{self.class} #{content.join(', ')}>"
     end
+
+    def pretty_print(q)
+      content = self.content.map { |n| ("%g" % n).to_f }
+
+      columns = Array.new(4) do |x|
+        Array.new(4) { |y| ("%g" % self[x, y]).to_f }
+      end
+
+      column_length = columns.map { |c| c.map { |n| n.to_s.length }.max }
+
+      q.group(2, '{', '}') do
+        q.breakable ''
+        content.each_slice(4).with_index do |(x, y, z, w), i|
+          q.text '('
+          q.pp x
+          q.text ', ' + ' ' * (column_length[0] - x.to_s.length)
+          q.pp y
+          q.text ', ' + ' ' * (column_length[1] - y.to_s.length)
+          q.pp z
+          q.text ', ' + ' ' * (column_length[2] - z.to_s.length)
+          q.pp w
+          q.text ')'
+          q.breakable '' unless i == 3
+        end
+      end
+    end
   end
 end

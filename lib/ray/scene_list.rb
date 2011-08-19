@@ -3,6 +3,7 @@ module Ray
   # It needs a game object to find a scene from its name.
   class SceneList
     include Enumerable
+    include Ray::PP
 
     # @param [Ray::Game] game The game which will be used to find scenes.
     def initialize(game)
@@ -67,8 +68,16 @@ module Ray
       @scenes.each(&block)
     end
 
+    # @return [Array<Ray::Scene>]
+    attr_reader :scenes
+    alias to_a scenes
+
     def inspect
       "#{self.class}#{@scenes.inspect}"
+    end
+
+    def pretty_print(q)
+      pretty_print_attributes q, ["scenes"]
     end
   end
 end

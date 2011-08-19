@@ -1,9 +1,13 @@
 module Ray
   module GL
     class Vertex
+      include Ray::PP
+
       @vertex_classes = {0 => Ray::Vertex}
 
       class Instance
+        include Ray::PP
+
         @instance_classes = {}
 
         class << self
@@ -21,6 +25,15 @@ module Ray
           end
 
           "#<#{self.class} #{pairs.join " "}>"
+        end
+
+        def pretty_print(q)
+          attr = []
+          self.class.layout.each do |key, _, _, per_instance|
+            attr << key if per_instance
+          end
+
+          pretty_print_attributes q, attr
         end
       end
 
@@ -157,6 +170,15 @@ module Ray
         end
 
         "#<#{self.class} #{pairs.join " "}>"
+      end
+
+      def pretty_print(q)
+        attr = []
+        self.class.layout.each do |key, _, _, per_instance|
+          attr << key unless per_instance
+        end
+
+        pretty_print_attributes q, attr
       end
     end
   end

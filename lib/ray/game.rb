@@ -234,10 +234,6 @@ module Ray
         scene.event_runner = runner
       end
     end
-
-    def inspect
-      "game(#{title.inspect})"
-    end
   end
 
   # (see Ray::Game#initialize)

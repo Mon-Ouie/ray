@@ -1,5 +1,7 @@
 module Ray
   class Drawable
+    include Ray::PP
+
     # @group Transformations
 
     def y
@@ -36,18 +38,7 @@ module Ray
 
     # @endgroup
 
-    # Pretty prints attributes
-    #
-    # @param [PrettyPrint] q Pretty printer
-    # @param [Array<String>] other_attributes Other attributes to be printed
-    #
-    # @yield Yields to insert custom attributes
-    def pretty_print_attributes(q, other_attributes = [])
-      id = "%x" % (__id__ * 2)
-      id.sub!(/\Af(?=[[:xdigit:]]{2}+\z)/, '') if id.sub!(/\A\.\./, '')
-
-      klass = self.class.pretty_inspect.chomp
-
+    def pretty_print(q, other_attributes = [])
       # Note: This doesn't use %w[...] arrays because YARD can't parse them
       attributes = [
                     "origin", "pos", "z", "scale", "angle",
@@ -55,26 +46,10 @@ module Ray
                     "shader", "shader_attributes",
                     "vertex_count", "index_count", "changed?", "textured?",
                     "blend_mode"
-                   ] + other_attributes
+                   ]
 
-      q.group(2, "\#<#{klass}:0x#{id}", '>') do
-        q.seplist(attributes, lambda { q.text ',' }) do |key|
-          q.breakable
-
-          q.text key.to_s
-          q.text '='
-
-          q.group(2) do
-            q.breakable ''
-            q.pp send(key)
-          end
-        end
-
-        yield q if block_given?
-      end
+      pretty_print_attributes q, attributes + other_attributes
     end
-
-    alias pretty_print pretty_print_attributes
 
     # @return [Hash, nil] Attributes passed to the shader when the object is
     #   drawn.

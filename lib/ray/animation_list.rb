@@ -10,6 +10,7 @@ module Ray
   #
   class AnimationList
     include Enumerable
+    include Ray::PP
 
     def initialize
       @animations = []
@@ -48,8 +49,17 @@ module Ray
       self
     end
 
+    # @return [Array<Ray::Animation>]
+    attr_reader :animations
+
+    alias to_a animations
+
     def inspect
       "#{self.class}#{@animations.inspect}"
+    end
+
+    def pretty_print(q)
+      pretty_print_attributes q, ["animations"]
     end
   end
 end

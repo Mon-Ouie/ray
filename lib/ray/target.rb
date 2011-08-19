@@ -1,5 +1,7 @@
 module Ray
   class Target
+    include Ray::PP
+
     # Shader used when drawing on this target
     #
     # Notice this method will always return the same object, and that modifying
@@ -33,5 +35,9 @@ module Ray
     end
 
     # @endgroup
+
+    def pretty_print(q, other_attr = [])
+      pretty_print_attributes q, ["view", "shader", "size"] + other_attr
+    end
   end
 end

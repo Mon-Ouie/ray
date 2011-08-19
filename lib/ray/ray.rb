@@ -17,6 +17,8 @@ module Ray
   InternalEncoding = BigEndian ? "UTF-32BE" : "UTF-32LE"
 end
 
+require 'ray/pp'
+
 require 'ray/resource_set'
 
 require 'ray/vector'
@@ -48,6 +50,7 @@ require 'ray/text'
 require 'ray/turtle'
 
 require 'ray/audio'
+require 'ray/audio_source'
 require 'ray/sound_buffer'
 require 'ray/sound'
 require 'ray/music'
