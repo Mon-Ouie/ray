@@ -21,9 +21,9 @@ VALUE ray_music_alloc(VALUE self) {
 }
 
 /*
-  @overload open(filename)
-    @param [String] filename Name of the file containing the music to load.
-*/
+ * @overload open(filename)
+ *   @param [String] filename Name of the file containing the music to load.
+ */
 static
 VALUE ray_music_open(VALUE self, VALUE arg) {
   say_music *music = ray_rb2music(self);
@@ -48,10 +48,10 @@ VALUE ray_music_set_looping(VALUE self, VALUE val) {
 }
 
 /*
-  @overload seek(time)
-    Seeks to a specific time in the music.
-    @param [Float] time Time in seconds
-*/
+ * @overload seek(time)
+ *   Seeks to a specific time in the music
+ *   @param [Float] time Time in seconds
+ */
 static
 VALUE ray_music_seek(VALUE self, VALUE time) {
   say_music_seek(ray_rb2music(self), NUM2DBL(time));
@@ -64,7 +64,8 @@ VALUE ray_music_time(VALUE self) {
   return rb_float_new(say_music_get_time(ray_rb2music(self)));
 }
 
-/* @return [Float] Duration of the music. 0 when no buffer is attached to the
+/*
+ * @return [Float] Duration of the music. 0 when no buffer is attached to the
  *   music.
  */
 static
