@@ -77,8 +77,6 @@ static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
 
     say_index_buffer_rebind();
   }
-
-  free(pair);
 }
 
 static size_t say_buffer_register_pointer(size_t attr_i, say_vertex_elem_type t,
@@ -198,23 +196,19 @@ static void say_buffer_build_vao(say_buffer *buf, GLuint vao) {
 
 static GLuint say_buffer_get_vao(say_buffer *buf) {
   say_context *ctxt = say_context_current();
-  uint32_t count = ctxt->count;
 
-  say_vao_pair *pair = say_table_get(buf->vaos, count);
+  if (!mo_hash_has_key(buf->vaos, &ctxt)) {
+    say_vao_pair pair;
+    pair.context = ctxt;
+    glGenVertexArrays(1, &pair.vao);
+    say_buffer_build_vao(buf, pair.vao);
 
-  if (!pair) {
-    pair = malloc(sizeof(say_vao_pair));
-    say_table_set(buf->vaos, count, pair);
+    mo_hash_set(buf->vaos, &ctxt, &pair);
 
-    pair->context = ctxt;
-
-    glGenVertexArrays(1, &pair->vao);
-    say_buffer_build_vao(buf, pair->vao);
-
-    return pair->vao;
+    return pair.vao;
   }
   else {
-    return pair->vao;
+    return mo_hash_get_ptr(buf->vaos, &ctxt, say_vao_pair)->vao;
   }
 }
 
@@ -223,8 +217,13 @@ say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size) {
 
   say_buffer *buf = (say_buffer*)malloc(sizeof(say_buffer));
 
-  if (say_has_vao())
-    buf->vaos = say_table_create((say_destructor)say_buffer_delete_vao_pair);
+  if (say_has_vao()) {
+    buf->vaos = mo_hash_create(sizeof(say_context*), sizeof(say_vao_pair));
+    buf->vaos->release = (say_destructor)say_buffer_delete_vao_pair;
+    buf->vaos->hash_of = mo_hash_of_pointer;
+    buf->vaos->key_cmp = mo_hash_pointer_cmp;
+
+  }
   else
     buf->vaos = NULL;
 
@@ -260,7 +259,7 @@ void say_buffer_free(say_buffer *buf) {
   say_context_ensure();
 
   if (buf->vaos)
-    say_table_free(buf->vaos);
+    mo_hash_free(buf->vaos);
   else
     say_buffer_will_delete(buf);
 

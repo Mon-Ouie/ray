@@ -2,8 +2,6 @@
 #define SAY_BUFFER_H_
 
 #include "say_basic_type.h"
-#include "say_array.h"
-#include "say_table.h"
 
 #define SAY_STATIC  GL_STATIC_DRAW_ARB
 #define SAY_STREAM  GL_STREAM_DRAW_ARB
@@ -15,7 +13,7 @@ typedef struct {
   GLuint vbo, instance_vbo;
   GLenum type;
 
-  say_table *vaos;
+  mo_hash *vaos;
 
   mo_array buffer, *instance_buffer;
 } say_buffer;

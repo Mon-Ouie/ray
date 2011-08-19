@@ -129,6 +129,12 @@ typedef struct mo_hash_it {
 int mo_hash_of_pointer(void *ptr);
 int mo_hash_pointer_cmp(const void *a, const void *b);
 
+int mo_hash_of_u32(void *ptr);
+int mo_hash_u32_cmp(const void *a, const void *b);
+
+int mo_hash_of_size(void *ptr);
+int mo_hash_size_cmp(const void *a, const void *b);
+
 mo_hash *mo_hash_create(size_t key_size, size_t el_size);
 void     mo_hash_free(mo_hash *hash);
 

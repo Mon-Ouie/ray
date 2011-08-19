@@ -434,11 +434,11 @@ void mo_hash_fill_bucket(mo_hash *hash, void *store, void *key, void *data) {
 }
 
 void mo_hash_set(mo_hash *hash, void *key, void *data) {
-  int id = hash->hash_of(key) % hash->buffer.size;
-  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
-
   if (hash->size + 1 > hash->buffer.size)
     mo_hash_grow(hash);
+
+  int id = hash->hash_of(key) % hash->buffer.size;
+  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
 
   hash->size += 1;
 
@@ -552,6 +552,30 @@ int mo_hash_of_pointer(void *ptr) {
 
 int mo_hash_pointer_cmp(const void *a, const void *b) {
   void *first = *(void**)a, *sec = *(void**)b;
+
+  if (first > sec)      return +1;
+  else if (sec > first) return -1;
+  else                  return +0;
+}
+
+int mo_hash_of_u32(void *ptr) {
+  return (*(uint32_t*)ptr) * MAGIC_NUMBER;
+}
+
+int mo_hash_u32_cmp(const void *a, const void *b) {
+  uint32_t first = *(uint32_t*)a, sec = *(uint32_t*)b;
+
+  if (first > sec)      return +1;
+  else if (sec > first) return -1;
+  else                  return +0;
+}
+
+int mo_hash_of_size(void *ptr) {
+  return (*(size_t*)ptr) * MAGIC_NUMBER;
+}
+
+int mo_hash_size_cmp(const void *a, const void *b) {
+  size_t first = *(size_t*)a, sec = *(size_t*)b;
 
   if (first > sec)      return +1;
   else if (sec > first) return -1;
