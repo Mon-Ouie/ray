@@ -200,7 +200,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
     case WM_CLOSE: {
       say_event ev;
       ev.type = SAY_EVENT_QUIT;
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -214,7 +214,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
         say_event ev;
         ev.type = SAY_EVENT_RESIZE;
         ev.ev.resize.size = say_make_vector2(w, h);
-        say_array_push(win->events, &ev);
+        mo_array_push(&win->events, &ev);
       }
 
       break;
@@ -223,14 +223,14 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
     case WM_SETFOCUS: {
       say_event ev;
       ev.type = SAY_EVENT_FOCUS_GAIN;
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
     case WM_KILLFOCUS: {
       say_event ev;
       ev.type = SAY_EVENT_FOCUS_LOSS;
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -239,7 +239,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.type = SAY_EVENT_TEXT_ENTERED;
       ev.ev.text.text = (uint32_t)wparam;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
 
       break;
     }
@@ -253,7 +253,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
         ev.ev.key.native_code = (uint32_t)wparam;
         ev.ev.key.code        = say_win_get_key(wparam, lparam);
 
-        say_array_push(win->events, &ev);
+        mo_array_push(&win->events, &ev);
       }
       break;
     }
@@ -266,7 +266,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.key.native_code = (uint32_t)wparam;
       ev.ev.key.code        = say_win_get_key(wparam, lparam);
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -281,7 +281,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.wheel.pos   = say_make_vector2(pos.x, pos.y);
       ev.ev.wheel.delta = (int16_t)(HIWORD(wparam)) / 120;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -291,7 +291,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.button.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
       ev.ev.button.button = SAY_BUTTON_LEFT;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -301,7 +301,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.button.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
       ev.ev.button.button = SAY_BUTTON_LEFT;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -311,7 +311,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.button.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
       ev.ev.button.button = SAY_BUTTON_RIGHT;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -321,7 +321,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.button.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
       ev.ev.button.button = SAY_BUTTON_RIGHT;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -331,7 +331,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.button.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
       ev.ev.button.button = SAY_BUTTON_MIDDLE;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -341,7 +341,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
       ev.ev.button.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
       ev.ev.button.button = SAY_BUTTON_MIDDLE;
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -357,14 +357,14 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
 
         say_event ev;
         ev.type = SAY_EVENT_MOUSE_ENTERED;
-        say_array_push(win->events, &ev);
+        mo_array_push(&win->events, &ev);
       }
 
       say_event ev;
       ev.type = SAY_EVENT_MOUSE_MOTION;
       ev.ev.motion.pos = say_make_vector2(LOWORD(lparam), HIWORD(lparam));
 
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
 
@@ -373,7 +373,7 @@ static void say_win_window_translate(say_win_window *win, UINT msg, WPARAM wpara
 
       say_event ev;
       ev.type = SAY_EVENT_MOUSE_LEFT;
-      say_array_push(win->events, &ev);
+      mo_array_push(&win->events, &ev);
       break;
     }
   }
@@ -466,14 +466,14 @@ say_imp_window say_imp_window_create() {
   win->icon   = 0;
   win->cursor = LoadCursor(NULL, IDC_ARROW);;
 
-  win->events = say_array_create(sizeof(say_event), NULL, NULL);
+  mo_array_init(&win->events, sizeof(say_event));
 
   return win;
 }
 
 void say_imp_window_free(say_imp_window win) {
   say_imp_window_close(win);
-  say_array_free(win->events);
+  mo_array_release(&win->events);
   free(win);
 }
 
@@ -637,7 +637,7 @@ bool say_imp_window_resize(say_imp_window win, size_t w, size_t h) {
 bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev,
                                struct say_input *input) {
 
-  if (say_array_get_size(win->events) == 0) {
+  if (win->events.size == 0) {
     MSG message;
     while (PeekMessage(&message, win->win, 0, 0, PM_REMOVE)) {
       TranslateMessage(&message);
@@ -645,20 +645,20 @@ bool say_imp_window_poll_event(say_imp_window win, struct say_event *ev,
     }
   }
 
-  if (say_array_get_size(win->events) == 0) {
+  if (win->events.size == 0) {
     ev->type = SAY_EVENT_NONE;
     return false;
   }
   else {
-    *ev = *(say_event*)say_array_get(win->events, 0);
-    say_array_delete(win->events, 0);
+    *ev = mo_array_get_as(&win->events, 0, say_event);
+    mo_array_delete(&win->events, 0);
     return true;
   }
 }
 
 void say_imp_window_wait_event(say_imp_window win, struct say_event *ev,
                                struct say_input *input) {
-  while (say_array_get_size(win->events) == 0) {
+  while (win->events.size == 0) {
     WaitMessage();
 
     MSG message;
@@ -668,6 +668,6 @@ void say_imp_window_wait_event(say_imp_window win, struct say_event *ev,
     }
   }
 
-  *ev = *(say_event*)say_array_get(win->events, 0);
-  say_array_delete(win->events, 0);
+  *ev = mo_array_get_as(&win->events, 0, say_event);
+  mo_array_delete(&win->events, 0);
 }

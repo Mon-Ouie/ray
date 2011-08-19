@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 
-struct say_array;
+#include "mo.h"
 
 typedef struct say_win_window {
   HWND    win;
@@ -12,7 +12,7 @@ typedef struct say_win_window {
   HCURSOR cursor;
   bool    cursor_inside;
   
-  struct say_array *events;
+  mo_array events;
 } say_win_window;
 
 typedef struct say_win_context {
