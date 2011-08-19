@@ -143,9 +143,9 @@ module Ray
 
     def pretty_print(q)
       q.text "("
-      q.pp ("%g" % x).to_f # hides simple-precision inacurracy
+      q.pp(("%g" % x).to_f) # hides simple-precision inacurracy
       q.text ", "
-      q.pp ("%g" % y).to_f
+      q.pp(("%g" % y).to_f)
       q.text ")"
     end
 
@@ -288,11 +288,11 @@ module Ray
 
     def pretty_print(q)
       q.text "("
-      q.pp ("%g" % x).to_f # hides simple-precision inacurracy
+      q.pp(("%g" % x).to_f) # hides simple-precision inacurracy
       q.text ", "
-      q.pp ("%g" % y).to_f
+      q.pp(("%g" % y).to_f)
       q.text ", "
-      q.pp ("%g" % z).to_f
+      q.pp(("%g" % z).to_f)
       q.text ")"
     end
 
