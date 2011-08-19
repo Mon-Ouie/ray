@@ -172,6 +172,10 @@ void say_context_clean_up() {
 }
 
 static void say_context_glew_init() {
+  /*
+   * Fetch any proc we can.
+   */
+  glewExperimental = true;
   glewInit();
 
   /**
@@ -184,17 +188,6 @@ static void say_context_glew_init() {
 #define replace(old, new)                       \
   if (!new && old)                              \
     new = old;
-
-  /* Perform GLEW's job. */
-  glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)
-    say_get_proc("glBindVertexArray");
-  glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSPROC)
-    say_get_proc("glDeleteVertexArrays");
-  glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)
-    say_get_proc("glGenVertexArrays");
-
-  glBindFragDataLocation = (PFNGLBINDFRAGDATALOCATIONPROC)
-    say_get_proc("glBindFragDataLocation");
 
   /* Shaders */
   replace(glCreateShaderObjectARB, glCreateShader);
@@ -232,27 +225,12 @@ static void say_context_glew_init() {
   replace(glBufferSubDataARB, glBufferSubData);
   replace(glGetBufferSubDataARB, glGetBufferSubData);
 
-  glVertexAttribDivisor = (PFNGLVERTEXATTRIBDIVISORPROC)
-    say_get_proc("glVertexAttribDivisor");
-
   /* Vertex attribs */
   replace(glVertexAttribPointerARB, glVertexAttribPointer);
   replace(glEnableVertexAttribArrayARB, glEnableVertexAttribArray);
   replace(glVertexAttribDivisorARB, glVertexAttribDivisor);
   replace(glGetVertexAttribivARB, glGetVertexAttribiv);
   replace(glDisableVertexAttribArrayARB, glDisableVertexAttribArray);
-
-  /* Perform GLEW's job. */
-  glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)
-    say_get_proc("glGenFramebuffers");
-  glDeleteFramebuffers = (PFNGLDELETEFRAMEBUFFERSPROC)
-    say_get_proc("glDeleteFramebuffers");
-  glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)
-    say_get_proc("glBindFramebuffer");
-  glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC)
-    say_get_proc("glFramebufferTexture2D");
-  glFramebufferRenderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFERPROC)
-    say_get_proc("glFramebufferRenderbuffer");
 
   /* Framebuffer objects */
   replace(glGenFramebuffersEXT, glGenFramebuffers);
@@ -261,32 +239,12 @@ static void say_context_glew_init() {
   replace(glFramebufferTexture2DEXT, glFramebufferTexture2D);
   replace(glFramebufferRenderbufferEXT, glFramebufferRenderbuffer);
 
-  glGenRenderbuffers = (PFNGLGENRENDERBUFFERSPROC)
-    say_get_proc("glGenRenderbuffers");
-  glDeleteRenderbuffers = (PFNGLDELETERENDERBUFFERSPROC)
-    say_get_proc("glDeleteRenderbuffers");
-  glBindRenderbuffer = (PFNGLBINDRENDERBUFFERPROC)
-    say_get_proc("glBindRenderbuffer");
-  glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEPROC)
-    say_get_proc("glRenderbufferStorage");
-
   /* Renderbuffer objects */
   replace(glGenRenderbuffersEXT, glGenRenderbuffers);
   replace(glDeleteRenderbuffersEXT, glDeleteRenderbuffers);
   replace(glBindRenderbufferEXT, glBindRenderbuffer);
   replace(glRenderbufferStorageEXT, glRenderbufferStorage);
 
-  glGenerateMipmap = (PFNGLGENERATEMIPMAPPROC)
-    say_get_proc("glGenerateMipmap");
-
   /* Mipmaps */
   replace(glGenerateMipmapEXT, glGenerateMipmap);
-
-  /*
-   * Debug output
-   */
-  glDebugMessageCallbackARB = (PFNGLDEBUGMESSAGECALLBACKARBPROC)
-    say_get_proc("glDebugMessageCallbackARB");
-
-#undef replace
 }
