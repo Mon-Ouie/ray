@@ -17,14 +17,14 @@ say_input *ray_rb2input(VALUE obj) {
 VALUE ray_input2rb(say_input *input, VALUE owner) {
   VALUE obj = Data_Wrap_Struct(rb_path2class("Ray::Input"), NULL, NULL, input);
   rb_iv_set(obj, "@owner", owner);
-
   return obj;
 }
 
 static
 VALUE ray_input_alloc(VALUE self) {
-  rb_raise(rb_eRuntimeError, "can't allocate Ray::Input");
-  return Qnil;
+  say_input *obj = malloc(sizeof(say_input));
+  say_input_reset(obj);
+  return Data_Wrap_Struct(self, NULL, free, obj);
 }
 
 /*
