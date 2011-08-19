@@ -70,7 +70,7 @@ module Ray
       end
     end
 
-    # alias pretty_print pretty_print_attributes
+    alias pretty_print pretty_print_attributes
 
     # @return [Hash, nil] Attributes passed to the shader when the object is
     #   drawn.
