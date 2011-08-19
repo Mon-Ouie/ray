@@ -30,12 +30,6 @@ Ray.game "grayscale" do
       end
     end
 
-    @inverted = true
-
-    on :key_press, key(:i) do
-
-    end
-
     render do |win|
       win.draw @obj
     end
