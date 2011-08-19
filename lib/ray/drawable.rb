@@ -36,6 +36,7 @@ module Ray
     #
     # @param [PrettyPrint] q Pretty printer
     # @param [Array<String>] other_attributes Other attributes to be printed
+    #
     # @yield Yields to insert custom attributes
     def pretty_print_attributes(q, other_attributes = [])
       id = "%x" % (__id__ * 2)
@@ -43,14 +44,14 @@ module Ray
 
       klass = self.class.pretty_inspect.chomp
 
-      attributes = %w[
-        origin pos z scale angle
-        matrix
-        matrix_proc
-        shader shader_attributes
-        vertex_count index_count changed? textured?
-        blend_mode
-      ] + other_attributes
+      # Note: This doesn't use %w[...] arrays because YARD can't parse them
+      attributes = [
+                    "origin", "pos", "z", "scale", "angle",
+                    "matrix", "matrix_proc",
+                    "shader", "shader_attributes",
+                    "vertex_count", "index_count", "changed?", "textured?",
+                    "blend_mode"
+                   ] + other_attributes
 
       q.group(2, "\#<#{klass}:0x#{id}", '>') do
         q.seplist(attributes, lambda { q.text ',' }) do |key|
@@ -69,7 +70,7 @@ module Ray
       end
     end
 
-    alias pretty_print pretty_print_attributes
+    # alias pretty_print pretty_print_attributes
 
     # @return [Hash, nil] Attributes passed to the shader when the object is
     #   drawn.
