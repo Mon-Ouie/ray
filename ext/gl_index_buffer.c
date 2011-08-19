@@ -61,6 +61,15 @@ VALUE ray_gl_index_buffer_bind(VALUE self) {
 }
 
 /*
+ * @return [Integer] The identifier of the OpenGL buffer used by the index
+ * buffer.
+ */
+static
+VALUE ray_gl_index_buffer_ibo(VALUE self) {
+  return ULONG2NUM(say_index_buffer_get_ibo(ray_rb2index_buffer(self)));
+}
+
+/*
  * @overload [](id)
  *   @param [Integer] id
  *   @return [Index] The indexed stored at that index
@@ -189,6 +198,8 @@ void Init_ray_gl_index_buffer() {
   rb_define_singleton_method(ray_cGLIndexBuffer, "unbind",
                              ray_gl_index_buffer_unbind, 0);
   rb_define_method(ray_cGLIndexBuffer, "bind", ray_gl_index_buffer_bind, 0);
+
+  rb_define_method(ray_cGLIndexBuffer, "ibo", ray_gl_index_buffer_ibo, 0);
 
   rb_define_method(ray_cGLIndexBuffer, "[]",  ray_gl_index_buffer_get, 1);
   rb_define_method(ray_cGLIndexBuffer, "[]=", ray_gl_index_buffer_set, 2);

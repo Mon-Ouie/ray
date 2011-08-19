@@ -92,6 +92,23 @@ VALUE ray_gl_buffer_bind_instance_vbo(VALUE self) {
 }
 
 /*
+ * @return [Integer] The identifier of the OpenGL buffer used by the buffer
+ */
+static
+VALUE ray_gl_buffer_vbo(VALUE self) {
+  return ULONG2NUM(say_buffer_get_vbo(ray_rb2buffer(self)));
+}
+
+/*
+ * @return [Integer] The identifier of the OpenGL buffer used by the buffer to
+ *   store per-instance data
+ */
+static
+VALUE ray_gl_buffer_instance_vbo(VALUE self) {
+  return ULONG2NUM(say_buffer_get_instance_vbo(ray_rb2buffer(self)));
+}
+
+/*
  * @overload [](id)
  *   @param [Integer] id
  *   @return [Ray::GL::Vertex, Ray::Vertex] The vertex at the given index.
@@ -401,6 +418,10 @@ void Init_ray_gl_buffer() {
   rb_define_method(ray_cGLBuffer, "bind_vbo", ray_gl_buffer_bind_vbo, 0);
   rb_define_method(ray_cGLBuffer, "bind_instance_vbo",
                    ray_gl_buffer_bind_instance_vbo, 0);
+
+  rb_define_method(ray_cGLBuffer, "vbo", ray_gl_buffer_vbo, 0);
+  rb_define_method(ray_cGLBuffer, "instance_vbo", ray_gl_buffer_instance_vbo,
+                   0);
 
   rb_define_method(ray_cGLBuffer, "[]",  ray_gl_buffer_get, 1);
   rb_define_method(ray_cGLBuffer, "[]=", ray_gl_buffer_set, 2);

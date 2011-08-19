@@ -237,6 +237,13 @@ VALUE ray_image_bind(VALUE self) {
 }
 
 /*
+ * @return [Integer] Identifer of the image's texture
+ */
+VALUE ray_image_texture(VALUE self) {
+  return ULONG2NUM(say_image_get_texture(ray_rb2image(self)));
+}
+
+/*
  * @see smooth=
  */
 VALUE ray_image_is_smooth(VALUE self) {
@@ -315,5 +322,6 @@ void Init_ray_image() {
 
   /* @group OpenGL access */
   rb_define_method(ray_cImage, "bind", ray_image_bind, 0);
+  rb_define_method(ray_cImage, "texture", ray_image_texture, 0);
   /* @endgroup */
 }

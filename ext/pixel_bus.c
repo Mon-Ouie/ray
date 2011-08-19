@@ -295,6 +295,15 @@ VALUE ray_pixel_bus_unbind_unpack(VALUE self) {
   say_pixel_bus_unbind_unpack();
   return Qnil;
 }
+
+/*
+ * @return [Integer] The identifier of the OpenGL buffer used by the PixelBus.
+ */
+static
+VALUE ray_pixel_bus_pbo(VALUE self) {
+  return ULONG2NUM(say_pixel_bus_get_pbo(ray_rb2pixel_bus(self)));
+}
+
 /*
  * Document-class: Ray::PixelBus
  *
@@ -329,6 +338,7 @@ void Init_ray_pixel_bus() {
   rb_define_method(ray_cPixelBus, "bind", ray_pixel_bus_bind, 0);
   rb_define_method(ray_cPixelBus, "bind_pack", ray_pixel_bus_bind_pack, 0);
   rb_define_method(ray_cPixelBus, "bind_unpack", ray_pixel_bus_bind_unpack, 0);
+  rb_define_method(ray_cPixelBus, "pbo", ray_pixel_bus_pbo, 0);
 
   rb_define_singleton_method(ray_cPixelBus, "unbind", ray_pixel_bus_unbind, 0);
   rb_define_singleton_method(ray_cPixelBus, "unbind_pack",
