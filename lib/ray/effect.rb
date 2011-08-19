@@ -113,3 +113,4 @@ require 'ray/effect/generator'
 
 require 'ray/effect/grayscale'
 require 'ray/effect/color_inversion'
+require 'ray/effect/black_and_white'
