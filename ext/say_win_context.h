@@ -1,10 +1,11 @@
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
+#define WGL_CONTEXT_FLAGS_ARB	      0x2094
+#define WGL_CONTEXT_PROFILE_MASK_ARB  0x9126
 
-#define WGL_CONTEXT_PROFILE_MASK_ARB 0x9126
-
-#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB         1
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB          1
 #define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 2
+#define WGL_CONTEXT_DEBUG_BIT_ARB                 1
 
 typedef HGLRC (*say_gl_create_context)(HDC dc, HGLRC share, const GLint *attr);
 
@@ -41,10 +42,12 @@ static HGLRC say_win_context_build(HDC device, HGLRC share) {
 
   say_context_config *conf = say_context_get_config();
 
-  if (create && conf->major_version > 3) {
+  if (create && (conf->major_version > 3 || conf->debug)) {
     GLint attribs[] = {
       WGL_CONTEXT_MAJOR_VERSION_ARB, conf->major_version,
       WGL_CONTEXT_MINOR_VERSION_ARB, conf->minor_version,
+      WGL_CONTEXT_FLAGS_ARB, conf->debug ? WGL_CONTEXT_DEBUG_BIT_ARB :
+      0,
       WGL_CONTEXT_PROFILE_MASK_ARB, conf->core_profile ?
       WGL_CONTEXT_CORE_PROFILE_BIT_ARB :
       WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB
