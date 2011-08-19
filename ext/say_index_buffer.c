@@ -96,3 +96,7 @@ void say_index_buffer_resize(say_index_buffer *buf, size_t size) {
 GLuint *say_index_buffer_get(say_index_buffer *buf, size_t i) {
   return mo_array_get_ptr(&buf->buffer, i, GLuint);
 }
+
+GLuint say_index_buffer_get_ibo(say_index_buffer *buf) {
+  return buf->ibo;
+}

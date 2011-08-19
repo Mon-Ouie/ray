@@ -54,4 +54,6 @@ void say_image_unbind();
 
 void say_image_update_texture(say_image *img);
 
+GLuint say_image_get_texture(say_image *img);
+
 #endif

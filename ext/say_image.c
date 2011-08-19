@@ -352,3 +352,7 @@ void say_image_update_texture(say_image *img) {
 void say_image_unbind() {
   say_texture_make_current(0);
 }
+
+GLuint say_image_get_texture(say_image *img) {
+  return img->texture;
+}

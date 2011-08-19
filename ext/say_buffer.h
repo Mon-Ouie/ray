@@ -46,4 +46,7 @@ void say_buffer_update_instance(say_buffer *buf);
 size_t say_buffer_get_instance_size(say_buffer *buf);
 void say_buffer_resize_instance(say_buffer *buf, size_t size);
 
+GLuint say_buffer_get_vbo(say_buffer *buf);
+GLuint say_buffer_get_instance_vbo(say_buffer *buf);
+
 #endif

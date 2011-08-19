@@ -26,4 +26,6 @@ void   say_index_buffer_resize(say_index_buffer *buf, size_t size);
 
 GLuint *say_index_buffer_get(say_index_buffer *buf, size_t i);
 
+GLuint say_index_buffer_get_ibo(say_index_buffer *buf);
+
 #endif

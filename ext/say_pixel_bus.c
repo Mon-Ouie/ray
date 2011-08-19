@@ -157,3 +157,7 @@ void say_pixel_bus_resize_fast(say_pixel_bus *bus, size_t new_size) {
 size_t say_pixel_bus_get_size(say_pixel_bus *bus) {
   return bus->size;
 }
+
+GLuint say_pixel_bus_get_pbo(say_pixel_bus *bus) {
+  return bus->pbo;
+}

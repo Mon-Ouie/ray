@@ -396,3 +396,11 @@ void say_buffer_resize_instance(say_buffer *buf, size_t size) {
                say_buffer_get_instance(buf, 0),
                buf->type);
 }
+
+GLuint say_buffer_get_vbo(say_buffer *buf) {
+  return buf->vbo;
+}
+
+GLuint say_buffer_get_instance_vbo(say_buffer *buf) {
+  return buf->instance_vbo;
+}
