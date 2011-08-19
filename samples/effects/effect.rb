@@ -7,7 +7,7 @@ end
 
 require 'ray'
 
-Ray.game "grayscale" do
+Ray.game "Some effects" do
   register { add_hook :quit, method(:exit!) }
 
   scene :shader do
