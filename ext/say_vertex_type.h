@@ -2,7 +2,6 @@
 #define SAY_VERTEX_TYPE_H_
 
 #include "say_basic_type.h"
-#include "say_array.h"
 
 typedef enum {
   SAY_FLOAT,

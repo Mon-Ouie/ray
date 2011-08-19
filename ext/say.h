@@ -2,7 +2,6 @@
 #define SAY_H_
 
 #include "say_basic_type.h"
-#include "say_array.h"
 #include "say_thread.h"
 #include "say_matrix.h"
 #include "say_image.h"
