@@ -434,11 +434,11 @@ void mo_hash_fill_bucket(mo_hash *hash, void *store, void *key, void *data) {
 }
 
 void mo_hash_set(mo_hash *hash, void *key, void *data) {
-  int id = hash->hash_of(key) % hash->buffer.size;
-  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
-
   if (hash->size + 1 > hash->buffer.size)
     mo_hash_grow(hash);
+
+  int id = hash->hash_of(key) % hash->buffer.size;
+  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
 
   hash->size += 1;
 
