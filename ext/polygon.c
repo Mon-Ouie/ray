@@ -47,16 +47,16 @@ void ray_polygon_make_outline(say_polygon *poly, VALUE outline_width,
 }
 
 /*
-  @overload line(first, last, width = 1, color = Ray::Color.white)
-    @param [Vector2, #to_vector2] first First point of the line
-    @param [Vector2, #to_vector2] last Last point of the line
-
-    @param [Float] width Width of the line
-
-    @param [Ray::Color] color Color of the line
-
-    @return [Ray::Polygon] A line
-*/
+ * @overload line(first, last, width = 1, color = Ray::Color.white)
+ *   @param [Vector2, #to_vector2] first First point of the line
+ *   @param [Vector2, #to_vector2] last Last point of the line
+ *
+ *   @param [Float] width Width of the line
+ *
+ *   @param [Ray::Color] color Color of the line
+ *
+ *   @return [Ray::Polygon] A line
+ */
 static
 VALUE ray_polygon_line(int argc, VALUE *argv, VALUE self) {
   VALUE first = Qnil, last = Qnil, width = Qnil, color = Qnil;
@@ -77,15 +77,15 @@ VALUE ray_polygon_line(int argc, VALUE *argv, VALUE self) {
 }
 
 /*
-  @overload rectangle(rect, color = Ray::Color.white, outline_width = 0,
-                      outline_color = Ray::Color.white)
-    @param [Ray::Rect, #to_rect] rect Rectangle occupied by the polygon
-    @param [Ray::Color] color Color of the rectangle
-    @param [Float] outline_width Width of the outline
-    @param [Ray::Color] outline_color Color of the outline
-
-    @return [Ray::Polygon] A rectangle
-*/
+ * @overload rectangle(rect, color = Ray::Color.white, outline_width = 0,
+ *                     outline_color = Ray::Color.white)
+ *   @param [Ray::Rect, #to_rect] rect Rectangle occupied by the polygon
+ *   @param [Ray::Color] color Color of the rectangle
+ *   @param [Float] outline_width Width of the outline
+ *   @param [Ray::Color] outline_color Color of the outline
+ *
+ *   @return [Ray::Polygon] A rectangle
+ */
 static
 VALUE ray_polygon_rectangle(int argc, VALUE *argv, VALUE self) {
   VALUE rb_rect = Qnil, rb_color = Qnil, outline_width = Qnil, outline = Qnil;
@@ -109,17 +109,18 @@ VALUE ray_polygon_rectangle(int argc, VALUE *argv, VALUE self) {
 }
 
 /*
-  @overload circle(center, radius, color = Ray::Color.white, outline_width = 0,
-                   outline_color = Ray::Color.white)
-    @param [Ray::Vector2] center The center of the circle
-    @param [Float] radius The radius of the circle
-    @param [Ray::Color] color The color of the circle
-
-    @param outline_width (see rectangle)
-    @param outline_color (see rectangle)
-
-    @return [Ray::Polygon] A circle
-*/
+ * @overload circle(center, radius, color = Ray::Color.white, outline_width = 0,
+ *                  outline_color = Ray::Color.white)
+ *
+ *   @param [Ray::Vector2] center The center of the circle
+ *   @param [Float] radius The radius of the circle
+ *   @param [Ray::Color] color The color of the circle
+ *
+ *   @param outline_width (see rectangle)
+ *   @param outline_color (see rectangle)
+ *
+ *   @return [Ray::Polygon] A circle
+ */
 static
 VALUE ray_polygon_circle(int argc, VALUE *argv, VALUE self) {
   VALUE rb_center = Qnil, rb_radius = Qnil, rb_color = Qnil,
@@ -145,18 +146,18 @@ VALUE ray_polygon_circle(int argc, VALUE *argv, VALUE self) {
 }
 
 /*
-  @overload ellipse(center, rx, ry, color = Ray::Color.white, outline_width = 0,
-                    outline_color = Ray::Color.white)
-    @param [Ray::Vector2] center The center of the ellipse
-    @param [Float] rx Horizontal radius
-    @param [Float] ry Vertical radius
-    @param [Ray::Color] color The color of the ellipse
-
-    @param outline_width (see rectangle)
-    @param outline_color (see rectangle)
-
-    @return [Ray::Polygon] An ellipse
-*/
+ * @overload ellipse(center, rx, ry, color = Ray::Color.white,
+ *                   outline_width = 0, outline_color = Ray::Color.white)
+ *
+ *   @param [Ray::Vector2] center The center of the ellipse
+ *   @param [Float] rx Horizontal radius
+ *   @param [Float] ry Vertical radius
+ *   @param [Ray::Color] color The color of the ellipse
+ *   @param outline_width (see rectangle)
+ *   @param outline_color (see rectangle)
+ *
+ *   @return [Ray::Polygon] An ellipse
+ */
 static
 VALUE ray_polygon_ellipse(int argc, VALUE *argv, VALUE self) {
   VALUE rb_center = Qnil, rb_rx = Qnil, rb_ry = Qnil, rb_color = Qnil,

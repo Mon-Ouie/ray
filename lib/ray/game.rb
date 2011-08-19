@@ -204,14 +204,17 @@ module Ray
       @game_scenes.clear
     end
 
+    # @return [Ray::String]
     def title
       @game_title
     end
 
+    # @return [Ray::SceneList]
     def scenes
       @game_scenes
     end
 
+    # @return [Ray::Window]
     def window
       @game_window
     end

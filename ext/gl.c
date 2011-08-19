@@ -314,6 +314,11 @@ VALUE ray_gl_set_callback(VALUE self, VALUE proc) {
   return proc;
 }
 
+/*
+ * Document-Class: Ray::GL
+ *
+ * The GL module is used to give access to low-level OpenGL features in Ray.
+ */
 void Init_ray_gl() {
   ray_mGL = rb_define_module_under(ray_mRay, "GL");
 
@@ -332,6 +337,7 @@ void Init_ray_gl() {
   /* @return [Hash] Available primitives. */
   rb_define_const(ray_mGL, "Primitives", ray_gl_primitives);
 
+  /* @group Context configuration */
   rb_define_module_function(ray_mGL, "depth_size", ray_gl_depth_size, 0);
   rb_define_module_function(ray_mGL, "depth_size=", ray_gl_set_depth_size, 1);
 
@@ -353,7 +359,10 @@ void Init_ray_gl() {
 
   rb_define_module_function(ray_mGL, "debug?", ray_gl_debug, 0);
   rb_define_module_function(ray_mGL, "debug=", ray_gl_set_debug, 1);
+  /* @endgroup */
 
+
+  /* @group Low-level rendering */
   rb_define_module_function(ray_mGL, "draw_arrays", ray_gl_draw_arrays, 3);
   rb_define_module_function(ray_mGL, "draw_elements", ray_gl_draw_elements, 3);
 
@@ -366,6 +375,7 @@ void Init_ray_gl() {
                             ray_gl_multi_draw_arrays, 3);
   rb_define_module_function(ray_mGL, "multi_draw_elements",
                             ray_gl_multi_draw_elements, 3);
+  /* @endgroup */
 
   rb_define_module_function(ray_mGL, "has_callback?", ray_gl_has_callback, 0);
   rb_define_module_function(ray_mGL, "callback=", ray_gl_set_callback, 1);

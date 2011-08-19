@@ -298,22 +298,22 @@ VALUE ray_drawable_set_z(VALUE self, VALUE val) {
 }
 
 /*
-  Angle is a rotation applied to a drawable. It is expressed in degrees, in the
-  counter-clockwise direction.
-
-  @return [Float] The rotation applied to the drawable
-*/
+ * Angle is a rotation applied to a drawable. It is expressed in degrees, in the
+ * counter-clockwise direction.
+ *
+ * @return [Float] The rotation applied to the drawable
+ */
 static
 VALUE ray_drawable_angle(VALUE self) {
   return rb_float_new(say_drawable_get_angle(ray_rb2drawable(self)));
 }
 
 /*
-  @overload angle=(val)
-    Sets the rotation applied to the drawable.
-    @see #angle=
-    @param [Float] val The rotation applied to the drawable.
-*/
+ * @overload angle=(val)
+ *   Sets the rotation applied to the drawable.
+ *   @see #angle=
+ *   @param [Float] val The rotation applied to the drawable.
+ */
 static
 VALUE ray_drawable_set_angle(VALUE self, VALUE val) {
   say_drawable_set_angle(ray_rb2drawable(self), NUM2DBL(val));
@@ -368,15 +368,15 @@ VALUE ray_drawable_matrix(VALUE self) {
 }
 
 /*
-  @overload matrix=(val)
-    Sets the current matrix to a custom one, making Ray ignore attributes
-    setting that change the transformation matrix.
-
-    Setting this to nil will cause Ray to start using the actual transformation
-    matrix.
-
-    @param [Ray::Matrix, nil] val
-*/
+ *  @overload matrix=(val)
+ *    Sets the current matrix to a custom one, making Ray ignore attributes
+ *    setting that change the transformation matrix.
+ *
+ *    Setting this to nil will cause Ray to start using the actual
+ *    transformation matrix.
+ *
+ *    @param [Ray::Matrix, nil] val
+ */
 static
 VALUE ray_drawable_set_matrix(VALUE self, VALUE val) {
   say_drawable *drawable = ray_rb2drawable(self);
@@ -390,12 +390,12 @@ VALUE ray_drawable_set_matrix(VALUE self, VALUE val) {
 }
 
 /*
-  @overload transform(point)
-    Applies the transformations to a point.
-
-    @param [Ray::Vector3] point Point to transform.
-    @return [Ray::Vector3] Transformed point
-*/
+ *  @overload transform(point)
+ *    Applies the transformations to a point
+ *
+ *    @param [Ray::Vector3] point Point to transform.
+ *    @return [Ray::Vector3] Transformed point
+ */
 static
 VALUE ray_drawable_transform(VALUE self, VALUE point) {
   say_vector3 res = say_drawable_transform(ray_rb2drawable(self),
@@ -516,12 +516,43 @@ VALUE ray_drawable_blend_mode(VALUE self) {
   return Qnil; /* should never happen */
 }
 
+/*
+ * Document-class: Ray::Drawable
+ *
+ * A drawable object represents anything that can be rendered on a target. This
+ * class allows to define transformations for any drawable and to set states to
+ * create your own drawable.
+ *
+ * A subclass of Ray::Drawable must implement ``render`` to draw the object,
+ * using OpenGL calls:
+ *
+ *    # vertex_id is the index of the first vertex of this object; index_id is
+ *    # the index of the first index of this object in the element buffer. One
+ *    # of those variables at least will be ignored in the implementation
+ *    def render(vertex_id, index_id)
+ *      # do work
+ *    end
+ *
+ * Also, it will often use Ray's system to store vertices and sometimes indices:
+ *
+ *     def fill_vertices
+ *       # returns an array of vertices
+ *     end
+ *
+ * Same with indices:
+ *
+ *     def fill_indices(vertex_id)
+ *       # returns a Ray::GL::IntArray
+ *     end
+ *
+ */
 void Init_ray_drawable() {
   ray_cDrawable = rb_define_class_under(ray_mRay, "Drawable", rb_cObject);
   rb_define_alloc_func(ray_cDrawable, ray_drawable_alloc);
   rb_define_method(ray_cDrawable, "initialize", ray_drawable_init, -1);
   rb_define_method(ray_cDrawable, "initialize_copy", ray_drawable_init_copy, 1);
 
+  /* @group Transformations */
   rb_define_method(ray_cDrawable, "origin", ray_drawable_origin, 0);
   rb_define_method(ray_cDrawable, "origin=", ray_drawable_set_origin, 1);
 
@@ -541,12 +572,15 @@ void Init_ray_drawable() {
   rb_define_method(ray_cDrawable, "matrix_proc=", ray_drawable_set_matrix_proc,
                    1);
 
-  rb_define_method(ray_cDrawable, "matrix_changed!", ray_drawable_matrix_changed, 0);
+  rb_define_method(ray_cDrawable, "matrix_changed!",
+                   ray_drawable_matrix_changed, 0);
 
   rb_define_method(ray_cDrawable, "matrix", ray_drawable_matrix, 0);
   rb_define_method(ray_cDrawable, "matrix=", ray_drawable_set_matrix, 1);
   rb_define_method(ray_cDrawable, "transform", ray_drawable_transform, 1);
+  /* @endgroup */
 
+  /* @group Rendering options */
   rb_define_method(ray_cDrawable, "shader", ray_drawable_shader, 0);
   rb_define_method(ray_cDrawable, "shader=", ray_drawable_set_shader, 1);
 
@@ -567,4 +601,5 @@ void Init_ray_drawable() {
   rb_define_method(ray_cDrawable, "blend_mode=", ray_drawable_set_blend_mode,
                    1);
   rb_define_method(ray_cDrawable, "blend_mode", ray_drawable_blend_mode, 0);
+  /* @endgroup */
 }

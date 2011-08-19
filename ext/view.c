@@ -63,11 +63,19 @@ VALUE ray_view_init_copy(VALUE self, VALUE orig) {
   return self;
 }
 
+/*
+ * @see view=
+ */
 static
 VALUE ray_view_size(VALUE self) {
   return ray_vector2_to_rb(say_view_get_size(ray_rb2view(self)));
 }
 
+/*
+ * @overload size=(val)
+ *   Sets the size of the visible world
+ *   @param [Ray::Vector2] val
+ */
 static
 VALUE ray_view_set_size(VALUE self, VALUE val) {
   rb_check_frozen(self);
@@ -75,11 +83,19 @@ VALUE ray_view_set_size(VALUE self, VALUE val) {
   return val;
 }
 
+/*
+ * @see center=
+ */
 static
 VALUE ray_view_center(VALUE self) {
   return ray_vector2_to_rb(say_view_get_center(ray_rb2view(self)));
 }
 
+/*
+ * @overload center=(center)
+ *   Sets the center of the world
+ *   @param [Ray::Vector2] center
+ */
 static
 VALUE ray_view_set_center(VALUE self, VALUE val) {
   rb_check_frozen(self);
@@ -87,11 +103,23 @@ VALUE ray_view_set_center(VALUE self, VALUE val) {
   return val;
 }
 
+/*
+ * @see viewport=
+ */
 static
 VALUE ray_view_viewport(VALUE self) {
   return ray_rect2rb(say_view_get_viewport(ray_rb2view(self)));
 }
 
+/*
+ * @overload viewport=(rect)
+ *   Sets the region of the world where rendering will be done
+ *
+ *   All the components of the rects are values between 0 and 1, allowing to use
+ *   the same rect for two targets of different size
+ *
+ *   @param [Ray::Rect] rect
+ */
 static
 VALUE ray_view_set_viewport(VALUE self, VALUE val) {
   rb_check_frozen(self);
@@ -99,11 +127,23 @@ VALUE ray_view_set_viewport(VALUE self, VALUE val) {
   return val;
 }
 
+/*
+ * @see matrix=
+ */
 static
 VALUE ray_view_matrix(VALUE self) {
   return ray_matrix2rb(say_view_get_matrix(ray_rb2view(self)));
 }
 
+/*
+ * @overload matrix=(mat)
+ *   Sets the projection matrix
+ *
+ *   Setting the projection matrix causes the center and the size of the view to
+ *   be ignored. Passing nil would cancel this.
+ *
+ *   @param [Ray::Matrix, nil] mat New matrix
+ */
 static
 VALUE ray_view_set_matrix(VALUE self, VALUE val) {
   rb_check_frozen(self);
@@ -116,6 +156,13 @@ VALUE ray_view_set_matrix(VALUE self, VALUE val) {
   return val;
 }
 
+/*
+ * Document-class: Ray::View
+ *
+ * A view is a way to apply some transformations to all the drawables at once,
+ * by defining a projection. It also determines the region of the screen where
+ * the view will draw.
+ */
 void Init_ray_view() {
   ray_cView = rb_define_class_under(ray_mRay, "View", rb_cObject);
   rb_define_alloc_func(ray_cView, ray_view_alloc);

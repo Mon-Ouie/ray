@@ -1,5 +1,7 @@
 module Ray
   class Drawable
+    # @group Transformations
+
     def y
       pos.y
     end
@@ -31,6 +33,8 @@ module Ray
     def scale_y=(val)
       self.scale = [scale_x, val]
     end
+
+    # @endgroup
 
     # Pretty prints attributes
     #

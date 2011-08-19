@@ -182,6 +182,14 @@ module Ray
     end
   end
 
+  # A Key object can be used as a matcher to check if a key has been pressed or
+  # released:
+  #
+  #    on :key_press, Key.new(:+) do
+  #      # work
+  #    end
+  #
+  # @see KeyMod
   class Key
     def initialize(name)
       raise NoKeyError, name unless Keys[name]
@@ -205,6 +213,10 @@ module Ray
     end
   end
 
+  # A KeyMod object can be used as a matcher to check if some modifiers are held
+  # when a key is pressed.
+  #
+  # @see KeyMod
   class KeyMod
     def initialize(name)
       raise NoKeyError, name unless Mod[name]
