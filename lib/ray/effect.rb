@@ -112,3 +112,4 @@ end
 require 'ray/effect/generator'
 
 require 'ray/effect/grayscale'
+require 'ray/effect/color_inversion'
