@@ -373,3 +373,7 @@ void say_shader_set_bool_loc(say_shader *shader, int loc, uint8_t val) {
   say_shader_bind(shader);
   glUniform1i(loc, val);
 }
+
+GLuint say_shader_get_program(say_shader *shader) {
+  return shader->program;
+}

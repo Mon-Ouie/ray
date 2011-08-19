@@ -158,6 +158,14 @@ VALUE ray_shader_bind(VALUE self) {
   return Qnil;
 }
 
+/*
+ * @return [Integer] The OpenGL program id
+ */
+static
+VALUE ray_shader_program(VALUE self) {
+  return NUM2ULONG(say_shader_get_program(ray_rb2shader(self)));
+}
+
 static
 VALUE ray_shader_set_vector2(VALUE self, VALUE loc, VALUE val) {
   rb_check_frozen(self);
@@ -299,4 +307,5 @@ void Init_ray_shader() {
   rb_define_method(ray_cShader, "set_bool", ray_shader_set_bool, 2);
 
   rb_define_method(ray_cShader, "bind", ray_shader_bind, 0);
+  rb_define_method(ray_cShader, "program", ray_shader_program, 0);
 }

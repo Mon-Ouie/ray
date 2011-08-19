@@ -88,4 +88,6 @@ void say_shader_set_bool_loc(say_shader *shader, int loc, uint8_t val);
 
 void say_shader_bind(say_shader *shader);
 
+GLuint say_shader_get_program(say_shader *shader);
+
 #endif
