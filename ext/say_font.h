@@ -1,9 +1,6 @@
 #ifndef SAY_FONT_H_
 #define SAY_FONT_H_
 
-#include "say_table.h"
-#include "say_array.h"
-
 #include "say_image.h"
 
 typedef struct {
