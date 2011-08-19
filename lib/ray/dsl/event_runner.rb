@@ -7,7 +7,6 @@ module Ray
     class EventRunner
       def initialize
         @handlers    = []
-        @event_list  = []
         @next_events = []
 
         @event_groups = Hash.new { |h, k| h[k] = true }
@@ -16,13 +15,13 @@ module Ray
 
       # Sends all the known events to our listeners.
       def run
-        @event_list  = @next_events
+        event_list   = @next_events
         @next_events = []
 
         handlers = @handlers.select { |o| group_enabled?(o.group) }
 
-        @event_list.each do |ev|
-          handlers.select { |o| o.call(ev) if o.match?(ev) }
+        event_list.each do |ev|
+          handlers.each { |o| o.call(ev) if o.match?(ev) }
         end
       end
 

@@ -1,14 +1,6 @@
 module Ray
   module DSL
     # Used internally to store event when raise_event is called.
-    class Event
-      def initialize(type, args)
-        @type = type
-        @args = args
-      end
-
-      attr_reader :type
-      attr_reader :args
-    end
+    Event = Struct.new(:type, :args)
   end
 end
