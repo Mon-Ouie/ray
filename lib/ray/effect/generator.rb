@@ -126,12 +126,17 @@ default
         str << "}\n"
       end
 
+      # Generates a shader
+      # @param [Ray::Shader] shader Shader to compile and apply defaults to
+      # @return [Ray::Shader] shader
       def build(shader = Ray::Shader.new)
         shader.compile :frag => StringIO.new(code)
         apply_defaults shader
         shader
       end
 
+      # Apply generator defaults to a shader
+      # @param [Ray::Shader] shader Shader to apply defaults to
       def apply_defaults(shader)
         each { |effect| effect.apply_defaults(shader) }
       end
