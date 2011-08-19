@@ -16,8 +16,8 @@ typedef struct {
 } say_font_row;
 
 typedef struct {
-  say_table *glyphs;
-  mo_array   rows;
+  mo_hash  *glyphs;
+  mo_array  rows;
 
   say_image *image;
 
@@ -28,7 +28,7 @@ typedef struct {
   FT_Library library;
   FT_Face face;
 
-  say_table *pages;
+  mo_hash *pages;
 } say_font;
 
 say_font *say_font_create();

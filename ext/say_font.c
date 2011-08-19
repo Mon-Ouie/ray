@@ -1,9 +1,10 @@
 #include "say.h"
 
-static say_font_page *say_page_create() {
-  say_font_page *page = malloc(sizeof(say_font_page));
+static void say_page_init(say_font_page *page) {
+  page->glyphs = mo_hash_create(sizeof(uint32_t), sizeof(say_glyph));
+  page->glyphs->hash_of = mo_hash_of_u32;
+  page->glyphs->key_cmp = mo_hash_u32_cmp;
 
-  page->glyphs = say_table_create(free);
   mo_array_init(&page->rows, sizeof(say_font_row));
 
   page->current_height = 2;
@@ -23,17 +24,13 @@ static say_font_page *say_page_create() {
       say_image_set(page->image, x, y, say_make_color(255, 255, 255, 255));
     }
   }
-
-  return page;
 }
 
 static void say_page_free(say_font_page *page) {
   say_image_free(page->image);
 
   mo_array_release(&page->rows);
-  say_table_free(page->glyphs);
-
-  free(page);
+  mo_hash_free(page->glyphs);
 }
 
 static say_rect say_page_find_rect(say_font_page *page, size_t width, size_t height) {
@@ -111,8 +108,10 @@ static say_glyph *say_font_load_glyph(say_font *font, say_font_page *page,
                                       size_t size) {
   uint32_t bold_codepoint = ((bold ? 1 : 0) << 31) | codepoint;
 
-  say_glyph *glyph = malloc(sizeof(say_glyph));
-  say_table_set(page->glyphs, bold_codepoint, glyph);
+  say_glyph tmp;
+  mo_hash_set(page->glyphs, &bold_codepoint, &tmp);
+
+  say_glyph *glyph = mo_hash_get(page->glyphs, &bold_codepoint);
 
   glyph->offset   = 0;
   glyph->bounds   = say_make_rect(2, 0, 2, 2);
@@ -216,7 +215,10 @@ say_font *say_font_create() {
 
   font->face = NULL;
 
-  font->pages = say_table_create((say_destructor)say_page_free);
+  font->pages = mo_hash_create(sizeof(size_t), sizeof(say_font_page));
+  font->pages->release = (say_destructor)say_page_free;
+  font->pages->hash_of = mo_hash_of_size;
+  font->pages->key_cmp = mo_hash_size_cmp;
 
   return font;
 }
@@ -241,7 +243,7 @@ void say_font_free(say_font *font) {
   if (font->library)
     FT_Done_FreeType(font->library);
 
-  say_table_free(font->pages);
+  mo_hash_free(font->pages);
   free(font);
 }
 
@@ -273,13 +275,15 @@ int say_font_load_from_memory(say_font *font, void *buf, size_t size) {
 
 say_font_page *say_font_get_page(say_font *font, size_t size) {
   say_font_page *page = NULL;
-  if ((page = say_table_get(font->pages, size)))
+  if ((page = mo_hash_get(font->pages, &size)))
     return page;
   else {
-    page = say_page_create();
-    say_table_set(font->pages, size, page);
+    say_font_page page;
+    say_page_init(&page);
 
-    return page;
+    mo_hash_set(font->pages, &size, &page);
+
+    return mo_hash_get(font->pages, &size);
   }
 }
 
@@ -288,7 +292,7 @@ say_glyph *say_font_get_glyph(say_font *font, uint32_t codepoint, size_t size, u
   uint32_t bold_codepoint = ((bold ? 1 : 0) << 31) | codepoint;
 
   say_glyph *glyph = NULL;
-  if ((glyph = say_table_get(page->glyphs, bold_codepoint)))
+  if ((glyph = mo_hash_get(page->glyphs, &bold_codepoint)))
     return glyph;
   else {
     return say_font_load_glyph(font, page, codepoint, bold, size);
