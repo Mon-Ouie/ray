@@ -15,7 +15,7 @@ typedef struct {
   GLuint vbo, instance_vbo;
   GLenum type;
 
-  say_table *vaos;
+  mo_hash *vaos;
 
   mo_array buffer, *instance_buffer;
 } say_buffer;
