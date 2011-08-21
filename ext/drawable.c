@@ -123,6 +123,8 @@ VALUE ray_drawable_alloc(VALUE self) {
 
   VALUE rb = Data_Wrap_Struct(self, NULL, ray_drawable_free, obj);
 
+  rb_iv_set(rb, "@shader_attributes", Qnil);
+
   obj->drawable = NULL;
   obj->obj      = rb;
 

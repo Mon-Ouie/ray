@@ -103,10 +103,9 @@ module Ray
       @scene_always_block     = nil
       @scene_render_block     = nil
       @scene_clean_block      = nil
-
       @scene_loops_per_second = 60
-
       @scene_animations       = Ray::AnimationList.new
+      @scene_arguments        = []
     end
 
     def register_events

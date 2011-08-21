@@ -21,6 +21,7 @@ VALUE ray_polygon_alloc(VALUE self) {
 
   say_drawable_set_shader_proc(obj->drawable, ray_drawable_shader_proc);
   say_drawable_set_other_data(obj->drawable, (void*)rb);
+  rb_iv_set(rb, "@shader_attributes", Qnil);
 
   return rb;
 }
@@ -72,6 +73,7 @@ VALUE ray_polygon_line(int argc, VALUE *argv, VALUE self) {
 
   say_drawable_set_shader_proc(line->drawable, ray_drawable_shader_proc);
   say_drawable_set_other_data(line->drawable, (void*)rb);
+  rb_iv_set(rb, "@shader_attributes", Qnil);
 
   return rb;
 }
@@ -104,6 +106,7 @@ VALUE ray_polygon_rectangle(int argc, VALUE *argv, VALUE self) {
 
   say_drawable_set_shader_proc(poly->drawable, ray_drawable_shader_proc);
   say_drawable_set_other_data(poly->drawable, (void*)ret);
+  rb_iv_set(ret, "@shader_attributes", Qnil);
 
   return ret;
 }
@@ -141,6 +144,7 @@ VALUE ray_polygon_circle(int argc, VALUE *argv, VALUE self) {
 
   say_drawable_set_shader_proc(poly->drawable, ray_drawable_shader_proc);
   say_drawable_set_other_data(poly->drawable, (void*)ret);
+  rb_iv_set(ret, "@shader_attributes", Qnil);
 
   return ret;
 }
@@ -179,6 +183,7 @@ VALUE ray_polygon_ellipse(int argc, VALUE *argv, VALUE self) {
 
   say_drawable_set_shader_proc(poly->drawable, ray_drawable_shader_proc);
   say_drawable_set_other_data(poly->drawable, (void*)rb);
+  rb_iv_set(ret, "@shader_attributes", Qnil);
 
   return rb;
 }

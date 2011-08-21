@@ -21,6 +21,8 @@ VALUE ray_text_alloc(VALUE self) {
 
   say_drawable_set_shader_proc(text->drawable, ray_drawable_shader_proc);
   say_drawable_set_other_data(text->drawable, (void*)rb);
+  rb_iv_set(rb, "@shader_attributes", Qnil);
+  rb_iv_set(rb, "@font", Qnil);
 
   return rb;
 }

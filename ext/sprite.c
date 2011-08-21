@@ -20,6 +20,7 @@ VALUE ray_sprite_alloc(VALUE self) {
 
   say_drawable_set_shader_proc(sprite->drawable, ray_drawable_shader_proc);
   say_drawable_set_other_data(sprite->drawable, (void*)rb);
+  rb_iv_set(rb, "@shader_attributes", Qnil);
 
   return rb;
 }
