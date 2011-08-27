@@ -131,4 +131,18 @@ context "any transformation" do
   asserts(:untransform, [1, 2, 3]).equals { topic.inverse.transform [1, 2, 3] }
 end
 
+context "a transformation matrix" do
+  setup do
+    Ray::Matrix.transformation([10, -50],
+                               [-20, 30], 3,
+                               [2, -1],
+                               50)
+  end
+
+  asserts_topic.almost_equals(Ray::Matrix.translation([-20, 30, 3]).
+                              rotate(50, [0, 0, 1]).
+                              scale([2, -1, 1]).
+                              translate([-10, +50, 0]), 1e-6)
+end
+
 run_tests if __FILE__ == $0

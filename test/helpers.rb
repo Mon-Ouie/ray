@@ -27,12 +27,15 @@ class AlmostEqualMacro < Riot::AssertionMacro
   register :almost_equals
 
   def test(actual, expected, epsilon)
-    diff = (actual - expected)
-    case diff
+    case actual
     when Numeric
-      diff.abs <= epsilon
+      (actual - expected).abs <= epsilon
     when Ray::Vector2, Ray::Vector3
-      diff.to_a.all? { |n| n.abs <= epsilon }
+      (actual - expected).to_a.all? { |n| n.abs <= epsilon }
+    when Ray::Matrix
+      actual.content.zip(expected.content).all? do |a, b|
+        (a - b).abs <= epsilon
+      end
     end
   end
 

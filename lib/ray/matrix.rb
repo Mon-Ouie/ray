@@ -37,16 +37,22 @@ module Ray
         new.look_at(eye, center, up)
       end
 
-      # @param [Array<Float>] args (see #orthogonal)
+      # @param (see #orthogonal)
       # @return [Ray::Matrix] An orthogonal projection matrix
       def orthogonal(*args)
         new.orthogonal(*args)
       end
 
-      # @param [Array<Float>] args (see #perspective)
+      # @param (see #perspective)
       # @return [Ray::Matrix] A perspective projection matrix
       def perspective(*args)
         new.perspective(*args)
+      end
+
+      # @param (see #set_transformation)
+      # @return [Ray::Matrix] A 2D transformation matrix
+      def transformation(*args)
+        new.set_transformation(*args)
       end
     end
 

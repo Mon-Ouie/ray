@@ -336,6 +336,33 @@ VALUE ray_matrix_perspective(VALUE self,
   return self;
 }
 
+/*
+ * @overload set_transformation(origin, pos, z, scale, angle)
+ *   Resets the matrix content to a 2D transformation matrix
+ *
+ *   @param [Vector2] origin Origin of all the transformations
+ *   @param [Vector2] pos Position of the object
+ *   @param [Float] z Z ordering
+ *   @param [Vector2] scale Scaling factor
+ *   @param [Float] angle Rotation
+ */
+static
+VALUE ray_matrix_set_transformation(VALUE self,
+                                    VALUE origin,
+                                    VALUE pos, VALUE z,
+                                    VALUE scale,
+                                    VALUE angle) {
+  rb_check_frozen(self);
+
+  say_matrix_set_transformation(ray_rb2matrix(self),
+                                ray_convert_to_vector2(origin),
+                                ray_convert_to_vector2(pos),
+                                NUM2DBL(z),
+                                ray_convert_to_vector2(scale),
+                                NUM2DBL(angle));
+
+  return self;
+}
 
 /*
   Document-class: Ray::Matrix
@@ -371,4 +398,6 @@ void Init_ray_matrix() {
   rb_define_method(ray_cMatrix, "look_at", ray_matrix_look_at, 3);
   rb_define_method(ray_cMatrix, "orthogonal", ray_matrix_orthogonal, 6);
   rb_define_method(ray_cMatrix, "perspective", ray_matrix_perspective, 4);
+  rb_define_method(ray_cMatrix, "set_transformation",
+                   ray_matrix_set_transformation, 5);
 }
