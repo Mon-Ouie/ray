@@ -402,6 +402,17 @@ say_matrix *say_drawable_get_matrix(say_drawable *drawable) {
   return drawable->matrix;
 }
 
+say_matrix *say_drawable_get_default_matrix(say_drawable *drawable) {
+  say_matrix *ret = say_matrix_identity();
+  say_matrix_set_transformation(ret,
+                                drawable->origin,
+                                drawable->pos, drawable->z_order,
+                                drawable->scale,
+                                drawable->angle);
+
+  return ret;
+}
+
 void say_drawable_set_matrix(say_drawable *drawable, say_matrix *matrix) {
   if (matrix) {
     drawable->custom_matrix = true;
@@ -419,7 +430,6 @@ say_vector3 say_drawable_transform(say_drawable *drawable, say_vector3 point) {
 
   return say_matrix_transform(drawable->matrix, point);
 }
-
 
 say_blend_mode say_drawable_get_blend_mode(say_drawable *drawable) {
   return drawable->blend_mode;

@@ -71,6 +71,12 @@ context "a drawable" do
   context "with several transformations" do
     attr = {:foo => 3}
 
+    transformation_matrix = Ray::Matrix.transformation([30, 40],
+                                                       [10, 20],
+                                                       9,
+                                                       [2, 0.5],
+                                                       90)
+
     hookup do
       topic.origin = [30, 40]
       topic.pos    = [10, 20]
@@ -80,6 +86,9 @@ context "a drawable" do
 
       topic.shader_attributes = attr
     end
+
+    asserts(:default_matrix).equals transformation_matrix
+    asserts(:matrix).equals transformation_matrix
 
     # (10, 30)   => (-20, -10) (origin)
     # (-20, -10) => (-40, -5)  (scale)
@@ -113,6 +122,8 @@ context "a drawable" do
       end
 
       asserts(:matrix).equals Ray::Matrix.new
+      asserts(:default_matrix).equals transformation_matrix
+
       asserts(:transform, [10, 30]).equals Ray::Vector3[10, 30, 0]
 
       context "that has been disabled" do
@@ -136,6 +147,7 @@ context "a drawable" do
       end
 
       asserts(:matrix).equals Ray::Matrix.new
+      asserts(:default_matrix).equals transformation_matrix
       asserts(:matrix_proc).equals matrix_proc
       asserts(:matrix_proc).received(:call) { topic }
 

@@ -112,6 +112,7 @@ float say_drawable_get_z(say_drawable *drawable);
 float say_drawable_get_angle(say_drawable *drawable);
 
 say_matrix *say_drawable_get_matrix(say_drawable *drawable);
+say_matrix *say_drawable_get_default_matrix(say_drawable *drawable);
 void say_drawable_set_matrix(say_drawable *drawable, say_matrix *matrix);
 say_vector3 say_drawable_transform(say_drawable *drawable, say_vector3 point);
 

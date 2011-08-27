@@ -392,6 +392,23 @@ VALUE ray_drawable_set_matrix(VALUE self, VALUE val) {
 }
 
 /*
+ * @overload default_matrix
+ *   Default transformation matrix
+ *
+ *   This is useful when matrix is set to a custom matrix or matrix_proc is
+ *   non-nil. It allows to retrieve the matrix that would be used otherwise, for
+ *   instance to multiply it by another matrix to apply more transformations.
+ *
+ *   @return [Ray::Matrix]
+ */
+static
+VALUE ray_drawable_default_matrix(VALUE self) {
+  say_matrix *mat = say_drawable_get_default_matrix(ray_rb2drawable(self));
+  return Data_Wrap_Struct(rb_path2class("Ray::Matrix"), NULL, say_matrix_free,
+                          mat);
+}
+
+/*
  *  @overload transform(point)
  *    Applies the transformations to a point
  *
@@ -579,6 +596,8 @@ void Init_ray_drawable() {
 
   rb_define_method(ray_cDrawable, "matrix", ray_drawable_matrix, 0);
   rb_define_method(ray_cDrawable, "matrix=", ray_drawable_set_matrix, 1);
+  rb_define_method(ray_cDrawable, "default_matrix",
+                   ray_drawable_default_matrix, 0);
   rb_define_method(ray_cDrawable, "transform", ray_drawable_transform, 1);
   /* @endgroup */
 
