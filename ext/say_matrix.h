@@ -52,4 +52,10 @@ void say_matrix_look_at(say_matrix *matrix,
                         float center_x, float center_y, float center_z,
                         float up_x, float up_y, float up_z);
 
+void say_matrix_set_transformation(say_matrix *matrix,
+                                   say_vector2 origin,
+                                   say_vector2 pos, float z,
+                                   say_vector2 scale,
+                                   float angle);
+
 #endif

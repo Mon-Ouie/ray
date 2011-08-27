@@ -8,19 +8,11 @@ static void say_drawable_update_matrix(say_drawable *drawable) {
     drawable->matrix_proc(drawable->data, drawable->matrix);
   }
   else {
-    say_matrix_reset(drawable->matrix);
-
-    say_matrix_translate_by(drawable->matrix,
-                            drawable->pos.x,
-                            drawable->pos.y,
-                            drawable->z_order);
-    say_matrix_rotate(drawable->matrix, drawable->angle, 0, 0, 1);
-    say_matrix_scale_by(drawable->matrix, drawable->scale.x, drawable->scale.y,
-                      1);
-    say_matrix_translate_by(drawable->matrix,
-                            -drawable->origin.x,
-                            -drawable->origin.y,
-                            0);
+    say_matrix_set_transformation(drawable->matrix,
+                                  drawable->origin,
+                                  drawable->pos, drawable->z_order,
+                                  drawable->scale,
+                                  drawable->angle);
   }
 
   drawable->matrix_updated = true;

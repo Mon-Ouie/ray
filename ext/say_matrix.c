@@ -312,3 +312,35 @@ void say_matrix_look_at(say_matrix *matrix,
 
   say_matrix_free(other);
 }
+
+void say_matrix_set_transformation(say_matrix *matrix,
+                                   say_vector2 origin,
+                                   say_vector2 pos, float z,
+                                   say_vector2 scale,
+                                   float angle) {
+  angle = -angle * SAY_PI / 180;
+
+  float c = cosf(angle);
+  float s = sinf(angle);
+
+  float sx_cos = scale.x * c;
+  float sy_cos = scale.y * c;
+  float sx_sin = scale.x * s;
+  float sy_sin = scale.y * s;
+
+  float o_x = -origin.x * sx_cos - origin.y * sy_sin;
+  float o_y = +origin.x * sx_sin - origin.y * sy_cos;
+
+  float t_x = o_x + pos.x;
+  float t_y = o_y + pos.y;
+  float t_z = z;
+
+  float content[16] = {
+    +sx_cos, +sy_sin, 0, t_x,
+    -sx_sin, +sy_cos, 0, t_y,
+    0,       0, 1, t_z,
+    0,       0, 0,   1
+  };
+
+  say_matrix_set_content(matrix, content);
+}
