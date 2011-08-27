@@ -7,13 +7,15 @@ unsigned long  say_x11_event_mask =
   LeaveWindowMask;
 
 static void say_x11_window_find_config(say_x11_window *win) {
-  static int visual_attribs[] = {
-    GLX_DOUBLEBUFFER, GL_TRUE,
-    GLX_RED_SIZE,   8,
-    GLX_GREEN_SIZE, 8,
-    GLX_BLUE_SIZE,  8,
-    GLX_ALPHA_SIZE, 8,
-    GLX_DEPTH_SIZE, 24,
+  say_context_config *say_conf = say_context_get_config();
+  int visual_attribs[] = {
+    GLX_RED_SIZE,     8,
+    GLX_GREEN_SIZE,   8,
+    GLX_BLUE_SIZE,    8,
+    GLX_ALPHA_SIZE,   8,
+    GLX_DEPTH_SIZE,   say_conf->depth_size,
+    GLX_STENCIL_SIZE, say_conf->stencil_size,
+    GLX_DOUBLEBUFFER, True,
     None
   };
 
