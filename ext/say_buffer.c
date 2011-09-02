@@ -5,23 +5,14 @@ static bool say_has_vao() {
     GLEW_VERSION_3_0;
 }
 
-static GLuint say_current_vbo = 0;
-static say_context *say_vbo_last_context = NULL;
-
 static void say_vbo_make_current(GLuint vbo) {
   say_context *context = say_context_current();
 
-  if (context != say_vbo_last_context ||
-      vbo != say_current_vbo) {
-    say_current_vbo      = vbo;
-    say_vbo_last_context = context;
-
+  if (context->vbo != vbo) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    context->vbo = vbo;
   }
 }
-
-static GLuint       say_current_vao      = 0;
-static say_context *say_vao_last_context = NULL;
 
 typedef struct {
   GLuint vao;
@@ -31,51 +22,51 @@ typedef struct {
 static void say_vao_make_current(GLuint vao) {
   say_context *context = say_context_current();
 
-  if (context != say_vao_last_context ||
-      vao != say_current_vao) {
-    say_current_vao      = vao;
-    say_vao_last_context = context;
-
+  if (context->vao != vao) {
     glBindVertexArray(vao);
-
     say_index_buffer_rebind();
+
+    context->vao = vao;
   }
 }
-
-static say_buffer  *say_current_buffer      = NULL;
-static say_context *say_buffer_last_context = NULL;
 
 static void say_buffer_setup_pointer(say_buffer *buf);
 
 static void say_buffer_make_current(say_buffer *buf) {
   say_context *context = say_context_current();
 
-  if (context != say_buffer_last_context ||
-      buf != say_current_buffer) {
-    say_current_buffer      = buf;
-    say_buffer_last_context = context;
-
+  if (context->buffer_obj != buf) {
     say_buffer_setup_pointer(buf);
+    context->buffer_obj = buf;
   }
 }
 
 static void say_vbo_will_delete(GLuint vbo) {
-  if (vbo == say_current_vbo)
-    say_current_vbo = 0;
+  mo_array *contexts = say_context_get_all();
+  for (size_t i = 0; i < contexts->size; i++) {
+    say_context *context = mo_array_get_as(contexts, i, say_context*);
+    if (context->vbo == vbo)
+      context->vbo = 0;
+  }
 }
 
 static void say_buffer_will_delete(say_buffer *buf) {
-  if (buf == say_current_buffer)
-    say_current_buffer = NULL;
+  mo_array *contexts = say_context_get_all();
+  for (size_t i = 0; i < contexts->size; i++) {
+    say_context *context = mo_array_get_as(contexts, i, say_context*);
+    if (context->buffer_obj == buf)
+      context->buffer_obj = NULL;
+  }
 }
 
 static void say_buffer_delete_vao_pair(say_vao_pair *pair) {
-  /* TODO: finding out if the context is still alive, to avoid leaks */
-  if (say_vao_last_context == pair->context && say_current_vao == pair->vao) {
-    say_current_vao = 0;
-    glDeleteVertexArrays(1, &pair->vao);
+  say_context *context = say_context_current();
 
+  if (context == pair->context && context->vao == pair->vao) {
+    glDeleteVertexArrays(1, &pair->vao);
     say_index_buffer_rebind();
+
+    context->vao = 0;
   }
 }
 

@@ -20,6 +20,10 @@ typedef struct {
   say_imp_context context;
 
   GLuint texture;
+
+  GLuint  vao;
+  GLuint  vbo;
+  void   *buffer_obj;
 } say_context;
 
 say_context_config *say_context_get_config();

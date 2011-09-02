@@ -170,6 +170,10 @@ static void say_context_setup_states(say_context *context) {
 
 static void say_context_setup_cache(say_context *context) {
   context->texture = 0;
+
+  context->vao        = 0;
+  context->vbo        = 0;
+  context->buffer_obj = NULL;
 }
 
 void say_context_clean_up() {
