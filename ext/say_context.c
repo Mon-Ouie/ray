@@ -22,6 +22,7 @@ static mo_array *say_all_ensured_contexts = NULL;
 static void say_context_create_initial();
 static void say_context_setup(say_context *context);
 static void say_context_setup_states(say_context *context);
+static void say_context_setup_cache(say_context *context);
 static void say_context_glew_init();
 
 static uint32_t say_context_count = 0;
@@ -47,6 +48,15 @@ say_context *say_context_current() {
   }
 
   return (say_context*)say_thread_variable_get(say_current_context);
+}
+
+mo_array *say_context_get_all() {
+  if (!say_all_ensured_contexts) {
+    say_all_ensured_contexts = mo_array_create(sizeof(say_context*));
+    say_all_ensured_contexts->release = say_context_free_el;
+  }
+
+  return say_all_ensured_contexts;
 }
 
 void say_context_ensure() {
@@ -80,6 +90,7 @@ say_context *say_context_create() {
 
   say_context_setup(context);
   say_context_setup_states(context);
+  say_context_setup_cache(context);
 
   return context;
 }
@@ -95,6 +106,7 @@ say_context *say_context_create_for_window(say_window *window) {
   context->context = say_imp_context_create_for_window(shared,
                                                        window->win);
   say_context_setup_states(context);
+  say_context_setup_cache(context);
 
   return context;
 }
@@ -154,6 +166,10 @@ static void say_context_setup_states(say_context *context) {
   glDepthFunc(GL_LEQUAL);
 
   glReadBuffer(GL_FRONT);
+}
+
+static void say_context_setup_cache(say_context *context) {
+  context->texture = 0;
 }
 
 void say_context_clean_up() {

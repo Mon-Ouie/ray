@@ -18,6 +18,8 @@ struct say_window;
 typedef struct {
   uint32_t count;
   say_imp_context context;
+
+  GLuint texture;
 } say_context;
 
 say_context_config *say_context_get_config();
@@ -27,6 +29,7 @@ void say_context_free_el(void *context);
 void say_context_ensure();
 
 say_context *say_context_current();
+mo_array    *say_context_get_all();
 
 say_context *say_context_create_for_window(struct say_window *window);
 say_context *say_context_create();

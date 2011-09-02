@@ -5,24 +5,22 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION 1
 #include "stb_image_write.h"
 
-static GLuint say_current_texture = 0;
-static say_context *say_texture_last_context = NULL;
-
 static void say_texture_make_current(GLuint texture) {
   say_context *context = say_context_current();
 
-  if (texture != say_current_texture ||
-      context != say_texture_last_context) {
-    say_texture_last_context = context;
-    say_current_texture = texture;
-
+  if (context->texture != texture) {
     glBindTexture(GL_TEXTURE_2D, texture);
+    context->texture = texture;
   }
 }
 
 static void say_texture_will_delete(GLuint texture) {
-  if (say_current_texture == texture)
-    say_current_texture = 0;
+  mo_array *contexts = say_context_get_all();
+  for (size_t i = 0; i < contexts->size; i++) {
+    say_context *context = mo_array_get_as(contexts, i, say_context*);
+    if (context->texture == texture)
+      context->texture = 0;
+  }
 }
 
 static void say_image_update_buffer(say_image *img) {
