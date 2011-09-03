@@ -55,6 +55,25 @@ static void say_shader_find_locations(say_shader *shader) {
     glGetUniformLocation(shader->program, SAY_TEXTURE_ENABLED_ATTR);
 }
 
+static const char *say_default_vertex_shader =
+  "#version 110\n"
+  "\n"
+  "attribute vec2 in_Vertex;\n"
+  "attribute vec4 in_Color;\n"
+  "attribute vec2 in_TexCoord;\n"
+  "\n"
+  "uniform mat4 in_ModelView;\n"
+  "uniform mat4 in_Projection;\n"
+  "\n"
+  "varying vec4 var_Color;\n"
+  "varying vec2 var_TexCoord;\n"
+  "\n"
+  "void main() {\n"
+  "  gl_Position  = vec4(in_Vertex, 0, 1) * (in_ModelView * in_Projection);\n"
+  "  var_Color    = in_Color;\n"
+  "  var_TexCoord = in_TexCoord;\n"
+  "}\n";
+
 static const char *say_default_frag_shader =
   "#version 110\n"
   "\n"
@@ -71,18 +90,18 @@ static const char *say_default_frag_shader =
   "    gl_FragColor = var_Color;\n"
   "}\n";
 
-static const char *say_default_vertex_shader =
-  "#version 110\n"
+static const char *say_new_default_vertex_shader =
+  "#version 130\n"
   "\n"
-  "attribute vec2 in_Vertex;\n"
-  "attribute vec4 in_Color;\n"
-  "attribute vec2 in_TexCoord;\n"
+  "in vec2 in_Vertex;\n"
+  "in vec4 in_Color;\n"
+  "in vec2 in_TexCoord;\n"
   "\n"
   "uniform mat4 in_ModelView;\n"
   "uniform mat4 in_Projection;\n"
   "\n"
-  "varying vec4 var_Color;\n"
-  "varying vec2 var_TexCoord;\n"
+  "out vec4 var_Color;\n"
+  "out vec2 var_TexCoord;\n"
   "\n"
   "void main() {\n"
   "  gl_Position  = vec4(in_Vertex, 0, 1) * (in_ModelView * in_Projection);\n"
@@ -106,25 +125,6 @@ static const char *say_new_default_frag_shader =
   "    out_FragColor = texture(in_Texture, var_TexCoord) * var_Color;\n"
   "  else\n"
   "    out_FragColor = var_Color;\n"
-  "}\n";
-
-static const char *say_new_default_vertex_shader =
-  "#version 130\n"
-  "\n"
-  "in vec2 in_Vertex;\n"
-  "in vec4 in_Color;\n"
-  "in vec2 in_TexCoord;\n"
-  "\n"
-  "uniform mat4 in_ModelView;\n"
-  "uniform mat4 in_Projection;\n"
-  "\n"
-  "out vec4 var_Color;\n"
-  "out vec2 var_TexCoord;\n"
-  "\n"
-  "void main() {\n"
-  "  gl_Position  = vec4(in_Vertex, 0, 1) * (in_ModelView * in_Projection);\n"
-  "  var_Color    = in_Color;\n"
-  "  var_TexCoord = in_TexCoord;\n"
   "}\n";
 
 static uint8_t say_shader_use_new       = 0;
