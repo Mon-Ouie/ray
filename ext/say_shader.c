@@ -1,17 +1,20 @@
 #include "say.h"
 
-static GLuint say_current_program = 0;
-static say_context *say_shader_last_context = NULL;
-
 static void say_shader_make_current(GLuint program) {
   say_context *context = say_context_current();
 
-  if (context != say_shader_last_context ||
-      program != say_current_program) {
-    say_current_program     = program;
-    say_shader_last_context = context;
-
+  if (context->program != program) {
     glUseProgram(program);
+    context->program = program;
+  }
+}
+
+static void say_shader_will_delete(GLuint program) {
+  mo_array *contexts = say_context_get_all();
+  for (size_t i = 0; i < contexts->size; i++) {
+    say_context *context = mo_array_get_as(contexts, i, say_context*);
+    if (context->program == program)
+      context->program = 0;
   }
 }
 
@@ -198,6 +201,7 @@ void say_shader_free(say_shader *shader) {
 
   say_shader_detach_geometry(shader);
 
+  say_shader_will_delete(shader->program);
   glDeleteProgram(shader->program);
 
   free(shader);

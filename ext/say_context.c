@@ -174,6 +174,8 @@ static void say_context_setup_cache(say_context *context) {
   context->vao        = 0;
   context->vbo        = 0;
   context->buffer_obj = NULL;
+
+  context->program = 0;
 }
 
 void say_context_clean_up() {
