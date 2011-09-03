@@ -176,6 +176,8 @@ static void say_context_setup_cache(say_context *context) {
   context->buffer_obj = NULL;
 
   context->program = 0;
+
+  context->ibo = 0;
 }
 
 void say_context_clean_up() {

@@ -26,6 +26,8 @@ typedef struct {
   void   *buffer_obj;
 
   GLuint program;
+
+  GLuint ibo;
 } say_context;
 
 say_context_config *say_context_get_config();

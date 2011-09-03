@@ -1,23 +1,20 @@
 #include "say.h"
 
-static GLuint       say_current_ibo      = 0;
-static say_context *say_ibo_last_context = NULL;
-
 static void say_ibo_make_current(GLuint ibo) {
   say_context *context = say_context_current();
 
-  if (context != say_ibo_last_context ||
-      ibo != say_current_ibo) {
-    say_current_ibo      = ibo;
-    say_ibo_last_context = context;
-
+  if (context->ibo != ibo) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    context->ibo = ibo;
   }
 }
 
 static void say_ibo_will_delete(GLuint ibo) {
-  if (ibo == say_current_ibo) {
-    say_current_ibo = 0;
+  mo_array *contexts = say_context_get_all();
+  for (size_t i = 0; i < contexts->size; i++) {
+    say_context *context = mo_array_get_as(contexts, i, say_context*);
+    if (context->ibo == ibo)
+      context->ibo = 0;
   }
 }
 
@@ -59,8 +56,7 @@ void say_index_buffer_unbind() {
 }
 
 void say_index_buffer_rebind() {
-  if (say_ibo_last_context == say_context_current())
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, say_current_ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, say_context_current()->ibo);
 }
 
 void say_index_buffer_update_part(say_index_buffer *buf, size_t index,
