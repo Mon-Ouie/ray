@@ -79,11 +79,13 @@ static void *say_music_playback_thread(say_music *music) {
       }
     }
 
-    /* sleep for 0.25s */
+    /* sleep for 0.1s */
+    static const int sleep_time = 100;
+
 #ifdef SAY_WIN
-    Sleep(250);
+    Sleep(sleep_time);
 #else
-    usleep(250 * 1000);
+    usleep(sleep_time * 1000);
 #endif
   }
 
