@@ -134,7 +134,9 @@ void say_pixel_bus_resize(say_pixel_bus *bus, size_t new_size) {
   say_pixel_bus_bind_pack(bus);
 
   void *buffer = malloc(sizeof(say_color) * new_size);
-  glGetBufferSubData(GL_PIXEL_PACK_BUFFER, 0, new_size, buffer);
+  size_t copied_size = new_size > bus->size ? bus->size : new_size;
+  glGetBufferSubData(GL_PIXEL_PACK_BUFFER, 0, copied_size * sizeof(say_color),
+                     buffer);
 
   glBufferData(GL_PIXEL_PACK_BUFFER, new_size * sizeof(say_color),
                buffer, bus->mode);
