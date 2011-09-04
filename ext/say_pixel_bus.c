@@ -1,36 +1,31 @@
 #include "say.h"
 
-static say_context *say_pack_pbo_last_context = NULL;
-static GLuint       say_pack_pbo              = 0;
-
 static void say_pack_pbo_make_current(GLuint pbo) {
   say_context *context = say_context_current();
-  if (say_pack_pbo_last_context != context ||
-      pbo != say_pack_pbo) {
-    say_pack_pbo              = pbo;
-    say_pack_pbo_last_context = context;
 
+  if (context->pack_pbo != pbo) {
     glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+    context->pack_pbo = pbo;
   }
 }
 
-static say_context *say_unpack_pbo_last_context = NULL;
-static GLuint       say_unpack_pbo              = 0;
-
 static void say_unpack_pbo_make_current(GLuint pbo) {
   say_context *context = say_context_current();
-  if (say_unpack_pbo_last_context != context ||
-      pbo != say_unpack_pbo) {
-    say_unpack_pbo              = pbo;
-    say_unpack_pbo_last_context = context;
 
+  if (context->unpack_pbo != pbo) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo);
+    context->unpack_pbo = pbo;
   }
 }
 
 static void say_pbo_will_delete(GLuint pbo) {
-  if (say_pack_pbo   == pbo) say_pack_pbo   = 0;
-  if (say_unpack_pbo == pbo) say_unpack_pbo = 0;
+  mo_array *contexts = say_context_get_all();
+  for (size_t i = 0; i < contexts->size; i++) {
+    say_context *context = mo_array_get_as(contexts, i, say_context*);
+
+    if (context->pack_pbo   == pbo) context->pack_pbo   = 0;
+    if (context->unpack_pbo == pbo) context->unpack_pbo = 0;
+  }
 }
 
 bool say_pixel_bus_is_available() {

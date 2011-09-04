@@ -28,6 +28,9 @@ typedef struct {
   GLuint program;
 
   GLuint ibo;
+
+  GLuint pack_pbo;
+  GLuint unpack_pbo;
 } say_context;
 
 say_context_config *say_context_get_config();
