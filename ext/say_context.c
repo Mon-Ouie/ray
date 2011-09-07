@@ -187,6 +187,9 @@ static void say_context_setup_cache(say_context *context) {
   context->blend_enabled = false;
   context->src_blend_func = GL_SRC_ALPHA;
   context->dst_blend_func = GL_ONE_MINUS_SRC_ALPHA;
+
+  context->fbo = 0;
+  context->rbo = 0;
 }
 
 void say_context_clean_up() {

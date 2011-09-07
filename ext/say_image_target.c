@@ -44,48 +44,37 @@ static void say_fbo_build(say_image_target *target, say_fbo *fbo) {
   fbo->img = target->img;
 }
 
-static GLuint say_current_fbo = 0;
-static say_context *say_fbo_last_context = NULL;
-
 void say_fbo_make_current(GLuint fbo) {
   say_context *context = say_context_current();
 
-  if (context != say_fbo_last_context ||
-      fbo != say_current_fbo) {
-    say_current_fbo = fbo;
-    say_fbo_last_context = context;
-
+  if (context->fbo != fbo) {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    context->fbo = fbo;
   }
 }
-
-static GLuint say_current_rbo = 0;
-static say_context *say_rbo_last_context = NULL;
 
 void say_rbo_make_current(GLuint rbo) {
   say_context *context = say_context_current();
 
-  if (context != say_rbo_last_context ||
-      rbo != say_current_rbo) {
-    say_current_rbo = rbo;
-    say_rbo_last_context = context;
-
+  if (context->rbo != rbo) {
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    context->rbo = rbo;
   }
 }
 
 void say_image_target_will_delete(mo_hash *fbos, GLuint rbo) {
-  mo_hash_it it = mo_hash_begin(fbos);
-  for (; !mo_hash_it_is_end(&it); mo_hash_it_next(&it)) {
-    say_fbo *fbo = mo_hash_it_val_ptr(&it, say_fbo);
-    if (fbo->id == say_current_fbo) {
-      say_current_fbo = 0;
-      break;
-    }
-  }
+  mo_array *contexts = say_context_get_all();
 
-  if (say_current_rbo == rbo)
-    say_current_rbo = 0;
+  for (size_t i = 0; i < contexts->size; i++) {
+    say_context *context = mo_array_get_as(contexts, i, say_context*);
+
+    say_fbo *fbo = mo_hash_get_ptr(fbos, &context, say_fbo);
+    if (fbo && fbo->id == context->fbo)
+      context->fbo = 0;
+
+    if (context->rbo == rbo)
+      context->rbo = 0;
+  }
 }
 
 bool say_image_target_is_available() {

@@ -37,6 +37,9 @@ typedef struct {
   bool blend_enabled;
   GLenum src_blend_func;
   GLenum dst_blend_func;
+
+  GLuint fbo;
+  GLuint rbo;
 } say_context;
 
 say_context_config *say_context_get_config();
