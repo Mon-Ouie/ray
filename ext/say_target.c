@@ -1,8 +1,5 @@
 #include "say.h"
 
-static say_target *say_current_target = NULL;
-static say_context *say_target_last_context = NULL;
-
 static void say_target_update_states(say_target *target) {
   if (target->up_to_date) {
     target->up_to_date = 0;
@@ -106,9 +103,8 @@ int say_target_make_current(say_target *target) {
   if (context) {
     say_context *current = say_context_current();
 
-    if (current == say_target_last_context &&
-        target  == say_current_target &&
-        current == context) {
+    if (current == context &&
+        current->target == target) {
       return 1;
     }
 
@@ -118,8 +114,7 @@ int say_target_make_current(say_target *target) {
     if (target->bind_hook)
       target->bind_hook(target->data);
 
-    say_current_target      = target;
-    say_target_last_context = context;
+    current->target = target;
 
     return 1;
   }

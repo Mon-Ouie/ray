@@ -181,6 +181,8 @@ static void say_context_setup_cache(say_context *context) {
 
   context->pack_pbo   = 0;
   context->unpack_pbo = 0;
+
+  context->target = NULL;
 }
 
 void say_context_clean_up() {

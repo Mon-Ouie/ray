@@ -31,6 +31,8 @@ typedef struct {
 
   GLuint pack_pbo;
   GLuint unpack_pbo;
+
+  void *target;
 } say_context;
 
 say_context_config *say_context_get_config();
