@@ -33,6 +33,10 @@ typedef struct {
   GLuint unpack_pbo;
 
   void *target;
+
+  bool blend_enabled;
+  GLenum src_blend_func;
+  GLenum dst_blend_func;
 } say_context;
 
 say_context_config *say_context_get_config();

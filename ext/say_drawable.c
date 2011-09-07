@@ -18,37 +18,42 @@ static void say_drawable_update_matrix(say_drawable *drawable) {
   drawable->matrix_updated = true;
 }
 
-static say_context *say_blend_last_context = NULL;
-static say_blend_mode say_last_blend = SAY_BLEND_NO;
-
 static void say_drawable_enable_blend_mode(say_blend_mode mode) {
   say_context *context = say_context_current();
 
-  if (mode != say_last_blend || context != say_blend_last_context) {
-    if (context != say_blend_last_context)
-      say_last_blend = SAY_BLEND_NO;
+  bool must_be_enabled = mode != SAY_BLEND_NO;
+  if (context->blend_enabled != must_be_enabled) {
+    context->blend_enabled = must_be_enabled;
 
-    if (mode == SAY_BLEND_NO)
-      glDisable(GL_BLEND);
-    else if (say_last_blend == SAY_BLEND_NO)
+    if (must_be_enabled)
       glEnable(GL_BLEND);
-
-    switch (mode) {
-    case SAY_BLEND_NO:
-      break;
-    case SAY_BLEND_ALPHA:
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    case SAY_BLEND_ADD:
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-      break;
-    case SAY_BLEND_MULTIPLY:
-      glBlendFunc(GL_DST_COLOR, GL_ZERO);
-      break;
+    else {
+      glDisable(GL_BLEND);
+      return; /* No need to check depth function */
     }
+  }
 
-    say_last_blend         = mode;
-    say_blend_last_context = context;
+  GLenum src, dst;
+  switch (mode) {
+  case SAY_BLEND_ALPHA:
+    src = GL_SRC_ALPHA;
+    dst = GL_ONE_MINUS_SRC_ALPHA;
+    break;
+  case SAY_BLEND_ADD:
+    src = GL_SRC_ALPHA;
+    dst = GL_ONE;
+    break;
+  case SAY_BLEND_MULTIPLY:
+    src = GL_DST_COLOR;
+    dst = GL_ZERO;
+    break;
+  default: break;
+  }
+
+  if (context->src_blend_func != src || context->dst_blend_func != dst) {
+    glBlendFunc(src, dst);
+    context->src_blend_func = src;
+    context->dst_blend_func = dst;
   }
 }
 
