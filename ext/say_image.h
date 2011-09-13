@@ -3,6 +3,8 @@
 
 #include "say_basic_type.h"
 
+#define SAY_MAX_TEXTURE_UNIT 32
+
 typedef struct say_image {
   GLuint texture;
 
@@ -50,7 +52,9 @@ say_color *say_image_get_buffer(say_image *img);
 void say_image_mark_out_of_date(say_image *img);
 
 void say_image_bind(say_image *img);
+void say_image_bind_to(say_image *img, int unit);
 void say_image_unbind();
+void say_image_unbind_from(int unit);
 
 void say_image_update_texture(say_image *img);
 

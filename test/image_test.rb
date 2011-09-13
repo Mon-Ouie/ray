@@ -25,6 +25,10 @@ context "an image loaded from a file" do
   asserts(:[]=, 128, 100, Ray::Color.green).raises_kind_of RangeError
   asserts(:[]=, 100, 192, Ray::Color.green).raises_kind_of RangeError
 
+  asserts(:bind_to, -1).raises_kind_of RangeError
+  asserts(:bind_to, 32).raises_kind_of RangeError
+  denies(:bind_to, 31).raises_kind_of RangeError
+
   context "after changing a pixel" do
     hookup { topic[0, 10] = Ray::Color.green }
     asserts(:[], 0, 10).equals Ray::Color.green

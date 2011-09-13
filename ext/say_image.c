@@ -5,12 +5,17 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION 1
 #include "stb_image_write.h"
 
-static void say_texture_make_current(GLuint texture) {
+static void say_texture_make_current(GLuint texture, int unit) {
   say_context *context = say_context_current();
 
-  if (context->texture != texture) {
+  if (context->texture_unit != unit) {
+    glActiveTexture(GL_TEXTURE0 + unit);
+    context->texture_unit = unit;
+  }
+
+  if (context->textures[unit] != texture) {
     glBindTexture(GL_TEXTURE_2D, texture);
-    context->texture = texture;
+    context->textures[unit] = texture;
   }
 }
 
@@ -18,8 +23,11 @@ static void say_texture_will_delete(GLuint texture) {
   mo_array *contexts = say_context_get_all();
   for (size_t i = 0; i < contexts->size; i++) {
     say_context *context = mo_array_get_as(contexts, i, say_context*);
-    if (context->texture == texture)
-      context->texture = 0;
+
+    for (size_t i = 0; i < SAY_MAX_TEXTURE_UNIT; i++) {
+      if (context->textures[i] == texture)
+        context->textures[i] = 0;
+    }
   }
 }
 
@@ -27,7 +35,7 @@ static void say_image_update_buffer(say_image *img) {
   if (img->buffer_updated)
     return;
 
-  say_texture_make_current(img->texture);
+  say_texture_make_current(img->texture, 0);
   say_pixel_bus_unbind_pack();
   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                 img->pixels);
@@ -136,7 +144,7 @@ bool say_image_create_with_size(say_image *img, size_t w, size_t h) {
 
     img->pixels = malloc(sizeof(say_color) * w * h);
 
-    say_texture_make_current(img->texture);
+    say_texture_make_current(img->texture, 0);
     say_pixel_bus_unbind_unpack();
     glGetError(); /* Ignore potential previous errors */
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0,
@@ -287,7 +295,7 @@ void say_image_set_smooth(say_image *img, bool val) {
     img->smooth = val;
 
     say_context_ensure();
-    say_texture_make_current(img->texture);
+    say_texture_make_current(img->texture, 0);
 
     GLenum interp = val ? GL_LINEAR : GL_NEAREST;
 
@@ -326,8 +334,12 @@ void say_image_set(say_image *img, size_t x, size_t y, say_color color) {
 }
 
 void say_image_bind(say_image *img) {
+  say_image_bind_to(img, 0);
+}
+
+void say_image_bind_to(say_image *img, int unit) {
   say_context_ensure();
-  say_texture_make_current(img->texture);
+  say_texture_make_current(img->texture, unit);
 
   if (!img->texture_updated)
     say_image_update_texture(img);
@@ -337,7 +349,7 @@ void say_image_update_texture(say_image *img) {
   if (!img->pixels)
     return;
 
-  say_texture_make_current(img->texture);
+  say_texture_make_current(img->texture, 0);
   say_pixel_bus_unbind_unpack();
   glTexSubImage2D(GL_TEXTURE_2D, 0,
                   0, 0,
@@ -348,7 +360,14 @@ void say_image_update_texture(say_image *img) {
 }
 
 void say_image_unbind() {
-  say_texture_make_current(0);
+  say_context_ensure();
+  for (size_t i = 0; i < SAY_MAX_TEXTURE_UNIT; i++)
+    say_texture_make_current(0, i);
+}
+
+void say_image_unbind_from(int unit) {
+  say_context_ensure();
+  say_texture_make_current(0, unit);
 }
 
 GLuint say_image_get_texture(say_image *img) {

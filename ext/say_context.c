@@ -169,7 +169,9 @@ static void say_context_setup_states(say_context *context) {
 }
 
 static void say_context_setup_cache(say_context *context) {
-  context->texture = 0;
+  context->texture_unit = 0;
+  for (size_t i = 0; i < 32; i++)
+    context->textures[i] = 0;
 
   context->vao        = 0;
   context->vbo        = 0;

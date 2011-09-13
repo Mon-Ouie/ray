@@ -230,9 +230,26 @@ VALUE ray_image_tex_rect(VALUE self, VALUE rect) {
 /*
  * Binds the texture, which will be used as GL_TEXTURE_2D when drawing with
  * OpenGL
+ *
+ * This is equivalent to calling #bind_to with unit set to 0.
  */
 VALUE ray_image_bind(VALUE self) {
   say_image_bind(ray_rb2image(self));
+  return self;
+}
+
+/*
+ * @overload bind_to(unit)
+ *   Binds the texture to a given unit (0 <= unit < 32)
+ *   @param [Integer] unit Texture unit
+ */
+VALUE ray_image_bind_to(VALUE self, VALUE unit) {
+  int c_unit = NUM2INT(unit);
+  if (c_unit >= 32 || c_unit < 0)
+    rb_raise(rb_eRangeError, "texture unit %d out of bounds", c_unit);
+
+  say_image_bind_to(ray_rb2image(self), c_unit);
+
   return self;
 }
 
@@ -322,6 +339,7 @@ void Init_ray_image() {
 
   /* @group OpenGL access */
   rb_define_method(ray_cImage, "bind", ray_image_bind, 0);
+  rb_define_method(ray_cImage, "bind_to", ray_image_bind_to, 1);
   rb_define_method(ray_cImage, "texture", ray_image_texture, 0);
   /* @endgroup */
 }

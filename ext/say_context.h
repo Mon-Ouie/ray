@@ -19,7 +19,8 @@ typedef struct {
   uint32_t count;
   say_imp_context context;
 
-  GLuint texture;
+  int    texture_unit;
+  GLuint textures[32];
 
   GLuint  vao;
   GLuint  vbo;
