@@ -47,7 +47,7 @@ static void say_drawable_enable_blend_mode(say_blend_mode mode) {
     src = GL_DST_COLOR;
     dst = GL_ZERO;
     break;
-  default: break;
+  default: return;
   }
 
   if (context->src_blend_func != src || context->dst_blend_func != dst) {
