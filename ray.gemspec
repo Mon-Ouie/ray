@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.files |= Dir["test/res/**/*"]
   s.files |= Dir["test/**/*.rb"]
   s.files |= Dir["samples/**/*"]
-  s.files << ".gemtest" << "Rakefile"
+  s.files << ".gemtest" << "Rakefile" << "LICENSE"
 
   s.extensions = ["ext/extconf.rb"]
 
