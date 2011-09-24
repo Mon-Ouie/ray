@@ -12,7 +12,7 @@ typedef struct {
 
 typedef struct {
   say_index_buffer *buf;
-  mo_list          *ranges;
+  mo_list           ranges;
 } say_global_ibo;
 
 static mo_array *say_index_buffers = NULL;
@@ -20,7 +20,7 @@ static mo_array *say_index_buffers = NULL;
 static say_global_ibo say_global_ibo_create(size_t size) {
   say_global_ibo ret;
   ret.buf    = say_index_buffer_create(SAY_STREAM, size);
-  ret.ranges = NULL;
+  mo_list_init(&ret.ranges, sizeof(say_range));
 
   return ret;
 }
@@ -29,7 +29,7 @@ static void say_global_ibo_free(void *data) {
   say_global_ibo *ibo = (say_global_ibo*)data;
 
   say_index_buffer_free(ibo->buf);
-  if (ibo->ranges) mo_list_free(ibo->ranges);
+  mo_list_release(&ibo->ranges);
 }
 
 static say_global_ibo *say_global_ibo_at(size_t index) {
@@ -60,51 +60,49 @@ static bool say_global_ibo_fit_into(say_global_ibo *ibo, size_t used,
 
 static size_t say_global_ibo_prepend(say_global_ibo *ibo, size_t size) {
   say_range range = say_make_range(0, size);
-  ibo->ranges = mo_list_prepend(ibo->ranges, &range);
+  mo_list_prepend(&ibo->ranges, ibo->ranges.head, &range);
   return 0;
 }
 
-static size_t say_global_ibo_insert(mo_list *list, size_t size) {
-  say_range *range = mo_list_data_ptr(list, say_range);
+static size_t say_global_ibo_insert(mo_list *list, mo_list_it *it,
+                                    size_t size) {
+  say_range *range = mo_list_it_data_ptr(it, say_range);
   say_range tmp = say_make_range(range->loc + range->size, size);
 
-  mo_list_insert(list, &tmp);
+  mo_list_insert(list, it, &tmp);
   return tmp.loc;
 }
 
 static size_t say_global_ibo_find_in(say_global_ibo *ibo, size_t size) {
-  if (!ibo->ranges && say_global_ibo_fit_into(ibo, 0, size)) {
-    ibo->ranges = mo_list_create(sizeof(say_range));
-    say_range *range = mo_list_data_ptr(ibo->ranges, say_range);
-    *range = say_make_range(0, size);
-    return 0;
+  if (!ibo->ranges.head && say_global_ibo_fit_into(ibo, 0, size)) {
+    return say_global_ibo_prepend(ibo, size);
   }
 
-  say_range *first = mo_list_data_ptr(ibo->ranges, say_range);
+  say_range *first = mo_list_it_data_ptr(ibo->ranges.head, say_range);
 
   /* There's room at the begin of the buffer */
   if (first->loc >= size) {
     return say_global_ibo_prepend(ibo, size);
   }
 
-  mo_list *it = ibo->ranges;
+  mo_list_it *it = ibo->ranges.head;
   for (; it->next; it = it->next) {
-    say_range *current = mo_list_data_ptr(it, say_range);
-    say_range *next    = mo_list_data_ptr(it->next, say_range);
+    say_range *current = mo_list_it_data_ptr(it, say_range);
+    say_range *next    = mo_list_it_data_ptr(it->next, say_range);
 
     size_t begin = current->loc + current->size;
     size_t end   = next->loc;
 
     /* There's enough room between those two elements */
     if (end - begin >= size)
-      return say_global_ibo_insert(it, size);
+      return say_global_ibo_insert(&ibo->ranges, it, size);
   }
 
-  say_range *last = mo_list_data_ptr(it, say_range);
+  say_range *last = mo_list_it_data_ptr(it, say_range);
 
   /* There's enough room at the end of the buffer */
   if (say_global_ibo_fit_into(ibo, last->loc + last->size, size))
-    return say_global_ibo_insert(it, size);
+    return say_global_ibo_insert(&ibo->ranges, it, size);
   else
     return SAY_MAX_SIZE;
 }
@@ -148,14 +146,10 @@ static void say_global_ibo_delete_at(say_global_ibo *ibo, size_t loc,
   if (!ibo)
     return;
 
-  for (mo_list *it = ibo->ranges; it; it = it->next) {
-    say_range *range = mo_list_data_ptr(it, say_range);
+  for (mo_list_it *it = ibo->ranges.head; it; it = it->next) {
+    say_range *range = mo_list_it_data_ptr(it, say_range);
     if (range->loc == loc && range->size == range_size) {
-      mo_list *next = it->next;
-      mo_list_delete(it);
-
-      if (it == ibo->ranges) ibo->ranges = next;
-
+      mo_list_delete(&ibo->ranges, it);
       return;
     }
   }
@@ -163,8 +157,8 @@ static void say_global_ibo_delete_at(say_global_ibo *ibo, size_t loc,
 
 static void say_global_ibo_reduce_size(say_global_ibo *ibo, size_t loc,
                                        size_t old_size, size_t size) {
-  for (mo_list *it = ibo->ranges; it; it = it->next) {
-    say_range *range = mo_list_data_ptr(it, say_range);
+  for (mo_list_it *it = ibo->ranges.head; it; it = it->next) {
+    say_range *range = mo_list_it_data_ptr(it, say_range);
     if (range->loc == loc && range->size == old_size) {
       range->size = size;
       return;

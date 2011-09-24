@@ -213,7 +213,6 @@ say_buffer *say_buffer_create(size_t vtype, GLenum type, size_t size) {
     buf->vaos->release = (say_destructor)say_buffer_delete_vao_pair;
     buf->vaos->hash_of = mo_hash_of_pointer;
     buf->vaos->key_cmp = mo_hash_pointer_cmp;
-
   }
   else
     buf->vaos = NULL;

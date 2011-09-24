@@ -28,7 +28,7 @@ void mo_array_init(mo_array *ary, size_t el_size) {
 }
 
 void mo_array_release(mo_array *ary) {
-  if (ary->release && ary->size > 0) {
+  if (ary->release) {
     void *end = mo_array_end(ary);
     for (void *i = mo_array_begin(ary); i < end; mo_array_next(ary, &i))
       ary->release(i);
@@ -168,114 +168,174 @@ void mo_array_reserve(mo_array *ary, size_t size) {
   if (ary->capa > size)
     return;
 
-  ary->buffer = realloc(ary->buffer, size * ary->el_size);
+  ary->buffer = realloc(ary->buffer, size * ary->capa);
   ary->capa   = size;
 }
 
 void mo_array_shrink(mo_array *ary) {
-  if (ary->capa == ary->size) return;
-  ary->buffer = realloc(ary->buffer, ary->size * ary->el_size);
+  ary->buffer = realloc(ary->buffer, ary->size * ary->capa);
   ary->capa   = ary->size;
+}
+
+/**
+ * String.
+ */
+
+void mo_string_init(mo_string *str) {
+  mo_array_init(str, sizeof(char));
+  mo_array_resize(str, 1);
+  mo_string_at(str, 0) = '\0';
+}
+
+void mo_string_init_from_cstr(mo_string *str, const char *cstr) {
+  mo_string_init(str);
+  mo_string_replace(str, cstr);
+}
+
+void mo_string_init_from_buf(mo_string *str, const char *cstr, size_t size) {
+  mo_string_init(str);
+  mo_array_resize(str, size + 1);
+  memcpy(mo_string_cstr(str), cstr, size);
+  mo_string_at(str, size) = '\0';
+}
+
+void mo_string_replace(mo_string *str, const char *cstr) {
+  mo_array_resize(str, strlen(cstr) + 1);
+  strcpy(mo_string_cstr(str), cstr);
+}
+
+size_t mo_string_len(mo_string *str) {
+  return str->size - 1;
+}
+
+void mo_string_append(mo_string *str, const char *cstr) {
+  size_t old_size = str->size;
+
+  mo_array_resize(str, old_size + strlen(cstr));
+  strcpy(mo_array_get_ptr(str, old_size - 1, char), cstr);
+}
+
+char *mo_string_cstr(mo_string *str) {
+  return (char*)str->buffer;
+}
+
+int mo_string_cmp(mo_string *a, mo_string *b) {
+  return strcmp(mo_string_cstr(a), mo_string_cstr(b));
 }
 
 /**
  * Doubly linked list.
  */
 
-mo_list *mo_list_create(size_t el_size) {
-  mo_list *list = malloc(sizeof(mo_list) + el_size);
-
-  list->prev = list->next = NULL;
+void mo_list_init(mo_list *list, size_t el_size) {
+  list->head = list->last = NULL;
 
   list->release = NULL;
   list->copy    = NULL;
 
   list->el_size = el_size;
+}
 
+void mo_list_release(mo_list *list) {
+  mo_list_it *it = list->head;
+
+  while (it) {
+    mo_list_it *next = it->next;
+
+    if (list->release)
+      list->release(it->data);
+    free(it);
+
+    it = next;
+  }
+}
+
+mo_list *mo_list_create(size_t el_size) {
+  mo_list *list = malloc(sizeof(mo_list));
+  mo_list_init(list, el_size);
   return list;
 }
 
 void mo_list_free(mo_list *list) {
-  do {
-    mo_list *next = list->next;
-
-    if (list->release)
-      list->release(list->data);
-    free(list);
-
-    list = next;
-  } while (list);
+  mo_list_release(list);
+  free(list);
 }
 
-mo_list *mo_list_prepend(mo_list *list, void *data) {
-  mo_list *prev = malloc(sizeof(mo_list) + list->el_size);
+void mo_list_prepend(mo_list *list, mo_list_it *it, void *data) {
+  mo_list_it *new_it = malloc(offsetof(mo_list_it, data) + list->el_size);
 
-  prev->prev = list->prev;
-  prev->next = list;
+  new_it->next = it;
 
-  if (list->prev)
-    list->prev->next = list;
+  if (it && it->prev) {
+    new_it->prev   = it->prev;
+    it->prev->next = new_it;
+  }
+  else
+    new_it->prev = NULL;
 
-  list->prev = prev;
+  if (it)
+    it->prev = new_it;
 
-  prev->release = list->release;
-  prev->copy    = list->copy;
+  if (!list->last)
+    list->last = new_it;
 
-  prev->el_size = list->el_size;
+  if (it == list->head)
+    list->head = new_it;
 
-  if (prev->copy)
-    prev->copy(prev->data, data);
-  else if (data)
-    memcpy(prev->data, data, prev->el_size);
-
-  return prev;
+  if (list->copy)
+    list->copy(new_it->data, data);
+  else
+    memcpy(new_it->data, data, list->el_size);
 }
 
-mo_list *mo_list_insert(mo_list *list, void *data) {
-  mo_list *next = malloc(sizeof(mo_list) + list->el_size);
+void mo_list_insert(mo_list *list, mo_list_it *it, void *data) {
+  mo_list_it *new_it = malloc(offsetof(mo_list_it, data) + list->el_size);
 
-  next->prev = list;
-  next->next = list->next;
+  new_it->prev = it;
 
-  if (list->next)
-    list->next->prev = next;
+  if (it && it->next) {
+    new_it->next = it->next;
+    it->next->prev = new_it;
+  }
+  else
+    new_it->next = NULL;
 
-  list->next = next;
+  if (it)
+    it->next = new_it;
 
-  next->release = list->release;
-  next->copy    = list->copy;
+  if (!list->head)
+    list->head = new_it;
 
-  next->el_size = list->el_size;
+  if (it == list->last)
+    list->last = new_it;
 
-  if (next->copy)
-    next->copy(next->data, data);
-  else if (data)
-    memcpy(next->data, data, next->el_size);
-
-  return next;
+  if (list->copy)
+    list->copy(new_it->data, data);
+  else
+    memcpy(new_it->data, data, list->el_size);
 }
 
-mo_list *mo_list_delete(mo_list *list) {
-  if (list->prev)
-    list->prev->next = list->next;
+void mo_list_delete(mo_list *list, mo_list_it *it) {
+  if (it->prev)
+    it->prev->next = it->next;
+  else /* is head */
+    list->head = it->next;
 
-  if (list->next)
-    list->next->prev = list->prev;
-
-  mo_list *next = list->next;
+  if (it->next)
+    it->next->prev = it->prev;
+  else /* is tail */
+    list->last = it->prev;
 
   if (list->release)
-    list->release(list->data);
-  free(list);
-
-  return next;
+    list->release(it->data);
+  free(it);
 }
 
-void mo_list_set(mo_list *list, void *data) {
+void mo_list_set(mo_list *list, mo_list_it *it, void *data) {
   if (list->copy)
-    list->copy(list->data, data);
+    list->copy(it->data, data);
   else
-    memcpy(list->data, data, list->el_size);
+    memcpy(it->data, data, list->el_size);
 }
 
 /**
@@ -287,34 +347,11 @@ void mo_hash_zero_ptr(void *ptr) {
   *(void**)ptr = NULL;
 }
 
-static
-void mo_hash_list_free(void *ptr) {
-  mo_list *list = *(mo_list**)ptr;
-  if (list) mo_list_free(list);
-}
-
-static
-void mo_hash_bucket_free(void *ptr) {
-  uint8_t *start = ptr;
-
-  mo_hash *hash = *(mo_hash**)start;
-  if (!hash)
-    return;
-
-  if (hash->key_release)
-    hash->key_release(start + sizeof(mo_hash*));
-
-  if (hash->release)
-    hash->release(start + sizeof(mo_hash*) + hash->key_size);
-}
-
-static
 void mo_hash_init(mo_hash *hash, size_t key_size, size_t el_size) {
-  mo_array_init(&hash->buffer, sizeof(mo_list*));
+  mo_array_init(&hash->buffer, sizeof(mo_hash_list*));
 
-  hash->buffer.init    = mo_hash_zero_ptr;
+  hash->buffer.init = mo_hash_zero_ptr;
   mo_array_resize(&hash->buffer, 16);
-  hash->buffer.release = mo_hash_list_free;
 
   hash->release = NULL;
   hash->copy    = NULL;
@@ -331,8 +368,23 @@ void mo_hash_init(mo_hash *hash, size_t key_size, size_t el_size) {
   hash->hash_of = NULL;
 }
 
-static
 void mo_hash_release(mo_hash *hash) {
+  for (size_t i = 0; i < hash->buffer.size; i++) {
+    mo_hash_list *it = mo_array_get_as(&hash->buffer, i, mo_hash_list*);
+
+    while (it) {
+      mo_hash_list *next = it->next;
+
+      if (hash->key_release)
+        hash->key_release(it->data);
+      if (hash->release)
+        hash->release(it->data + hash->key_size);
+      free(it);
+
+      it = next;
+    }
+  }
+
   mo_array_release(&hash->buffer);
 }
 
@@ -349,12 +401,11 @@ void mo_hash_free(mo_hash *hash) {
 
 bool mo_hash_has_key(mo_hash *hash, void *key) {
   int id = hash->hash_of(key) % hash->buffer.size;
-  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
+  mo_hash_list *it = mo_array_get_as(&hash->buffer, id, mo_hash_list*);
 
-  while (bucket) {
-    if (hash->key_cmp(bucket->data + sizeof(mo_hash*), key) == 0)
+  for (; it; it = it->next) {
+    if (hash->key_cmp(it->data, key) == 0)
       return true;
-    bucket = bucket->next;
   }
 
   return false;
@@ -362,12 +413,11 @@ bool mo_hash_has_key(mo_hash *hash, void *key) {
 
 void *mo_hash_get(mo_hash *hash, void *key) {
   int id = hash->hash_of(key) % hash->buffer.size;
-  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
+  mo_hash_list *it = mo_array_get_as(&hash->buffer, id, mo_hash_list*);
 
-  while (bucket) {
-    if (hash->key_cmp(bucket->data + sizeof(mo_hash*), key) == 0)
-      return bucket->data + sizeof(mo_hash*) + hash->key_size;
-    bucket = bucket->next;
+  for (; it; it = it->next) {
+    if (hash->key_cmp(it->data, key) == 0)
+      return it->data + hash->key_size;
   }
 
   return NULL;
@@ -402,34 +452,22 @@ void mo_hash_grow(mo_hash *hash) {
   /*
    * Release the current hash, and use the copy instead.
    */
-  mo_hash_release(hash);
+  mo_array_release(&hash->buffer);
+
   *hash = copy;
-
-  /*
-   * Because each element actually contains a pointer to the hash, we need to
-   * update it.
-   */
-
-  it = mo_hash_begin(hash);
-  for (; !mo_hash_it_is_end(&it); mo_hash_it_next(&it)) {
-    mo_hash **data = (mo_hash**)(it.list->data);
-    *data          = hash;
-  }
 }
 
 static
 void mo_hash_fill_bucket(mo_hash *hash, void *store, void *key, void *data) {
-  *(mo_hash**)store = hash;
-
   if (hash->key_copy)
-    hash->key_copy((uint8_t*)store + sizeof(mo_hash*), key);
+    hash->key_copy((uint8_t*)store, key);
   else
-    memcpy((uint8_t*)store + sizeof(mo_hash*), key, hash->key_size);
+    memcpy((uint8_t*)store, key, hash->key_size);
 
   if (hash->copy)
-    hash->copy((uint8_t*)store + sizeof(mo_hash*) + hash->key_size, data);
+    hash->copy((uint8_t*)store + hash->key_size, data);
   else
-    memcpy((uint8_t*)store + sizeof(mo_hash*) + hash->key_size, data,
+    memcpy((uint8_t*)store + hash->key_size, data,
            hash->el_size);
 }
 
@@ -438,30 +476,31 @@ void mo_hash_set(mo_hash *hash, void *key, void *data) {
     mo_hash_grow(hash);
 
   int id = hash->hash_of(key) % hash->buffer.size;
-  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
+  mo_hash_list *bucket = mo_array_get_as(&hash->buffer, id, mo_hash_list*);
 
   hash->size += 1;
 
   if (!bucket) {
-    bucket = mo_list_create(sizeof(mo_hash*) + hash->key_size + hash->el_size);
-    bucket->release = mo_hash_bucket_free;
+    bucket = malloc(offsetof(mo_hash_list, data) +
+                    hash->key_size + hash->el_size);
 
+    bucket->next = NULL;
     mo_hash_fill_bucket(hash, bucket->data, key, data);
 
-    mo_array_get_as(&hash->buffer, id, mo_list*) = bucket;
+    mo_array_get_as(&hash->buffer, id, mo_hash_list*) = bucket;
   }
   else {
-    mo_list *it = bucket, *last = bucket;
+    mo_hash_list *it = bucket, *last = bucket;
+
     while (it) {
-      if (hash->key_cmp(it->data + sizeof(mo_hash*), key) == 0) {
+      if (hash->key_cmp(it->data, key) == 0) {
         hash->size -= 1;
 
         if (hash->copy) {
-          hash->copy(it->data + sizeof(mo_hash*) + hash->key_size, data);
+          hash->copy(it->data + hash->key_size, data);
         }
         else {
-          memcpy(it->data + sizeof(mo_hash*) + hash->key_size, data,
-                 hash->el_size);
+          memcpy(it->data + hash->key_size, data, hash->el_size);
         }
 
         return;
@@ -471,28 +510,41 @@ void mo_hash_set(mo_hash *hash, void *key, void *data) {
       it   = it->next;
     }
 
-    last = mo_list_insert(last, NULL);
+    last = malloc(offsetof(mo_hash_list, data) +
+                  hash->key_size + hash->el_size);
+    last->next = NULL;
     mo_hash_fill_bucket(hash, last->data, key, data);
+
+    bucket->next = last;
   }
 }
 
 void mo_hash_del(mo_hash *hash, void *key) {
   int id = hash->hash_of(key) % hash->buffer.size;
-  mo_list *bucket = mo_array_get_as(&hash->buffer, id, mo_list*);
+  mo_hash_list *bucket = mo_array_get_as(&hash->buffer, id, mo_hash_list*);
 
-  mo_list *it = bucket, *next = bucket->next;
+  mo_hash_list *it = bucket, *next = bucket->next, *prev = NULL;
   while (it) {
-    if (hash->key_cmp(it->data + sizeof(mo_hash*), key) == 0) {
+    if (hash->key_cmp(it->data, key) == 0) {
       hash->size -= 1;
-      mo_list_delete(it);
+
+      if (prev)
+        prev->next = it->next;
+      else /* is head */
+        mo_array_get_as(&hash->buffer, id, mo_hash_list*) = next;
+
+      if (hash->key_release)
+        hash->key_release(it->data);
+      if (hash->release)
+        hash->release(it->data + hash->key_size);
+      free(it);
+
       break;
     }
 
-    it = it->next;
+    prev = it;
+    it   = it->next;
   }
-
-  if (it == bucket) /* Head changed */
-    mo_array_get_as(&hash->buffer, id, mo_list*) = next;
 }
 
 mo_hash_it mo_hash_begin(mo_hash *hash) {
@@ -503,7 +555,9 @@ mo_hash_it mo_hash_begin(mo_hash *hash) {
   };
 
   for (ret.id = 0; ret.id < hash->buffer.size; ret.id++) {
-    mo_list *bucket = mo_array_get_as(&hash->buffer, ret.id, mo_list*);
+    mo_hash_list *bucket = mo_array_get_as(&hash->buffer, ret.id,
+                                           mo_hash_list*);
+
     if (bucket) {
       ret.list = bucket;
       break;
@@ -518,11 +572,11 @@ bool mo_hash_it_is_end(mo_hash_it *it) {
 }
 
 void *mo_hash_it_key(mo_hash_it *it) {
-  return it->list->data + sizeof(mo_hash*);
+  return it->list->data;
 }
 
 void *mo_hash_it_val(mo_hash_it *it) {
-  return it->list->data + sizeof(mo_hash*) + it->hash->key_size;
+  return it->list->data + it->hash->key_size;
 }
 
 void mo_hash_it_next(mo_hash_it *it) {
@@ -532,7 +586,8 @@ void mo_hash_it_next(mo_hash_it *it) {
     it->list = NULL;
 
     for (it->id++; it->id < it->hash->buffer.size; it->id++) {
-      mo_list *bucket = mo_array_get_as(&it->hash->buffer, it->id, mo_list*);
+      mo_hash_list *bucket = mo_array_get_as(&it->hash->buffer, it->id,
+                                             mo_hash_list*);
       if (bucket) {
         it->list = bucket;
         return;
@@ -559,7 +614,7 @@ int mo_hash_pointer_cmp(const void *a, const void *b) {
 }
 
 int mo_hash_of_u32(void *ptr) {
-  return (*(uint32_t*)ptr) * MAGIC_NUMBER;
+  return *(uint32_t*)ptr * MAGIC_NUMBER;
 }
 
 int mo_hash_u32_cmp(const void *a, const void *b) {
@@ -571,7 +626,7 @@ int mo_hash_u32_cmp(const void *a, const void *b) {
 }
 
 int mo_hash_of_size(void *ptr) {
-  return (*(size_t*)ptr) * MAGIC_NUMBER;
+  return *(size_t*)ptr * MAGIC_NUMBER;
 }
 
 int mo_hash_size_cmp(const void *a, const void *b) {

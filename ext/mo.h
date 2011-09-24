@@ -14,6 +14,15 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stddef.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if 0
+}
+#endif
 
 /**
  * Function pointer types
@@ -73,34 +82,60 @@ void mo_array_reserve(mo_array *ary, size_t size);
 void mo_array_shrink(mo_array *ary);
 
 /**
- * Doubly linked list.
+ * String.
  */
 
+typedef mo_array mo_string;
+
+void    mo_string_init(mo_string *str);
+void    mo_string_init_from_cstr(mo_string *str, const char *cstr);
+void    mo_string_init_from_buf(mo_string *str, const char *cstr, size_t size);
+void    mo_string_replace(mo_string *str, const char *cstr);
+size_t  mo_string_len(mo_string *str);
+void    mo_string_append(mo_string *str, const char *cstr);
+char   *mo_string_cstr(mo_string *str);
+int     mo_string_cmp(mo_string *a, mo_string *b);
+
+#define mo_string_at(str, i) mo_array_get_as(str, i, char)
+
+typedef struct mo_list_it {
+  struct mo_list_it *prev, *next;
+  uint8_t data[];
+} mo_list_it;
+
 typedef struct mo_list {
-  struct mo_list *prev, *next;
+  mo_list_it *head;
+  mo_list_it *last;
 
   mo_release release;
   mo_copy    copy;
 
   size_t el_size;
-  uint8_t data[];
 } mo_list;
+
+void mo_list_init(mo_list *list, size_t el_size);
+void mo_list_release(mo_list *list);
 
 mo_list *mo_list_create(size_t el_size);
 void mo_list_free(mo_list *list);
 
-mo_list *mo_list_prepend(mo_list *list, void *data);
-mo_list *mo_list_insert(mo_list *list, void *data);
-mo_list *mo_list_delete(mo_list *list);
+void mo_list_prepend(mo_list *list, mo_list_it *it, void *data);
+void mo_list_insert(mo_list *list, mo_list_it *it, void *data);
+void mo_list_delete(mo_list *list, mo_list_it *it);
 
-void mo_list_set(mo_list *list, void *data);
+void mo_list_set(mo_list *list, mo_list_it *it, void *data);
 
-#define mo_list_data_ptr(list, type) ( (type*)list->data)
-#define mo_list_data_as(list, type)  (*(type*)list->data)
+#define mo_list_it_data_ptr(it, type) ( (type*)it->data)
+#define mo_list_it_data_as(it, type)  (*(type*)it->data)
 
 /**
  * Hash table.
  */
+
+typedef struct mo_hash_list {
+  struct mo_hash_list *next;
+  uint8_t data[];
+} mo_hash_list;
 
 typedef struct mo_hash {
   mo_array buffer;
@@ -121,9 +156,9 @@ typedef struct mo_hash {
 } mo_hash;
 
 typedef struct mo_hash_it {
-  mo_hash *hash;
-  mo_list *list;
-  size_t   id;
+  mo_hash      *hash;
+  mo_hash_list *list;
+  size_t        id;
 } mo_hash_it;
 
 int mo_hash_of_pointer(void *ptr);
@@ -134,6 +169,9 @@ int mo_hash_u32_cmp(const void *a, const void *b);
 
 int mo_hash_of_size(void *ptr);
 int mo_hash_size_cmp(const void *a, const void *b);
+
+void mo_hash_init(mo_hash *hash, size_t key_size, size_t el_size);
+void mo_hash_release(mo_hash *hash);
 
 mo_hash *mo_hash_create(size_t key_size, size_t el_size);
 void     mo_hash_free(mo_hash *hash);
@@ -169,6 +207,9 @@ void mo_hash_it_next(mo_hash_it *it);
 typedef mo_hash    mo_set;
 typedef mo_hash_it mo_set_it;
 
+#define mo_set_init(set, key_size, el_size) mo_hash_init(set, key_size, el_size)
+#define mo_set_release(set)                 mo_hash_init(set)
+
 #define mo_set_create(size) mo_hash_create(size, 0)
 #define mo_set_free(set)    mo_hash_delete(set)
 
@@ -185,5 +226,9 @@ typedef mo_hash_it mo_set_it;
 
 #define mo_set_it_val_ptr(it, type) mo_hash_it_key_ptr(it, type)
 #define mo_set_it_val_as(it, type)  mo_hash_it_key_as(it, type)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MY OWN HEADER'S GUARD! */
