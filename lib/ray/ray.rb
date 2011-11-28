@@ -1,5 +1,5 @@
 require 'enumerator'
-require 'iconv'
+require 'iconv' if RUBY_VERSION < "1.9"
 
 # Change PATH so as to find DLLs on windows.
 if RUBY_PLATFORM =~ /mingw/
