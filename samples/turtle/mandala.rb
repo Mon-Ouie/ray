@@ -18,7 +18,7 @@ Ray::Game.new("Turtle") do
         center = target.clip.center
 
         poly = []
-        theta = 360 * (PI / 180) / n
+        theta = 360 * (Math::PI / 180) / n
 
         n.times do |k|
           angle = k * theta

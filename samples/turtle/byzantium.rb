@@ -14,7 +14,7 @@ class Ray::Turtle
 
     4.times do
       pen_down
-      forward 2 * r * sin(PI / 4)
+      forward 2 * r * sin(Math::PI / 4)
 
       pen_up
       byzantium(r / 2, n - 1)
