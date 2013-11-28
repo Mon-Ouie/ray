@@ -4,7 +4,7 @@
 Gem::Specification.new do |s|
   s.name = "ray"
 
-  s.version = "0.2.0"
+  s.version = "0.2.1"
 
   s.summary     = "A library to write games (or to play with) in Ruby"
   s.description = "Written to play with Ruby"
