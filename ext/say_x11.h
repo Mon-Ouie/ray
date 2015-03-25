@@ -40,4 +40,5 @@ typedef struct say_x11_context {
   Window   win;
 
   bool should_free_window;
+  bool should_close_display;
 } say_x11_context;

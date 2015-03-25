@@ -61,7 +61,13 @@ say_imp_context say_imp_context_create_shared(say_imp_context shared) {
 
   context->should_free_window = true;
 
-  context->dis = XOpenDisplay(NULL);
+  if (shared != NULL) {
+    context->should_close_display = false;
+    context->dis = shared->dis;
+  } else {
+    context->should_close_display = true;
+    context->dis = XOpenDisplay(NULL);
+  }
 
   int screen = DefaultScreen(context->dis);
 
@@ -130,14 +136,13 @@ void say_imp_context_free(say_imp_context context) {
       glXMakeCurrent(context->dis, None, NULL);
   }
 
-  if (context->should_free_window) {
-    if (context->win) {
-      XDestroyWindow(context->dis, context->win);
-      XFlush(context->dis);
-    }
-
-    XCloseDisplay(context->dis);
+  if (context->should_free_window && context->win) {
+    XDestroyWindow(context->dis, context->win);
+    XFlush(context->dis);
   }
+
+  if (context->should_close_display)
+    XCloseDisplay(context->dis);
 }
 
 void say_imp_context_make_current(say_imp_context context) {
