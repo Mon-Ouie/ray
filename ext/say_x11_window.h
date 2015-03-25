@@ -147,7 +147,9 @@ bool say_imp_window_open(say_imp_window win, const char *title,
   if (win->dis)
     say_imp_window_close(win);
 
-  win->dis = XOpenDisplay(NULL);
+  say_context *context = say_context_create();
+  win->dis = context->context->dis;
+  say_context_free(context);
 
   if (!win->dis) {
     say_error_set("could not open X display");
@@ -348,10 +350,8 @@ void say_imp_window_close(say_imp_window win) {
     win->win = None;
   }
 
-  if (win->dis) {
-    XCloseDisplay(win->dis);
+  if (win->dis)
     win->dis = NULL;
-  }
 }
 
 void say_imp_window_show_cursor(say_imp_window win) {
