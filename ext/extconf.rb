@@ -3,8 +3,15 @@ require 'mkmf'
 $CFLAGS  << " -Wextra -Wall -Wno-unused-parameter -std=gnu99 "
 
 unless RUBY_PLATFORM =~ /mingw/
-  $CFLAGS  << " " << `freetype-config --cflags`.chomp
-  $LDFLAGS << " " << `freetype-config --libs`.chomp
+  if RUBY_PLATFORM =~ /linux/
+    $CFLAGS  << " " << `pkg-config --cflags`.chomp
+    $CFLAGS  << " " << "-I/usr/include/freetype2"
+    $LDFLAGS << " " << `pkg-config --libs`.chomp
+    $LDFLAGS << " " << "-L/usr/local/lib -lfreetype"
+  else
+    $CFLAGS  << " " << `freetype-config --cflags`.chomp
+    $LDFLAGS << " " << `freetype-config --libs`.chomp
+  end
 end
 
 if RUBY_PLATFORM =~ /darwin/
